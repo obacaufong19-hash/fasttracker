@@ -1,0 +1,32 @@
+# Android
+*.iml
+.gradle/
+android/local.properties
+android/.idea/
+android/app/build/
+android/build/
+android/captures/
+android/.externalNativeBuild/
+android/.cxx/
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# Signing
+*.jks
+*.keystore
+keystore.properties
+
+# IDE
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Node (if used for tooling)
+node_modules/
+npm-debug.log

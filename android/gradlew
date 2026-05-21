@@ -1,0 +1,20 @@
+#!/bin/sh
+# Gradle wrapper script for UNIX
+
+APP_NAME="Gradle"
+APP_BASE_NAME=$(basename "$0")
+
+# Default JVM options
+DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m"'
+
+# Use the maximum available or the specified value
+JAVA_OPTS="${JAVA_OPTS:-}"
+
+# Resolve JAVA_HOME if not set
+if [ -z "$JAVA_HOME" ] ; then
+    JAVA_HOME=$(java -XshowSettings:all -version 2>&1 | grep 'java.home' | awk -F '= ' '{print $2}')
+fi
+
+CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar
+
+exec "$JAVA_HOME/bin/java" $DEFAULT_JVM_OPTS $JAVA_OPTS -classpath "$CLASSPATH" org.gradle.wrapper.GradleWrapperMain "$@"
