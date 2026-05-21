@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
+    namespace 'com.fasttracker'
     compileSdkVersion 34
     buildToolsVersion "34.0.0"
 
@@ -19,7 +20,6 @@ android {
             signingConfig signingConfigs.debug
         }
         debug {
-            applicationIdSuffix ".debug"
             debuggable true
         }
     }
