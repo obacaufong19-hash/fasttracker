@@ -5,810 +5,1093 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>FastTracker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Figtree:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-/* ── THEME VARIABLES ─────────────────────────────────── */
+/* ── DESIGN TOKENS ─────────────────────────────────────────── */
 :root {
-  --bg:#0a0a0f; --bg2:#111118; --bg3:#1a1a24; --card:#16161f;
-  --border:#2a2a3a; --text:#e8e8f0; --text2:#9090a8; --text3:#5a5a72;
-  --accent:#7c6af7; --accent2:#4ecdc4; --accent3:#ff6b6b; --accent4:#ffd93d;
-  --green:#56e39f; --orange:#ff9f43;
-  --shadow: 0 4px 24px rgba(0,0,0,0.4);
-  --nav-h: 64px;
-}
-[data-theme="light"] {
-  --bg:#f0f0f8; --bg2:#ffffff; --bg3:#e8e8f4; --card:#ffffff;
-  --border:#d0d0e0; --text:#1a1a2e; --text2:#5a5a7a; --text3:#9090b0;
-  --shadow: 0 4px 24px rgba(0,0,0,0.1);
+  /* Dark (default) */
+  --bg:        #080810;
+  --bg2:       #0e0e1a;
+  --bg3:       #14141f;
+  --card:      #12121c;
+  --card2:     #1a1a28;
+  --border:    rgba(255,255,255,0.07);
+  --border2:   rgba(255,255,255,0.12);
+  --text:      #f0eff8;
+  --text2:     #8887a4;
+  --text3:     #4a496a;
+  --text4:     #2e2d4a;
+
+  /* Brand */
+  --gold:      #c9a96e;
+  --gold2:     #e8cc96;
+  --gold-dim:  rgba(201,169,110,0.12);
+  --gold-glow: rgba(201,169,110,0.25);
+  --teal:      #5cc8c0;
+  --teal-dim:  rgba(92,200,192,0.1);
+  --rose:      #e07b7b;
+  --rose-dim:  rgba(224,123,123,0.1);
+  --sage:      #7ec8a0;
+  --sage-dim:  rgba(126,200,160,0.1);
+
+  --radius:    20px;
+  --radius-sm: 12px;
+  --shadow:    0 8px 32px rgba(0,0,0,0.6);
+  --shadow-sm: 0 4px 16px rgba(0,0,0,0.4);
+
+  --font-display: 'Cormorant Garamond', serif;
+  --font-body:    'Figtree', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
 }
 
-/* ── RESET ───────────────────────────────────────────── */
+[data-theme="light"] {
+  --bg:        #f5f4f0;
+  --bg2:       #eeede8;
+  --bg3:       #e6e5df;
+  --card:      #faf9f6;
+  --card2:     #f0efe9;
+  --border:    rgba(0,0,0,0.07);
+  --border2:   rgba(0,0,0,0.12);
+  --text:      #1a1820;
+  --text2:     #5a5870;
+  --text3:     #9a98b0;
+  --text4:     #c8c6d8;
+  --gold:      #a07840;
+  --gold2:     #c09860;
+  --gold-dim:  rgba(160,120,64,0.1);
+  --gold-glow: rgba(160,120,64,0.2);
+  --shadow:    0 8px 32px rgba(0,0,0,0.1);
+  --shadow-sm: 0 4px 16px rgba(0,0,0,0.06);
+}
+
+/* ── RESET ────────────────────────────────────────────────── */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;height:100%;overflow:hidden;transition:background 0.3s,color 0.3s}
-button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none;background:none}
+html,body{
+  background:var(--bg);color:var(--text);
+  font-family:var(--font-body);height:100%;overflow:hidden;
+  transition:background .35s,color .35s;
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:var(--font-body);cursor:pointer;border:none;background:none;color:inherit}
+input{font-family:var(--font-body)}
 ::-webkit-scrollbar{width:0}
 
-/* ── SPLASH SCREEN ───────────────────────────────────── */
-#splash {
+/* ── SPLASH ───────────────────────────────────────────────── */
+#splash{
   position:fixed;inset:0;z-index:999;
   background:var(--bg);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
-  transition:opacity 0.5s ease;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  overflow:hidden;
 }
-#splash.hide{opacity:0;pointer-events:none}
-.splash-logo{font-size:64px;animation:splashPulse 1.5s ease infinite}
-.splash-title{font-family:'Space Mono',monospace;font-size:28px;font-weight:700;color:var(--text);letter-spacing:-1px}
-.splash-sub{font-size:13px;color:var(--text3);letter-spacing:2px;text-transform:uppercase}
-.splash-bar{width:160px;height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-top:8px}
-.splash-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0;animation:splashLoad 1.8s ease forwards}
-@keyframes splashPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
-@keyframes splashLoad{0%{width:0}60%{width:80%}100%{width:100%}}
+#splash.hide{animation:splashOut .6s ease forwards}
+@keyframes splashOut{to{opacity:0;transform:scale(1.04)}}
 
-/* ── APP SHELL ───────────────────────────────────────── */
-#app{height:100vh;display:flex;flex-direction:column;overflow:hidden}
+.splash-bg{
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 60% at 50% 40%, rgba(201,169,110,0.08) 0%, transparent 70%);
+}
+.splash-ring{
+  position:absolute;
+  width:320px;height:320px;
+  border:1px solid rgba(201,169,110,0.08);
+  border-radius:50%;
+  animation:ringExpand 2s ease-out forwards;
+}
+.splash-ring:nth-child(2){width:220px;height:220px;animation-delay:.2s;border-color:rgba(201,169,110,0.12)}
+.splash-ring:nth-child(3){width:140px;height:140px;animation-delay:.4s;border-color:rgba(201,169,110,0.18)}
+@keyframes ringExpand{
+  from{opacity:0;transform:scale(.6)}
+  to{opacity:1;transform:scale(1)}
+}
 
-/* ── TOPBAR ──────────────────────────────────────────── */
+.splash-content{
+  position:relative;z-index:1;
+  display:flex;flex-direction:column;align-items:center;gap:0;
+  animation:splashFadeUp .8s .3s ease both;
+}
+@keyframes splashFadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+.splash-icon-wrap{
+  width:80px;height:80px;
+  border:1px solid rgba(201,169,110,0.25);
+  border-radius:24px;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,rgba(201,169,110,0.08),rgba(92,200,192,0.05));
+  margin-bottom:24px;
+  box-shadow:0 0 40px rgba(201,169,110,0.1);
+}
+
+.splash-wordmark{
+  font-family:var(--font-display);
+  font-size:42px;font-weight:300;
+  color:var(--text);
+  letter-spacing:0.02em;
+  line-height:1;
+}
+.splash-wordmark span{color:var(--gold);font-style:italic}
+
+.splash-tagline{
+  font-size:11px;font-weight:500;
+  color:var(--text3);
+  letter-spacing:.35em;
+  text-transform:uppercase;
+  margin-top:10px;
+  margin-bottom:40px;
+}
+
+.splash-loader{
+  width:80px;height:1px;
+  background:var(--border2);
+  border-radius:1px;
+  overflow:hidden;
+}
+.splash-loader-fill{
+  height:100%;
+  background:linear-gradient(90deg,var(--gold),var(--teal));
+  animation:loaderFill 1.8s .4s cubic-bezier(.4,0,.2,1) forwards;
+  width:0;
+}
+@keyframes loaderFill{to{width:100%}}
+
+.splash-version{
+  position:absolute;bottom:32px;
+  font-size:10px;color:var(--text4);letter-spacing:.15em;font-family:var(--font-mono);
+}
+
+/* ── APP SHELL ────────────────────────────────────────────── */
+#app{height:100vh;display:flex;flex-direction:column;overflow:hidden;opacity:0;transition:opacity .4s}
+#app.ready{opacity:1}
+
+/* ── TOPBAR ───────────────────────────────────────────────── */
 .topbar{
   display:flex;align-items:center;justify-content:space-between;
-  padding:12px 20px 8px;
+  padding:14px 20px 10px;
   background:var(--bg2);
   border-bottom:1px solid var(--border);
   flex-shrink:0;
 }
-.topbar-title{font-family:'Space Mono',monospace;font-size:15px;font-weight:700;color:var(--text)}
-.theme-btn{
-  width:36px;height:36px;border-radius:50%;
+.topbar-left{display:flex;align-items:baseline;gap:6px}
+.topbar-name{font-family:var(--font-display);font-size:20px;font-weight:400;color:var(--text);letter-spacing:.01em}
+.topbar-name em{color:var(--gold);font-style:italic}
+.topbar-dot{width:5px;height:5px;border-radius:50%;background:var(--gold);opacity:.5;margin-bottom:2px}
+
+.icon-btn{
+  width:38px;height:38px;border-radius:12px;
   background:var(--bg3);border:1px solid var(--border);
-  display:flex;align-items:center;justify-content:center;font-size:16px;
-  transition:all 0.2s;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text2);transition:all .2s;
 }
+.icon-btn:active{transform:scale(.94)}
+.icon-btn svg{width:18px;height:18px}
 
-/* ── NAV ─────────────────────────────────────────────── */
-.nav{display:flex;background:var(--bg2);border-top:1px solid var(--border);flex-shrink:0;order:99}
+/* ── NAV ──────────────────────────────────────────────────── */
+.nav{
+  display:flex;background:var(--bg2);
+  border-top:1px solid var(--border);
+  flex-shrink:0;padding-bottom:env(safe-area-inset-bottom,0);
+}
 .nav-btn{
-  flex:1;padding:10px 8px 12px;background:none;border:none;
-  color:var(--text3);font-size:10px;font-weight:600;letter-spacing:0.5px;
-  display:flex;flex-direction:column;align-items:center;gap:3px;text-transform:uppercase;
-  transition:color 0.2s;
+  flex:1;padding:12px 8px 14px;
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  color:var(--text3);font-size:10px;font-weight:600;
+  letter-spacing:.06em;text-transform:uppercase;
+  transition:color .2s;
+  position:relative;
 }
-.nav-btn .icon{font-size:20px}
-.nav-btn.active{color:var(--accent)}
-.nav-btn.active .icon-wrap{position:relative}
-.nav-btn.active .icon-wrap::after{
-  content:'';position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);
-  width:20px;height:2px;background:var(--accent);border-radius:1px;
+.nav-btn svg{width:22px;height:22px;transition:transform .2s}
+.nav-btn.active{color:var(--gold)}
+.nav-btn.active svg{transform:scale(1.05)}
+.nav-btn.active::before{
+  content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:28px;height:2px;background:var(--gold);border-radius:0 0 2px 2px;
 }
 
-/* ── PAGES ───────────────────────────────────────────── */
+/* ── PAGES ────────────────────────────────────────────────── */
 .page{display:none;flex:1;overflow-y:auto;overflow-x:hidden}
 .page.active{display:flex;flex-direction:column}
 
-/* ── ONBOARDING MODAL ────────────────────────────────── */
+/* ── ONBOARDING SHEET ─────────────────────────────────────── */
 #onboarding{
-  position:fixed;inset:0;z-index:100;
-  background:rgba(0,0,0,0.7);
-  display:flex;align-items:flex-end;justify-content:center;
-  backdrop-filter:blur(4px);
+  position:fixed;inset:0;z-index:200;
+  display:flex;align-items:flex-end;
+  background:rgba(0,0,0,0.6);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
 }
 #onboarding.hidden{display:none}
+
 .ob-sheet{
-  background:var(--bg2);border-radius:24px 24px 0 0;
-  padding:28px 24px 40px;width:100%;max-width:480px;
-  border:1px solid var(--border);border-bottom:none;
-  animation:slideUp 0.35s ease;
+  width:100%;background:var(--bg2);
+  border:1px solid var(--border2);border-bottom:none;
+  border-radius:28px 28px 0 0;
+  padding:8px 24px 40px;
+  animation:sheetUp .38s cubic-bezier(.32,1,.56,1);
 }
-@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.ob-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px}
-.ob-title{font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px}
-.ob-sub{font-size:13px;color:var(--text2);margin-bottom:24px}
-.ob-label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 
-/* protocol grid */
-.protocol-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:24px}
+.ob-pill{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:12px auto 24px}
+
+.ob-header{margin-bottom:24px}
+.ob-title{font-family:var(--font-display);font-size:28px;font-weight:400;color:var(--text);line-height:1.1}
+.ob-title em{color:var(--gold);font-style:italic}
+.ob-sub{font-size:13px;color:var(--text2);margin-top:6px;line-height:1.5}
+
+.ob-section{margin-bottom:22px}
+.ob-label{
+  font-size:10px;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--text3);margin-bottom:12px;
+}
+
+/* protocol pills */
+.proto-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .proto-btn{
-  padding:10px 6px;border-radius:12px;
-  background:var(--bg3);border:1.5px solid var(--border);
-  color:var(--text2);font-size:12px;font-weight:600;text-align:center;
-  transition:all 0.2s;
+  padding:12px 6px 10px;border-radius:14px;
+  background:var(--bg3);border:1px solid var(--border);
+  transition:all .2s;text-align:center;
 }
-.proto-btn .proto-label{font-size:10px;color:var(--text3);margin-top:2px;font-weight:400}
-.proto-btn.selected{background:rgba(124,106,247,0.15);border-color:var(--accent);color:var(--accent)}
-.proto-btn.selected .proto-label{color:var(--accent)}
-
-/* meal time picker */
-.meal-picker{margin-bottom:28px}
-.time-row{display:flex;gap:10px;align-items:center}
-.time-input{
-  flex:1;padding:14px 16px;border-radius:14px;
-  background:var(--bg3);border:1.5px solid var(--border);
-  color:var(--text);font-size:16px;font-family:'Space Mono',monospace;
-  outline:none;transition:border-color 0.2s;
+.proto-btn:active{transform:scale(.95)}
+.proto-name{font-family:var(--font-mono);font-size:12px;font-weight:500;color:var(--text2);display:block}
+.proto-desc{font-size:9px;color:var(--text3);margin-top:3px;display:block;letter-spacing:.04em}
+.proto-btn.sel{
+  background:var(--gold-dim);border-color:var(--gold);
+  box-shadow:0 0 0 1px var(--gold);
 }
-.time-input:focus{border-color:var(--accent)}
-[data-theme="light"] .time-input{color-scheme:light}
+.proto-btn.sel .proto-name{color:var(--gold)}
+.proto-btn.sel .proto-desc{color:var(--gold);opacity:.7}
 
-.btn-start-fast{
+/* date-time picker */
+.dt-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dt-field{display:flex;flex-direction:column;gap:6px}
+.dt-label{font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.dt-input{
+  padding:13px 14px;border-radius:14px;
+  background:var(--bg3);border:1px solid var(--border);
+  color:var(--text);font-family:var(--font-mono);font-size:14px;
+  outline:none;width:100%;
+  -webkit-appearance:none;appearance:none;
+  transition:border-color .2s;
+}
+.dt-input:focus{border-color:var(--gold)}
+[data-theme="light"] .dt-input{color-scheme:light}
+[data-theme="dark"] .dt-input{color-scheme:dark}
+
+.btn-primary{
   width:100%;padding:18px;border-radius:16px;
-  background:var(--accent);color:white;
-  font-size:16px;font-weight:700;letter-spacing:0.3px;
-  box-shadow:0 4px 20px rgba(124,106,247,0.4);
-  transition:all 0.2s;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:#1a1408;font-size:15px;font-weight:700;letter-spacing:.03em;
+  box-shadow:0 6px 24px var(--gold-glow);
+  transition:all .2s;display:flex;align-items:center;justify-content:center;gap:10px;
 }
-.btn-start-fast:active{transform:scale(0.98)}
+.btn-primary:active{transform:scale(.98);box-shadow:0 2px 12px var(--gold-glow)}
+.btn-primary svg{width:18px;height:18px}
 
-/* ── TIMER PAGE ──────────────────────────────────────── */
+/* ── TIMER PAGE ───────────────────────────────────────────── */
 .timer-page{
-  align-items:center;padding:20px 20px 24px;gap:20px;
-  background:radial-gradient(ellipse at 50% 15%,rgba(124,106,247,0.07) 0%,transparent 60%);
+  align-items:center;padding:22px 20px 28px;gap:18px;
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 0%, rgba(201,169,110,0.05) 0%, transparent 60%);
 }
 
-.status-badge{
-  display:flex;align-items:center;gap:8px;padding:8px 18px;border-radius:100px;
-  font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;
+/* status */
+.status-pill{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:7px 16px;border-radius:100px;
+  font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  transition:all .3s;
 }
-.status-badge.fasting{background:rgba(124,106,247,0.15);color:var(--accent);border:1px solid rgba(124,106,247,0.3)}
-.status-badge.eating{background:rgba(86,227,159,0.12);color:var(--green);border:1px solid rgba(86,227,159,0.25)}
-.pulse-dot{width:8px;height:8px;border-radius:50%;animation:pulse 2s infinite}
-.fasting .pulse-dot{background:var(--accent)}
-.eating .pulse-dot{background:var(--green)}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.8)}}
+.status-pill.fasting{
+  background:var(--gold-dim);color:var(--gold);
+  border:1px solid rgba(201,169,110,0.2);
+}
+.status-pill.eating{
+  background:var(--sage-dim);color:var(--sage);
+  border:1px solid rgba(126,200,160,0.2);
+}
+.status-dot{width:6px;height:6px;border-radius:50%;animation:blink 2.4s ease infinite}
+.fasting .status-dot{background:var(--gold)}
+.eating .status-dot{background:var(--sage)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 
 /* ring */
-.ring-container{position:relative;width:220px;height:220px}
+.ring-wrap{position:relative;width:230px;height:230px}
 .ring-svg{width:100%;height:100%;transform:rotate(-90deg)}
-.ring-bg{fill:none;stroke:var(--bg3);stroke-width:10}
-.ring-progress{
-  fill:none;stroke-width:10;stroke-linecap:round;
-  stroke-dasharray:596;stroke-dashoffset:596;
-  transition:stroke-dashoffset 1s ease,stroke 0.5s ease;
+.r-track{fill:none;stroke:var(--bg3);stroke-width:2}
+.r-prog{
+  fill:none;stroke-width:2;stroke-linecap:round;
+  stroke-dasharray:660;stroke-dashoffset:660;
+  transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1),stroke .5s;
 }
-.ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
-.timer-display{font-family:'Space Mono',monospace;font-size:34px;font-weight:700;color:var(--text);letter-spacing:-1px;line-height:1}
-.timer-label{font-size:11px;color:var(--text3);letter-spacing:1px;text-transform:uppercase}
-.timer-goal{font-size:12px;color:var(--accent);margin-top:2px}
+.r-tick{fill:none;stroke:var(--border2);stroke-width:1}
 
-/* info row */
-.info-row{display:flex;gap:10px;width:100%}
+.ring-inner{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+}
+.ring-time{
+  font-family:var(--font-mono);font-size:32px;font-weight:300;
+  color:var(--text);letter-spacing:.04em;line-height:1;
+}
+.ring-status{font-size:10px;color:var(--text3);letter-spacing:.14em;text-transform:uppercase;margin-top:4px}
+.ring-pct{font-size:12px;color:var(--gold);font-weight:600;margin-top:2px}
+
+/* info strip */
+.info-strip{
+  display:flex;gap:8px;width:100%;
+}
 .info-chip{
-  flex:1;background:var(--card);border:1px solid var(--border);border-radius:14px;
-  padding:12px 14px;display:flex;flex-direction:column;gap:2px;
+  flex:1;background:var(--card);border:1px solid var(--border);
+  border-radius:14px;padding:11px 12px;
 }
-.info-chip-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px}
-.info-chip-val{font-family:'Space Mono',monospace;font-size:14px;font-weight:700;color:var(--text)}
+.ic-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:4px}
+.ic-val{font-family:var(--font-mono);font-size:13px;color:var(--text);font-weight:400}
 
-/* phase banner */
-.phase-banner{
-  width:100%;background:var(--card);border:1px solid var(--border);border-radius:16px;
-  padding:14px 18px;display:flex;align-items:flex-start;gap:12px;
+/* phase card */
+.phase-card{
+  width:100%;background:var(--card);
+  border:1px solid var(--border);border-radius:var(--radius);
+  padding:16px 18px;
+  display:flex;align-items:flex-start;gap:14px;
+  position:relative;overflow:hidden;
 }
-.phase-icon{font-size:26px;flex-shrink:0}
-.phase-title{font-size:13px;font-weight:600;color:var(--accent2);margin-bottom:3px}
-.phase-desc{font-size:12px;color:var(--text2);line-height:1.5}
+.phase-card::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:2px;
+  background:linear-gradient(180deg,var(--gold),var(--teal));
+  border-radius:2px 0 0 2px;
+}
+.phase-ic{
+  width:40px;height:40px;border-radius:12px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--gold-dim);border:1px solid rgba(201,169,110,0.15);
+}
+.phase-ic svg{width:20px;height:20px;color:var(--gold)}
+.phase-name{font-size:13px;font-weight:600;color:var(--gold);margin-bottom:3px;letter-spacing:.01em}
+.phase-body{font-size:12px;color:var(--text2);line-height:1.55}
 
-/* controls */
-.controls{display:flex;gap:10px;width:100%}
-.btn-main{
-  flex:1;padding:17px;border-radius:16px;font-size:15px;font-weight:600;
-  transition:all 0.18s;letter-spacing:0.3px;
+/* CTA row */
+.cta-row{display:flex;gap:10px;width:100%}
+.btn-cta{
+  flex:1;padding:17px;border-radius:16px;font-size:14px;font-weight:700;
+  letter-spacing:.03em;transition:all .18s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
 }
-.btn-main:active{transform:scale(0.97)}
-.btn-action{background:var(--accent);color:white;box-shadow:0 4px 18px rgba(124,106,247,0.35)}
-.btn-stop{background:var(--card);color:var(--accent3);border:1.5px solid rgba(255,107,107,0.3)}
-.btn-icon{
-  background:var(--card);color:var(--text2);border:1px solid var(--border);
-  flex:0 0 auto;padding:17px 16px;border-radius:16px;font-size:18px;
+.btn-cta svg{width:16px;height:16px}
+.btn-cta:active{transform:scale(.97)}
+.btn-cta.start{
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:#1a1408;box-shadow:0 6px 20px var(--gold-glow);
 }
+.btn-cta.stop{
+  background:var(--rose-dim);color:var(--rose);
+  border:1px solid rgba(224,123,123,0.2);
+}
+.btn-sq{
+  width:54px;height:54px;border-radius:16px;flex-shrink:0;
+  background:var(--card);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text2);transition:all .2s;
+}
+.btn-sq:active{transform:scale(.94)}
+.btn-sq svg{width:20px;height:20px}
 
-/* goal picker */
-.goal-picker{
+/* goal drawer */
+.goal-drawer{
   display:none;width:100%;background:var(--card);
   border:1px solid var(--border);border-radius:16px;padding:14px 16px;
 }
-.goal-picker.open{display:block}
-.goal-picker-title{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
-.goal-options{display:flex;flex-wrap:wrap;gap:8px}
-.goal-opt{
-  padding:7px 13px;border-radius:100px;background:var(--bg3);
-  border:1px solid var(--border);color:var(--text2);font-size:12px;font-weight:600;
-  transition:all 0.2s;
+.goal-drawer.open{display:block}
+.gd-title{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
+.goal-chips{display:flex;flex-wrap:wrap;gap:7px}
+.goal-chip{
+  padding:7px 13px;border-radius:100px;
+  background:var(--bg3);border:1px solid var(--border);
+  font-size:12px;font-weight:600;color:var(--text2);
+  font-family:var(--font-mono);transition:all .2s;
 }
-.goal-opt.selected{background:rgba(124,106,247,0.15);border-color:var(--accent);color:var(--accent)}
+.goal-chip.sel{background:var(--gold-dim);border-color:var(--gold);color:var(--gold)}
 
-/* ── INSIGHTS PAGE ───────────────────────────────────── */
-.page-inner{padding:16px 16px 24px;display:flex;flex-direction:column;gap:14px}
-.section-title{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;font-weight:600}
+/* ── INSIGHTS PAGE ────────────────────────────────────────── */
+.page-pad{padding:16px 16px 32px;display:flex;flex-direction:column;gap:14px}
 
-.timeline-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px 18px}
-.tl-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
-.tl-title{font-size:13px;font-weight:600;color:var(--text)}
-.tl-time{font-family:'Space Mono',monospace;font-size:13px;color:var(--accent)}
-.tl-line{height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;position:relative}
-.tl-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width 0.8s ease;min-width:0}
-.tl-markers{display:flex;justify-content:space-between;margin-top:10px}
-.tl-marker{display:flex;flex-direction:column;align-items:center;gap:4px}
-.tl-marker-h{font-size:9px;color:var(--text3);font-family:'Space Mono',monospace;transition:color 0.3s}
-.tl-marker-dot{width:6px;height:6px;border-radius:50%;background:var(--bg3);transition:background 0.3s}
-.tl-marker.reached .tl-marker-h{color:var(--accent)}
-.tl-marker.reached .tl-marker-dot{background:var(--accent)}
+.sec-label{
+  font-size:10px;font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--text3);padding-left:2px;
+}
 
-.insight-card{
+/* timeline */
+.tl-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:18px;
+}
+.tl-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px}
+.tl-heading{font-family:var(--font-display);font-size:20px;font-weight:400;color:var(--text)}
+.tl-heading em{color:var(--gold);font-style:italic}
+.tl-elapsed{
+  font-family:var(--font-mono);font-size:14px;color:var(--gold);
+  background:var(--gold-dim);padding:4px 10px;border-radius:8px;
+}
+.tl-bar{height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;position:relative;margin-bottom:10px}
+.tl-prog{height:100%;background:linear-gradient(90deg,var(--gold),var(--teal));border-radius:2px;width:0;transition:width .8s ease}
+.tl-marks{display:flex;justify-content:space-between}
+.tl-m{display:flex;flex-direction:column;align-items:center;gap:5px}
+.tl-mh{font-family:var(--font-mono);font-size:9px;color:var(--text4);transition:color .3s}
+.tl-md{width:5px;height:5px;border-radius:50%;background:var(--bg3);transition:background .3s}
+.tl-m.hit .tl-mh{color:var(--gold)}
+.tl-m.hit .tl-md{background:var(--gold)}
+
+/* insight cards */
+.ic-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:16px;display:flex;gap:14px;align-items:flex-start;
+}
+.ic-card.dim{opacity:.42}
+.ic-ic{
+  width:42px;height:42px;border-radius:13px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;border:1px solid transparent;
+}
+.ic-ic svg{width:20px;height:20px}
+.ic-card.bio .ic-ic{background:var(--teal-dim);border-color:rgba(92,200,192,0.15);color:var(--teal)}
+.ic-card.mind .ic-ic{background:rgba(201,169,110,0.08);border-color:rgba(201,169,110,0.15);color:var(--gold)}
+.ic-card.body .ic-ic{background:var(--sage-dim);border-color:rgba(126,200,160,0.15);color:var(--sage)}
+.ic-card.nxt .ic-ic{background:var(--bg3);border-color:var(--border);color:var(--text3)}
+.ic-cat{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px}
+.bio .ic-cat{color:var(--teal)}
+.mind .ic-cat{color:var(--gold)}
+.body .ic-cat{color:var(--sage)}
+.nxt .ic-cat{color:var(--text3)}
+.ic-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;line-height:1.3}
+.ic-body{font-size:12px;color:var(--text2);line-height:1.65}
+.ic-card.dim .ic-title{color:var(--text2)}
+
+.idle-state{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;padding:48px 32px;gap:14px;text-align:center;
+}
+.idle-icon{
+  width:72px;height:72px;border-radius:20px;
+  background:var(--bg3);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text3);
+}
+.idle-icon svg{width:32px;height:32px}
+.idle-title{font-family:var(--font-display);font-size:22px;color:var(--text);font-weight:400}
+.idle-title em{color:var(--gold);font-style:italic}
+.idle-body{font-size:13px;color:var(--text2);line-height:1.6;max-width:260px}
+
+/* ── HISTORY PAGE ─────────────────────────────────────────── */
+.streak-card{
+  background:linear-gradient(135deg,rgba(201,169,110,0.08) 0%,rgba(92,200,192,0.06) 100%);
+  border:1px solid rgba(201,169,110,0.15);border-radius:var(--radius);
+  padding:20px;display:flex;align-items:center;gap:16px;
+}
+.streak-num{font-family:var(--font-display);font-size:52px;font-weight:300;color:var(--gold);line-height:1}
+.streak-num em{font-size:28px;color:var(--gold2)}
+.streak-lbl{font-size:13px;font-weight:600;color:var(--text)}
+.streak-sub{font-size:11px;color:var(--text2);margin-top:3px}
+
+.stat-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat-cell{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:16px;padding:16px;
+}
+.stat-num{font-family:var(--font-display);font-size:32px;font-weight:300;color:var(--text);line-height:1}
+.stat-unit{font-size:14px;color:var(--text2);margin-left:2px}
+.stat-lbl{font-size:11px;color:var(--text3);margin-top:4px;letter-spacing:.04em}
+
+.hist-item{
   background:var(--card);border:1px solid var(--border);border-radius:16px;
-  padding:16px;display:flex;gap:12px;align-items:flex-start;
-}
-.insight-card.dim{opacity:0.45}
-.i-icon{font-size:22px;flex-shrink:0;margin-top:2px}
-.i-cat{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px}
-.bio .i-cat{color:var(--accent2)}
-.mental .i-cat{color:var(--accent4)}
-.physical .i-cat{color:var(--orange)}
-.next-card .i-cat{color:var(--text3)}
-.i-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px}
-.i-body{font-size:12px;color:var(--text2);line-height:1.6}
-.next-card .i-title{color:var(--text2)}
-
-/* not fasting state */
-.insight-idle{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:48px 24px;gap:12px;text-align:center;
-}
-.insight-idle .big-icon{font-size:52px;opacity:0.3}
-.insight-idle p{font-size:13px;color:var(--text3)}
-
-/* ── HISTORY PAGE ────────────────────────────────────── */
-.streak-banner{
-  background:linear-gradient(135deg,rgba(124,106,247,0.15),rgba(78,205,196,0.1));
-  border:1px solid rgba(124,106,247,0.2);border-radius:16px;padding:18px;
-  display:flex;align-items:center;gap:16px;
-}
-.streak-num{font-family:'Space Mono',monospace;font-size:36px;font-weight:700;color:var(--accent);line-height:1}
-.streak-meta{flex:1}
-.streak-label{font-size:13px;color:var(--text2)}
-.streak-sub{font-size:11px;color:var(--text3);margin-top:2px}
-.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px}
-.stat-val{font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:var(--text)}
-.stat-unit{font-size:11px;color:var(--text3);margin-left:2px}
-.stat-label{font-size:11px;color:var(--text2);margin-top:3px}
-.history-item{
-  background:var(--card);border:1px solid var(--border);border-radius:14px;
   padding:14px 16px;display:flex;align-items:center;justify-content:space-between;
 }
-.h-date{font-size:11px;color:var(--text3);margin-bottom:3px}
-.h-duration{font-family:'Space Mono',monospace;font-size:17px;font-weight:700;color:var(--text)}
-.h-meta{font-size:11px;color:var(--text3);margin-top:2px}
-.h-badge{padding:5px 11px;border-radius:100px;font-size:11px;font-weight:600}
-.h-badge.great{background:rgba(86,227,159,0.12);color:var(--green)}
-.h-badge.good{background:rgba(124,106,247,0.12);color:var(--accent)}
-.h-badge.ok{background:rgba(255,159,67,0.12);color:var(--orange)}
-.history-empty{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  flex:1;gap:10px;color:var(--text3);font-size:13px;padding:48px 24px;text-align:center;
+.hi-date{font-size:11px;color:var(--text3);margin-bottom:4px}
+.hi-dur{font-family:var(--font-display);font-size:24px;font-weight:300;color:var(--text);line-height:1}
+.hi-meta{font-size:10px;color:var(--text3);margin-top:4px;letter-spacing:.03em}
+.hi-badge{
+  padding:6px 12px;border-radius:100px;font-size:11px;font-weight:700;
+  display:flex;align-items:center;gap:5px;
 }
-.history-empty .big-icon{font-size:48px;opacity:0.3}
+.hi-badge svg{width:10px;height:10px}
+.hi-badge.great{background:var(--sage-dim);color:var(--sage);border:1px solid rgba(126,200,160,0.2)}
+.hi-badge.good{background:var(--gold-dim);color:var(--gold);border:1px solid rgba(201,169,110,0.2)}
+.hi-badge.ok{background:var(--rose-dim);color:var(--rose);border:1px solid rgba(224,123,123,0.2)}
 
-/* ── ANIMATIONS ──────────────────────────────────────── */
-@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-.fade-up{animation:fadeUp 0.3s ease forwards}
+.empty-state{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;padding:64px 32px;gap:12px;text-align:center;
+}
+.empty-icon{width:64px;height:64px;border-radius:18px;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text3)}
+.empty-icon svg{width:28px;height:28px}
+.empty-title{font-family:var(--font-display);font-size:22px;color:var(--text2);font-weight:400}
+.empty-body{font-size:13px;color:var(--text3);line-height:1.6}
+
+/* ── ANIMATIONS ───────────────────────────────────────────── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fade-up{animation:fadeUp .3s ease both}
+.fade-up:nth-child(1){animation-delay:.03s}
+.fade-up:nth-child(2){animation-delay:.07s}
+.fade-up:nth-child(3){animation-delay:.11s}
+.fade-up:nth-child(4){animation-delay:.15s}
+.fade-up:nth-child(5){animation-delay:.19s}
+.fade-up:nth-child(6){animation-delay:.23s}
 </style>
 </head>
 <body>
 
-<!-- SPLASH -->
+<!-- ══ SPLASH ═══════════════════════════════════════════════ -->
 <div id="splash">
-  <div class="splash-logo">⏱️</div>
-  <div class="splash-title">FastTracker</div>
-  <div class="splash-sub">Know your body</div>
-  <div class="splash-bar"><div class="splash-fill"></div></div>
+  <div class="splash-bg"></div>
+  <div class="splash-ring"></div>
+  <div class="splash-ring"></div>
+  <div class="splash-ring"></div>
+  <div class="splash-content">
+    <div class="splash-icon-wrap">
+      <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+        <circle cx="18" cy="18" r="14" stroke="#c9a96e" stroke-width="1.5"/>
+        <path d="M18 10v8l5 3" stroke="#c9a96e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="18" cy="18" r="1.5" fill="#c9a96e"/>
+      </svg>
+    </div>
+    <div class="splash-wordmark">Fast<em>Track</em></div>
+    <div class="splash-tagline">Know your body</div>
+    <div class="splash-loader"><div class="splash-loader-fill"></div></div>
+  </div>
+  <div class="splash-version">v2.0</div>
 </div>
 
-<!-- ONBOARDING MODAL -->
+<!-- ══ ONBOARDING SHEET ═══════════════════════════════════ -->
 <div id="onboarding" class="hidden">
   <div class="ob-sheet">
-    <div class="ob-handle"></div>
-    <div class="ob-title">Set Up Your Fast</div>
-    <div class="ob-sub">Choose your protocol and when you last ate</div>
+    <div class="ob-pill"></div>
+    <div class="ob-header">
+      <div class="ob-title">Begin your<br><em>fast</em></div>
+      <div class="ob-sub">Select your protocol and when you last ate to track accurately.</div>
+    </div>
 
-    <div class="ob-label">Fasting Protocol</div>
-    <div class="protocol-grid" id="proto-grid"></div>
+    <div class="ob-section">
+      <div class="ob-label">Fasting Protocol</div>
+      <div class="proto-grid" id="proto-grid"></div>
+    </div>
 
-    <div class="ob-label">When did you last eat?</div>
-    <div class="meal-picker">
-      <div class="time-row">
-        <input class="time-input" type="time" id="last-meal-input">
+    <div class="ob-section">
+      <div class="ob-label">Last Meal</div>
+      <div class="dt-row">
+        <div class="dt-field">
+          <div class="dt-label">Date</div>
+          <input class="dt-input" type="date" id="meal-date">
+        </div>
+        <div class="dt-field">
+          <div class="dt-label">Time</div>
+          <input class="dt-input" type="time" id="meal-time">
+        </div>
       </div>
     </div>
 
-    <button class="btn-start-fast" onclick="confirmFastSetup()">Start Fasting ⚡</button>
+    <button class="btn-primary" onclick="confirmFast()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+      </svg>
+      Start Fasting
+    </button>
   </div>
 </div>
 
-<!-- APP -->
+<!-- ══ APP ════════════════════════════════════════════════ -->
 <div id="app">
-  <!-- TOP BAR -->
+
+  <!-- TOPBAR -->
   <div class="topbar">
-    <div class="topbar-title">⏱ FastTracker</div>
-    <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">🌙</button>
-  </div>
-
-  <!-- TIMER PAGE -->
-  <div class="page timer-page active" id="page-timer">
-    <div id="status-badge" class="status-badge eating">
-      <div class="pulse-dot"></div>
-      <span id="status-text">Eating Window</span>
+    <div class="topbar-left">
+      <div class="topbar-name">Fast<em>Track</em></div>
     </div>
-
-    <div class="ring-container">
-      <svg class="ring-svg" viewBox="0 0 200 200">
-        <circle class="ring-bg" cx="100" cy="100" r="95"/>
-        <circle class="ring-progress" id="ring-prog" cx="100" cy="100" r="95"/>
+    <button class="icon-btn" id="theme-btn" onclick="toggleTheme()">
+      <!-- moon icon -->
+      <svg id="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
       </svg>
-      <div class="ring-center">
-        <div class="timer-display" id="timer-display">00:00:00</div>
-        <div class="timer-label" id="timer-label">ready to start</div>
-        <div class="timer-goal" id="timer-goal"></div>
+      <svg id="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="display:none">
+        <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- ══ TIMER PAGE ════════════════════════════════════════ -->
+  <div class="page timer-page active" id="page-timer">
+
+    <div id="status-pill" class="status-pill eating">
+      <div class="status-dot"></div>
+      <span id="status-txt">Eating Window</span>
+    </div>
+
+    <!-- Ring -->
+    <div class="ring-wrap">
+      <svg class="ring-svg" viewBox="0 0 220 220">
+        <circle class="r-track" cx="110" cy="110" r="100"/>
+        <!-- tick marks -->
+        <g id="ticks"></g>
+        <circle class="r-prog" id="r-prog" cx="110" cy="110" r="100"/>
+      </svg>
+      <div class="ring-inner">
+        <div class="ring-time" id="ring-time">00:00:00</div>
+        <div class="ring-status" id="ring-status">ready to begin</div>
+        <div class="ring-pct" id="ring-pct"></div>
       </div>
     </div>
 
-    <div class="info-row" id="info-row" style="display:none">
+    <!-- Info chips (hidden when not fasting) -->
+    <div class="info-strip" id="info-strip" style="display:none">
       <div class="info-chip">
-        <div class="info-chip-label">Started</div>
-        <div class="info-chip-val" id="chip-started">--:--</div>
+        <div class="ic-label">Started</div>
+        <div class="ic-val" id="chip-start">—</div>
       </div>
       <div class="info-chip">
-        <div class="info-chip-label">Last Meal</div>
-        <div class="info-chip-val" id="chip-lastmeal">--:--</div>
+        <div class="ic-label">Last Meal</div>
+        <div class="ic-val" id="chip-meal">—</div>
       </div>
       <div class="info-chip">
-        <div class="info-chip-label">Goal</div>
-        <div class="info-chip-val" id="chip-goal">16h</div>
+        <div class="ic-label">Goal</div>
+        <div class="ic-val" id="chip-goal">16h</div>
       </div>
     </div>
 
-    <div class="phase-banner" id="phase-banner">
-      <div class="phase-icon">🍽️</div>
+    <!-- Phase card -->
+    <div class="phase-card" id="phase-card">
+      <div class="phase-ic">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>
+          <line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/>
+        </svg>
+      </div>
       <div>
-        <div class="phase-title">Ready to Fast</div>
-        <div class="phase-desc">Tap "Start Fast" to begin tracking with real-time biological insights.</div>
+        <div class="phase-name" id="phase-name">Ready to Fast</div>
+        <div class="phase-body" id="phase-body">Tap start to begin tracking with live biological insights.</div>
       </div>
     </div>
 
-    <div class="controls">
-      <button class="btn-main btn-action" id="main-btn" onclick="handleMainBtn()">Start Fast</button>
-      <button class="btn-main btn-icon" onclick="toggleGoalPicker()">🎯</button>
+    <!-- Controls -->
+    <div class="cta-row">
+      <button class="btn-cta start" id="main-btn" onclick="handleMain()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <polygon points="5 3 19 12 5 21 5 3"/>
+        </svg>
+        Start Fast
+      </button>
+      <button class="btn-sq" onclick="toggleGoalDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
+        </svg>
+      </button>
     </div>
 
-    <div class="goal-picker" id="goal-picker">
-      <div class="goal-picker-title">Change Goal</div>
-      <div class="goal-options" id="goal-options"></div>
+    <!-- Goal drawer -->
+    <div class="goal-drawer" id="goal-drawer">
+      <div class="gd-title">Fasting Goal</div>
+      <div class="goal-chips" id="goal-chips"></div>
     </div>
+
   </div>
 
-  <!-- INSIGHTS PAGE -->
+  <!-- ══ INSIGHTS PAGE ════════════════════════════════════ -->
   <div class="page" id="page-insights">
-    <div class="page-inner" id="insights-inner"></div>
+    <div class="page-pad" id="insights-pad"></div>
   </div>
 
-  <!-- HISTORY PAGE -->
+  <!-- ══ HISTORY PAGE ══════════════════════════════════════ -->
   <div class="page" id="page-history">
-    <div class="page-inner" id="history-content"></div>
+    <div class="page-pad" id="history-pad"></div>
   </div>
 
   <!-- NAV -->
   <div class="nav">
-    <button class="nav-btn active" onclick="showPage('timer')" id="nav-timer">
-      <div class="icon-wrap"><span class="icon">⏱️</span></div>Timer
+    <button class="nav-btn active" id="nav-timer" onclick="showPage('timer')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+      </svg>
+      Timer
     </button>
-    <button class="nav-btn" onclick="showPage('insights')" id="nav-insights">
-      <div class="icon-wrap"><span class="icon">🧬</span></div>Insights
+    <button class="nav-btn" id="nav-insights" onclick="showPage('insights')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+        <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+      </svg>
+      Insights
     </button>
-    <button class="nav-btn" onclick="showPage('history')" id="nav-history">
-      <div class="icon-wrap"><span class="icon">📊</span></div>History
+    <button class="nav-btn" id="nav-history" onclick="showPage('history')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      History
     </button>
   </div>
 </div>
 
 <script>
-// ── STORAGE ──────────────────────────────────────────────────
-const S = {
-  get(k){try{return window.AndroidStorage?window.AndroidStorage.getItem(k):localStorage.getItem(k)}catch(e){return localStorage.getItem(k)}},
-  set(k,v){try{window.AndroidStorage?window.AndroidStorage.setItem(k,v):localStorage.setItem(k,v)}catch(e){localStorage.setItem(k,v)}},
+/* ─── SVG ICON STRINGS ──────────────────────────────────── */
+const ICONS = {
+  dna: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 15c6.667-6 13.333 0 20-6"/><path d="M2 9c6.667 6 13.333 0 20 6"/></svg>`,
+  brain: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/></svg>`,
+  zap: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
+  clock: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+  leaf: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>`,
+  recycle: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>`,
+  fire: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>`,
+  star: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+  check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+  coffee: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>`,
 };
 
-// ── FASTING PHASES ────────────────────────────────────────────
-const PHASES=[
-  {hour:0,icon:'🍽️',title:'Fed State',desc:'Digesting & absorbing nutrients. Insulin elevated, glucose is primary fuel.',
-   bio:{title:'Digestion & Absorption',body:'Insulin is high, signaling cells to absorb glucose. The liver converts excess glucose to glycogen. No fat burning yet — your body has plenty of fuel from your last meal.'},
-   mental:{title:'Post-Meal Focus',body:'Slight energy dip as blood is redirected to digestion (postprandial somnolence). Serotonin may be slightly elevated from carbohydrate intake.'},
-   physical:{title:'Normal Energy Levels',body:'Energy is stable, body temperature slightly elevated as digestion generates heat. Gut is actively working through your last meal.'}},
-  {hour:2,icon:'🔄',title:'Transition Phase',desc:'Insulin declining. Body shifting fuel sources away from your last meal.',
-   bio:{title:'Insulin Declining',body:'Blood glucose normalizing. Glucagon begins to rise, signaling the liver to start releasing stored glycogen. The body prepares to tap stored energy reserves.'},
-   mental:{title:'Mental Clarity Building',body:'As insulin drops, the brain\'s glucose supply stabilizes. Many people notice a mild increase in alertness as the post-meal fog lifts completely.'},
-   physical:{title:'Stomach Fully Empty',body:'Ghrelin (hunger hormone) may begin a mild rise — this is normal. Stomach has completely emptied. Hunger comes in waves; water helps.'}},
-  {hour:4,icon:'🔥',title:'Glycogen Depletion',desc:'Liver glycogen being used. Fat utilization is ramping up.',
-   bio:{title:'Glycogenolysis Active',body:'The liver breaks down glycogen to maintain blood sugar. Free fatty acids enter the bloodstream as backup fuel. Insulin is at basal levels, gate-opening fat stores.'},
-   mental:{title:'Steady Alertness',body:'Norepinephrine starts a gentle rise — an evolutionary sharpening of focus during food scarcity. Ancestors needed sharper minds when hunting, not after a big meal.'},
-   physical:{title:'Mild Hunger Waves',body:'Hunger peaks and passes in waves every 90 minutes (tied to the migrating motor complex). Staying hydrated dramatically reduces perceived hunger intensity.'}},
-  {hour:8,icon:'⚡',title:'Fat Burning Initiated',desc:'Glycogen stores depleting. Lipolysis in full swing. Ketogenesis beginning.',
-   bio:{title:'Lipolysis Accelerating',body:'Triglycerides in fat cells are broken down into glycerol and fatty acids. The liver begins converting some fatty acids to ketones — early ketogenesis. Growth hormone starts rising to preserve muscle.'},
-   mental:{title:'Norepinephrine Surge',body:'BDNF (brain-derived neurotrophic factor) begins increasing, supporting neuroplasticity. Many fasters report heightened concentration and motivation in this window.'},
-   physical:{title:'The Metabolic Switch',body:'You may feel a brief energy dip as fuel sources transition, followed by a second wind. Hunger may paradoxically decrease as ketone production begins — ketones suppress ghrelin.'}},
-  {hour:12,icon:'🌟',title:'Ketosis Entry',desc:'Liver producing meaningful ketones. Approaching metabolic ketosis.',
-   bio:{title:'Ketone Production Rising',body:'Beta-hydroxybutyrate (BHB) is rising. These ketones cross the blood-brain barrier and fuel neurons more efficiently than glucose. Insulin is at its lowest, maximizing fat mobilization.'},
-   mental:{title:'The Fasting Clarity',body:'Ketones are premium brain fuel. Many people experience crystal-clear thinking — reduced mental chatter, heightened focus, and calm grounded energy. This is the state ancient meditators sought.'},
-   physical:{title:'True Fat Burning',body:'Fat oxidation is now dominant. Inflammation markers begin decreasing. Some notice reduced joint stiffness. The body is running clean — like switching from diesel to premium fuel.'}},
-  {hour:16,icon:'🧹',title:'Autophagy Accelerating',desc:'Cellular cleanup in full effect. Anti-aging mechanisms active.',
-   bio:{title:'Autophagy Ramping Up',body:'AMPK is highly activated, triggering autophagy — your cells\' self-cleaning process. Damaged proteins, mitochondria, and cellular debris are recycled. Linked to longevity and cancer prevention.'},
-   mental:{title:'Deep Cognitive Enhancement',body:'BDNF is significantly elevated, supporting memory consolidation and new neural connections. Dopamine receptor sensitivity may increase — rewards feel more satisfying after prolonged fasting.'},
-   physical:{title:'Cellular Renewal',body:'Growth hormone peaks dramatically (up to 2-3x baseline). This preserves lean muscle while fat burning continues. Energy is often surprisingly high — running on clean ketone fuel.'}},
-  {hour:24,icon:'🦋',title:'Deep Cellular Repair',desc:'Full autophagy, immune regeneration, deep metabolic reset.',
-   bio:{title:'Immune System Regeneration',body:'Stem cell production begins upregulating. Damaged immune cells are cleared and replaced. IGF-1 drops, reducing proliferation. Sirtuins (longevity proteins) are maximally activated.'},
-   mental:{title:'Transcendent Clarity',body:'Some experience a euphoric, meditative quality. Reduced neuroinflammation combined with peak BDNF and ketones creates a unique cognitive state. Ancient traditions called this "fasting clarity."'},
-   physical:{title:'Maximum Fat Adaptation',body:'Every cell runs on ketones. Insulin near zero. Anti-inflammatory cytokines elevated. Deep tissue repair underway. The body is operating at its most ancient, optimized state.'}}
+/* ─── PHASES ────────────────────────────────────────────── */
+const PHASES = [
+  { h:0,  icon:'coffee', name:'Fed State',
+    desc:'Digesting your last meal. Insulin elevated, glucose is primary fuel.',
+    bio:  { icon:'dna',     cat:'Biological', title:'Digestion & Absorption',      body:'Insulin is high, signaling cells to absorb glucose. The liver stores excess as glycogen. Fat burning is paused — your body is running on meal energy.' },
+    mind: { icon:'brain',   cat:'Mental',     title:'Post-Meal Calm',               body:'A mild post-meal dip in alertness is normal (postprandial somnolence). Serotonin may be slightly elevated from carbohydrate intake.' },
+    body: { icon:'zap',     cat:'Physical',   title:'Active Digestion',             body:'Body temperature slightly elevated as digestion generates heat. Gut is processing — energy is steady but blood is redirected to the digestive system.' } },
+
+  { h:2,  icon:'leaf', name:'Transition Phase',
+    desc:'Insulin declining. The body begins shifting away from meal-derived fuel.',
+    bio:  { icon:'dna',     cat:'Biological', title:'Insulin Declining',            body:'Blood glucose normalizing. Glucagon starts rising, signaling the liver to mobilize stored glycogen. The metabolic shift is beginning.' },
+    mind: { icon:'brain',   cat:'Mental',     title:'Clarity Returning',            body:'As insulin drops and glucose stabilizes, the post-meal fog lifts. Many notice a gentle sharpening of focus.' },
+    body: { icon:'zap',     cat:'Physical',   title:'Stomach Fully Empty',          body:'Ghrelin (the hunger hormone) begins rising gently. Hunger comes in 90-minute waves tied to your migrating motor complex — it passes.' } },
+
+  { h:4,  icon:'fire', name:'Glycogen Depletion',
+    desc:'Liver glycogen actively being used. Fat utilization ramping up.',
+    bio:  { icon:'dna',     cat:'Biological', title:'Glycogenolysis Active',        body:'The liver breaks down glycogen to sustain blood sugar. Free fatty acids enter the bloodstream as backup fuel. Insulin is at basal levels.' },
+    mind: { icon:'brain',   cat:'Mental',     title:'Steady Alertness',             body:'Norepinephrine begins a gentle rise — an ancient evolutionary response that sharpened focus during food scarcity. Ancestors hunted better hungry.' },
+    body: { icon:'zap',     cat:'Physical',   title:'Energy Stable',                body:'Hunger peaks and passes in waves. Water suppresses perceived hunger significantly. The body has ample stored fuel — no panic needed.' } },
+
+  { h:8,  icon:'fire', name:'Fat Burning Initiated',
+    desc:'Glycogen depleting. Lipolysis in full swing. Early ketogenesis begins.',
+    bio:  { icon:'dna',     cat:'Biological', title:'Lipolysis Accelerating',       body:'Triglycerides are broken into glycerol and fatty acids. The liver begins ketone production. Growth hormone rises to protect lean muscle.' },
+    mind: { icon:'brain',   cat:'Mental',     title:'BDNF Rising',                  body:'Brain-derived neurotrophic factor increases, supporting neuroplasticity and memory. Focus sharpens. Motivation and drive often elevated.' },
+    body: { icon:'zap',     cat:'Physical',   title:'The Metabolic Switch',         body:'A brief dip may occur as fuel sources transition — then a second wind arrives. Hunger often paradoxically decreases as ketones suppress ghrelin.' } },
+
+  { h:12, icon:'star', name:'Ketosis Entry',
+    desc:'Meaningful ketone production. The body is approaching full metabolic ketosis.',
+    bio:  { icon:'dna',     cat:'Biological', title:'Ketone Production Rising',     body:'Beta-hydroxybutyrate (BHB) is climbing. Ketones cross the blood-brain barrier, fueling neurons more efficiently than glucose. Insulin is at its lowest.' },
+    mind: { icon:'brain',   cat:'Mental',     title:'The Fasting Clarity',          body:'Ketones are premium brain fuel. Crystal-clear thinking, reduced mental chatter, calm and grounded energy. Ancient meditators sought this state deliberately.' },
+    body: { icon:'zap',     cat:'Physical',   title:'True Fat Burning',             body:'Fat oxidation is now dominant. Inflammation markers begin declining. Some notice reduced joint stiffness. The body runs clean on ketone fuel.' } },
+
+  { h:16, icon:'recycle', name:'Autophagy Accelerating',
+    desc:'Cellular self-cleaning in full effect. Anti-aging mechanisms fully active.',
+    bio:  { icon:'dna',     cat:'Biological', title:'Autophagy Ramping Up',         body:'AMPK activation triggers autophagy — the cell\'s cleanup protocol. Damaged proteins, mitochondria, and debris are recycled. Linked to longevity and cancer resilience.' },
+    mind: { icon:'brain',   cat:'Mental',     title:'Deep Cognitive Enhancement',   body:'BDNF is significantly elevated, supporting memory consolidation and new neural connections. Dopamine receptor sensitivity may increase — rewards feel more vivid.' },
+    body: { icon:'zap',     cat:'Physical',   title:'Cellular Renewal',             body:'Growth hormone peaks (2–3× baseline). Lean muscle is actively preserved while fat burns. Energy is often surprisingly high — clean ketone fuel at its peak.' } },
+
+  { h:24, icon:'star', name:'Deep Cellular Repair',
+    desc:'Full autophagy, immune regeneration, and profound metabolic reset.',
+    bio:  { icon:'dna',     cat:'Biological', title:'Immune Regeneration',          body:'Stem cell production upregulates. Damaged immune cells are cleared and replaced. IGF-1 drops, reducing proliferation. Sirtuins — the longevity proteins — are maximally active.' },
+    mind: { icon:'brain',   cat:'Mental',     title:'Transcendent Clarity',         body:'Some experience a calm euphoria. Reduced neuroinflammation, peak BDNF, and maximum ketones create a unique cognitive state. Ancient traditions called this "fasting clarity."' },
+    body: { icon:'zap',     cat:'Physical',   title:'Maximum Fat Adaptation',       body:'Every cell runs on ketones. Insulin near zero. Anti-inflammatory cytokines elevated. Deep tissue repair underway. The body operates at its most optimized state.' } },
 ];
 
-const GOALS=[
-  {label:'12:12',hours:12,desc:'Beginner'},{label:'14:10',hours:14,desc:'Easy IF'},
-  {label:'16:8',hours:16,desc:'Standard'},{label:'18:6',hours:18,desc:'Intermediate'},
-  {label:'20:4',hours:20,desc:'Advanced'},{label:'24h',hours:24,desc:'OMAD'},
-  {label:'36h',hours:36,desc:'Extended'},{label:'48h',hours:48,desc:'Prolonged'},
+const GOALS = [
+  {label:'12:12',h:12},{label:'14:10',h:14},{label:'16:8',h:16},
+  {label:'18:6',h:18},{label:'20:4',h:20},{label:'24h',h:24},
+  {label:'36h',h:36},{label:'48h',h:48},
 ];
 
-// ── STATE ─────────────────────────────────────────────────────
-let st={isFasting:false,startTime:null,lastMealTime:null,goalHours:16};
-let tick_=null;
-let elapsed=0;
-let insightsNeedRender=true;
+/* ─── STATE ─────────────────────────────────────────────── */
+let st = { on:false, start:null, lastMeal:null, goal:16 };
+let elapsed = 0, ticker = null, isDark = true;
 
-// ── INIT ──────────────────────────────────────────────────────
+/* ─── STORAGE ───────────────────────────────────────────── */
+const S = {
+  get(k){ try{ return window.AndroidStorage ? window.AndroidStorage.getItem(k) : localStorage.getItem(k) }catch(e){ return localStorage.getItem(k) } },
+  set(k,v){ try{ window.AndroidStorage ? window.AndroidStorage.setItem(k,v) : localStorage.setItem(k,v) }catch(e){ localStorage.setItem(k,v) } },
+};
+function save(){ S.set('ft2_st', JSON.stringify(st)) }
+function load(){
+  try{ const s=JSON.parse(S.get('ft2_st')||'{}'); st.on=!!s.on; st.start=s.start||null; st.lastMeal=s.lastMeal||null; st.goal=s.goal||16; }catch(e){}
+}
+
+/* ─── TICK MARKS ────────────────────────────────────────── */
+function buildTicks(){
+  const g = document.getElementById('ticks');
+  let html = '';
+  for(let i=0;i<60;i++){
+    const a = (i/60)*360, r=a*Math.PI/180;
+    const inner = i%5===0 ? 88 : 93;
+    const outer = 97;
+    const x1=110+inner*Math.sin(r), y1=110-inner*Math.cos(r);
+    const x2=110+outer*Math.sin(r), y2=110-outer*Math.cos(r);
+    html+=`<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="var(--border)" stroke-width="${i%5===0?1:.5}"/>`;
+  }
+  g.innerHTML=html;
+}
+
+/* ─── INIT ──────────────────────────────────────────────── */
 function init(){
-  loadTheme();
-  loadState();
-  buildGoalOptions();
-  buildProtocolGrid();
-  setDefaultMealTime();
+  loadTheme(); load(); buildTicks(); buildGoalChips(); buildProtoGrid();
+  setDefaultDateTime();
   setTimeout(()=>{
-    document.getElementById('splash').classList.add('hide');
-    setTimeout(()=>{document.getElementById('splash').style.display='none'},500);
+    const sp=document.getElementById('splash');
+    sp.classList.add('hide');
+    setTimeout(()=>sp.style.display='none',700);
+    document.getElementById('app').classList.add('ready');
     updateUI();
-    if(st.isFasting)startTick();
-  },2000);
+    if(st.on) startTick();
+  }, 2200);
 }
 
-function loadState(){
-  try{
-    const s=JSON.parse(S.get('ft_state')||'{}');
-    st.isFasting=!!s.isFasting;
-    st.startTime=s.startTime||null;
-    st.lastMealTime=s.lastMealTime||null;
-    st.goalHours=s.goalHours||16;
-  }catch(e){}
-}
-function saveState(){S.set('ft_state',JSON.stringify(st))}
-
-// ── THEME ─────────────────────────────────────────────────────
-let isDark=true;
-function loadTheme(){
-  isDark=(S.get('ft_theme')||'dark')==='dark';
-  applyTheme();
-}
-function toggleTheme(){
-  isDark=!isDark;
-  S.set('ft_theme',isDark?'dark':'light');
-  applyTheme();
-}
+/* ─── THEME ─────────────────────────────────────────────── */
+function loadTheme(){ isDark=(S.get('ft2_theme')||'dark')==='dark'; applyTheme(); }
+function toggleTheme(){ isDark=!isDark; S.set('ft2_theme',isDark?'dark':'light'); applyTheme(); }
 function applyTheme(){
-  document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
-  document.getElementById('theme-btn').textContent=isDark?'🌙':'☀️';
+  document.documentElement.setAttribute('data-theme', isDark?'dark':'light');
+  document.getElementById('icon-moon').style.display = isDark?'block':'none';
+  document.getElementById('icon-sun').style.display  = isDark?'none':'block';
 }
 
-// ── ONBOARDING ────────────────────────────────────────────────
-function buildProtocolGrid(){
-  const g=document.getElementById('proto-grid');
-  g.innerHTML=GOALS.map(go=>`
-    <button class="proto-btn ${go.hours===st.goalHours?'selected':''}" onclick="selectProto(${go.hours})">
-      <div>${go.label}</div>
-      <div class="proto-label">${go.desc}</div>
+/* ─── ONBOARDING ────────────────────────────────────────── */
+let obGoal = 16;
+function buildProtoGrid(){
+  document.getElementById('proto-grid').innerHTML = GOALS.map(g=>`
+    <button class="proto-btn ${g.h===obGoal?'sel':''}" onclick="pickProto(${g.h})">
+      <span class="proto-name">${g.label}</span>
+      <span class="proto-desc">${protoDesc(g.h)}</span>
     </button>`).join('');
 }
-let obGoal=16;
-function selectProto(h){
+function protoDesc(h){ return h<=12?'Beginner':h<=14?'Easy IF':h<=16?'Standard':h<=18?'Intermediate':h<=20?'Advanced':h<=24?'OMAD':'Extended'; }
+function pickProto(h){
   obGoal=h;
-  document.querySelectorAll('.proto-btn').forEach((b,i)=>b.classList.toggle('selected',GOALS[i].hours===h));
+  document.querySelectorAll('.proto-btn').forEach((b,i)=>b.classList.toggle('sel',GOALS[i].h===h));
 }
-function setDefaultMealTime(){
+function setDefaultDateTime(){
   const now=new Date();
   now.setHours(now.getHours()-1);
-  document.getElementById('last-meal-input').value=
-    String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('meal-date').value=now.toISOString().split('T')[0];
+  document.getElementById('meal-time').value=`${pad(now.getHours())}:${pad(now.getMinutes())}`;
 }
-function showOnboarding(){
-  obGoal=st.goalHours;
-  buildProtocolGrid();
-  setDefaultMealTime();
-  document.getElementById('onboarding').classList.remove('hidden');
-}
-function confirmFastSetup(){
-  const timeVal=document.getElementById('last-meal-input').value;
-  if(!timeVal)return;
-  const [hh,mm]=timeVal.split(':').map(Number);
-  const lm=new Date();lm.setHours(hh,mm,0,0);
-  if(lm>new Date())lm.setDate(lm.getDate()-1);
-  st.goalHours=obGoal;
-  st.lastMealTime=lm.getTime();
-  st.isFasting=true;
-  st.startTime=Date.now();
-  saveState();
-  document.getElementById('onboarding').classList.add('hidden');
-  buildGoalOptions();
-  updateUI();
-  startTick();
+function openOnboarding(){ obGoal=st.goal; buildProtoGrid(); setDefaultDateTime(); document.getElementById('onboarding').classList.remove('hidden'); }
+function confirmFast(){
+  const d=document.getElementById('meal-date').value;
+  const t=document.getElementById('meal-time').value;
+  if(!d||!t) return;
+  st.lastMeal = new Date(`${d}T${t}`).getTime();
+  st.goal = obGoal; st.on = true; st.start = Date.now();
+  save(); document.getElementById('onboarding').classList.add('hidden');
+  buildGoalChips(); updateUI(); startTick();
 }
 
-// ── TIMER ─────────────────────────────────────────────────────
-function handleMainBtn(){
-  if(!st.isFasting)showOnboarding();
-  else stopFast();
-}
+/* ─── TIMER LOGIC ───────────────────────────────────────── */
+function handleMain(){ st.on ? stopFast() : openOnboarding(); }
 function stopFast(){
-  saveFastHistory(st.startTime,(Date.now()-st.startTime)/1000);
-  st.isFasting=false;st.startTime=null;st.lastMealTime=null;
-  clearInterval(tick_);tick_=null;elapsed=0;
-  saveState();updateUI();renderHistory();
+  saveHistory(st.start,(Date.now()-st.start)/1000);
+  st.on=false; st.start=null; st.lastMeal=null;
+  clearInterval(ticker); ticker=null; elapsed=0;
+  save(); updateUI(); renderHistory();
 }
 function startTick(){
-  if(tick_)clearInterval(tick_);
-  tick=function(){
-    if(!st.isFasting||!st.startTime)return;
-    elapsed=(Date.now()-st.startTime)/1000;
-    updateTimerDisplay();updateRing();updatePhase();
-    if(document.getElementById('page-insights').classList.contains('active'))renderInsightsLive();
-  };
-  tick_=setInterval(tick,1000);tick();
-}
-function fmtTime(s){
-  const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sc=Math.floor(s%60);
-  return`${pad(h)}:${pad(m)}:${pad(sc)}`;
-}
-function pad(n){return String(n).padStart(2,'0')}
-function fmt12(ts){
-  const d=new Date(ts),h=d.getHours(),m=d.getMinutes();
-  return`${pad(h%12||12)}:${pad(m)}${h<12?'am':'pm'}`;
+  if(ticker) clearInterval(ticker);
+  ticker=setInterval(()=>{
+    elapsed=(Date.now()-st.start)/1000;
+    updateTimer();
+    if(document.getElementById('page-insights').classList.contains('active')) liveInsights();
+  },1000);
+  elapsed=(Date.now()-st.start)/1000; updateTimer();
 }
 
-function updateTimerDisplay(){
-  document.getElementById('timer-display').textContent=fmtTime(elapsed);
-  const pct=Math.min(100,((elapsed/3600)/st.goalHours)*100);
-  document.getElementById('timer-goal').textContent=`${Math.floor(pct)}% of ${st.goalHours}h goal`;
-  document.getElementById('timer-label').textContent='elapsed';
-  if(st.startTime)document.getElementById('chip-started').textContent=fmt12(st.startTime);
-  if(st.lastMealTime)document.getElementById('chip-lastmeal').textContent=fmt12(st.lastMealTime);
-  document.getElementById('chip-goal').textContent=st.goalHours+'h';
-}
-function updateRing(){
-  const pct=Math.min(1,(elapsed/3600)/st.goalHours);
-  const circ=596;
-  document.getElementById('ring-prog').style.strokeDashoffset=circ-(circ*pct);
-  const ring=document.getElementById('ring-prog');
-  ring.style.stroke=pct<0.33?'#7c6af7':pct<0.66?'#4ecdc4':'#56e39f';
-}
-function updatePhase(){
-  const h=elapsed/3600;
+/* ─── DISPLAY ───────────────────────────────────────────── */
+function pad(n){ return String(n).padStart(2,'0'); }
+function fmtElapsed(s){ return `${pad(Math.floor(s/3600))}:${pad(Math.floor((s%3600)/60))}:${pad(Math.floor(s%60))}`; }
+function fmtClock(ts){ const d=new Date(ts); return `${pad(d.getHours()%12||12)}:${pad(d.getMinutes())}${d.getHours()<12?'am':'pm'}`; }
+function fmtDate(ts){ const d=new Date(ts); return d.toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
+
+function updateTimer(){
+  const h=elapsed/3600, pct=Math.min(1,h/st.goal);
+  document.getElementById('ring-time').textContent=fmtElapsed(elapsed);
+  document.getElementById('ring-status').textContent='elapsed';
+  document.getElementById('ring-pct').textContent=`${Math.floor(pct*100)}% of ${st.goal}h goal`;
+  // ring
+  const circ=628;
+  document.getElementById('r-prog').style.strokeDashoffset=circ-(circ*pct);
+  document.getElementById('r-prog').style.stroke=pct<.33?'#c9a96e':pct<.66?'#5cc8c0':'#7ec8a0';
+  // chips
+  if(st.start) document.getElementById('chip-start').textContent=fmtClock(st.start);
+  if(st.lastMeal) document.getElementById('chip-meal').textContent=fmtDate(st.lastMeal)+' '+fmtClock(st.lastMeal);
+  document.getElementById('chip-goal').textContent=st.goal+'h';
+  // phase
   const ph=getPhase(h);
-  const b=document.getElementById('phase-banner');
-  b.querySelector('.phase-icon').textContent=ph.icon;
-  b.querySelector('.phase-title').textContent=ph.title;
-  b.querySelector('.phase-desc').textContent=ph.desc;
-}
-function getPhase(h){
-  let cur=PHASES[0];
-  for(const p of PHASES){if(h>=p.hour)cur=p;else break;}
-  return cur;
+  document.getElementById('phase-name').textContent=ph.name;
+  document.getElementById('phase-body').textContent=ph.desc;
 }
 
-// ── UI UPDATE ─────────────────────────────────────────────────
+function getPhase(h){ let c=PHASES[0]; for(const p of PHASES){if(h>=p.h)c=p;else break;} return c; }
+
 function updateUI(){
-  const badge=document.getElementById('status-badge');
-  const txt=document.getElementById('status-text');
-  const btn=document.getElementById('main-btn');
-  const infoRow=document.getElementById('info-row');
-  if(st.isFasting){
-    badge.className='status-badge fasting';txt.textContent='Fasting';
-    btn.className='btn-main btn-stop';btn.textContent='Stop Fast';
-    infoRow.style.display='flex';
-    updateRing();updatePhase();
-  }else{
-    badge.className='status-badge eating';txt.textContent='Eating Window';
-    btn.className='btn-main btn-action';btn.textContent='Start Fast';
-    infoRow.style.display='none';
-    document.getElementById('timer-display').textContent='00:00:00';
-    document.getElementById('timer-label').textContent='ready to start';
-    document.getElementById('timer-goal').textContent='';
-    document.getElementById('ring-prog').style.strokeDashoffset='596';
-    document.getElementById('ring-prog').style.stroke='#7c6af7';
-    document.getElementById('phase-banner').querySelector('.phase-icon').textContent='🍽️';
-    document.getElementById('phase-banner').querySelector('.phase-title').textContent='Ready to Fast';
-    document.getElementById('phase-banner').querySelector('.phase-desc').textContent='Tap "Start Fast" to begin with real-time biological insights.';
+  const on=st.on;
+  document.getElementById('status-pill').className='status-pill '+(on?'fasting':'eating');
+  document.getElementById('status-txt').textContent=on?'Fasting':'Eating Window';
+  const mb=document.getElementById('main-btn');
+  mb.className='btn-cta '+(on?'stop':'start');
+  mb.innerHTML=on
+    ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> Stop Fast`
+    : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg> Start Fast`;
+  document.getElementById('info-strip').style.display=on?'flex':'none';
+  if(!on){
+    document.getElementById('ring-time').textContent='00:00:00';
+    document.getElementById('ring-status').textContent='ready to begin';
+    document.getElementById('ring-pct').textContent='';
+    document.getElementById('r-prog').style.strokeDashoffset='628';
+    document.getElementById('r-prog').style.stroke='#c9a96e';
+    document.getElementById('phase-name').textContent='Ready to Fast';
+    document.getElementById('phase-body').textContent='Tap start to begin tracking with live biological insights.';
   }
-  buildGoalOptions();
+  buildGoalChips();
 }
 
-// ── GOAL PICKER ───────────────────────────────────────────────
-function buildGoalOptions(){
-  document.getElementById('goal-options').innerHTML=GOALS.map(g=>
-    `<div class="goal-opt ${g.hours===st.goalHours?'selected':''}" onclick="setGoal(${g.hours})">${g.label}</div>`
+/* ─── GOAL DRAWER ───────────────────────────────────────── */
+function buildGoalChips(){
+  document.getElementById('goal-chips').innerHTML=GOALS.map(g=>
+    `<div class="goal-chip ${g.h===st.goal?'sel':''}" onclick="setGoal(${g.h})">${g.label}</div>`
   ).join('');
 }
-function setGoal(h){st.goalHours=h;saveState();buildGoalOptions();if(st.isFasting)updateRing()}
-function toggleGoalPicker(){document.getElementById('goal-picker').classList.toggle('open')}
+function setGoal(h){ st.goal=h; save(); buildGoalChips(); if(st.on) updateTimer(); }
+function toggleGoalDrawer(){ document.getElementById('goal-drawer').classList.toggle('open'); }
 
-// ── INSIGHTS ──────────────────────────────────────────────────
-function renderInsightsLive(){
-  const h=elapsed/3600;
-  const pct=Math.min(100,(h/24)*100);
-  document.getElementById('tl-fill').style.width=pct+'%';
-  document.getElementById('tl-time').textContent=`${Math.floor(h)}h ${Math.floor((h%1)*60)}m`;
-  [0,4,8,12,16,20,24].forEach(t=>{
-    const el=document.getElementById('tm-'+t);
-    if(el)el.classList.toggle('reached',h>=t);
-  });
-  // update insight text without rebuilding DOM
-  const ph=getPhase(h);
-  const next=PHASES.find(p=>p.hour>h);
-  const bi=document.getElementById('i-bio-title');if(bi)bi.textContent=ph.bio.title;
-  const bb=document.getElementById('i-bio-body');if(bb)bb.textContent=ph.bio.body;
-  const mi=document.getElementById('i-men-title');if(mi)mi.textContent=ph.mental.title;
-  const mb=document.getElementById('i-men-body');if(mb)mb.textContent=ph.mental.body;
-  const pi=document.getElementById('i-phy-title');if(pi)pi.textContent=ph.physical.title;
-  const pb=document.getElementById('i-phy-body');if(pb)pb.textContent=ph.physical.body;
-  if(next){
-    const nt=document.getElementById('i-next-title');if(nt)nt.textContent='Next at '+next.hour+'h: '+next.bio.title;
-    const nb=document.getElementById('i-next-body');if(nb)nb.textContent=next.bio.body.substring(0,90)+'…';
-  }
-}
-
-function buildInsightsDOM(){
-  const inner=document.getElementById('insights-inner');
-  const h=elapsed/3600;
-  const ph=getPhase(h);
-  const next=PHASES.find(p=>p.hour>h);
-  const pct=Math.min(100,(h/24)*100);
-  const markers=[0,4,8,12,16,20,24];
-
-  if(!st.isFasting){
-    inner.innerHTML=`
-      <div class="insight-idle">
-        <div class="big-icon">🧬</div>
-        <p>Start a fast to see real-time biological, mental, and physical insights update as you progress.</p>
-      </div>`;
+/* ─── INSIGHTS ──────────────────────────────────────────── */
+function buildInsights(){
+  const pad=document.getElementById('insights-pad');
+  if(!st.on){
+    pad.innerHTML=`<div class="idle-state">
+      <div class="idle-icon">${ICONS.brain}</div>
+      <div class="idle-title">Track your <em>biology</em></div>
+      <div class="idle-body">Start a fast to see real-time biological, mental, and physical insights update as your body transitions through each phase.</div>
+    </div>`;
     return;
   }
-
-  inner.innerHTML=`
-    <div class="section-title">Progress Timeline</div>
-    <div class="timeline-card">
-      <div class="tl-header">
-        <span class="tl-title">Fasting Journey</span>
-        <span class="tl-time" id="tl-time">${Math.floor(h)}h ${Math.floor((h%1)*60)}m</span>
+  const h=elapsed/3600, pct=Math.min(100,(h/24)*100);
+  const ph=getPhase(h), nx=PHASES.find(p=>p.h>h);
+  const marks=[0,4,8,12,16,20,24];
+  pad.innerHTML=`
+    <div class="sec-label fade-up">Progress Timeline</div>
+    <div class="tl-card fade-up">
+      <div class="tl-top">
+        <div class="tl-heading">Fasting <em>Journey</em></div>
+        <div class="tl-elapsed" id="tl-el">${Math.floor(h)}h ${Math.floor((h%1)*60)}m</div>
       </div>
-      <div class="tl-line"><div class="tl-fill" id="tl-fill" style="width:${pct}%"></div></div>
-      <div class="tl-markers">
-        ${markers.map(t=>`<div class="tl-marker ${h>=t?'reached':''}" id="tm-${t}">
-          <div class="tl-marker-h">${t}h</div>
-          <div class="tl-marker-dot"></div>
+      <div class="tl-bar"><div class="tl-prog" id="tl-prog" style="width:${pct}%"></div></div>
+      <div class="tl-marks">
+        ${marks.map(t=>`<div class="tl-m ${h>=t?'hit':''}" id="tm${t}">
+          <div class="tl-mh">${t}h</div><div class="tl-md"></div>
         </div>`).join('')}
       </div>
     </div>
 
-    <div class="section-title">Biological Changes</div>
-    <div class="insight-card bio fade-up">
-      <div class="i-icon">🧫</div>
-      <div>
-        <div class="i-cat">Biological</div>
-        <div class="i-title" id="i-bio-title">${ph.bio.title}</div>
-        <div class="i-body" id="i-bio-body">${ph.bio.body}</div>
-      </div>
+    <div class="sec-label fade-up">Biological</div>
+    <div class="ic-card bio fade-up">
+      <div class="ic-ic">${ICONS[ph.bio.icon]}</div>
+      <div><div class="ic-cat">${ph.bio.cat}</div><div class="ic-title" id="ib-t">${ph.bio.title}</div><div class="ic-body" id="ib-b">${ph.bio.body}</div></div>
     </div>
-    ${next?`<div class="insight-card dim next-card">
-      <div class="i-icon">⏳</div>
-      <div>
-        <div class="i-cat">Next Phase</div>
-        <div class="i-title" id="i-next-title">Next at ${next.hour}h: ${next.bio.title}</div>
-        <div class="i-body" id="i-next-body">${next.bio.body.substring(0,90)}…</div>
-      </div>
+    ${nx?`<div class="ic-card dim nxt fade-up">
+      <div class="ic-ic">${ICONS.clock}</div>
+      <div><div class="ic-cat">Next at ${nx.h}h</div><div class="ic-title" id="ib-nt">${nx.bio.title}</div><div class="ic-body" id="ib-nb">${nx.bio.body.slice(0,88)}…</div></div>
     </div>`:''}
 
-    <div class="section-title">Mental State</div>
-    <div class="insight-card mental fade-up">
-      <div class="i-icon">🧠</div>
-      <div>
-        <div class="i-cat">Mental</div>
-        <div class="i-title" id="i-men-title">${ph.mental.title}</div>
-        <div class="i-body" id="i-men-body">${ph.mental.body}</div>
-      </div>
+    <div class="sec-label fade-up">Mental State</div>
+    <div class="ic-card mind fade-up">
+      <div class="ic-ic">${ICONS[ph.mind.icon]}</div>
+      <div><div class="ic-cat">${ph.mind.cat}</div><div class="ic-title" id="im-t">${ph.mind.title}</div><div class="ic-body" id="im-b">${ph.mind.body}</div></div>
     </div>
 
-    <div class="section-title">Physical Changes</div>
-    <div class="insight-card physical fade-up">
-      <div class="i-icon">💪</div>
-      <div>
-        <div class="i-cat">Physical</div>
-        <div class="i-title" id="i-phy-title">${ph.physical.title}</div>
-        <div class="i-body" id="i-phy-body">${ph.physical.body}</div>
-      </div>
+    <div class="sec-label fade-up">Physical Changes</div>
+    <div class="ic-card body fade-up">
+      <div class="ic-ic">${ICONS[ph.body.icon]}</div>
+      <div><div class="ic-cat">${ph.body.cat}</div><div class="ic-title" id="ip-t">${ph.body.title}</div><div class="ic-body" id="ip-b">${ph.body.body}</div></div>
     </div>
   `;
 }
 
-// ── HISTORY ───────────────────────────────────────────────────
-function saveFastHistory(start,dur){
-  const h=getHistory();
-  h.unshift({id:Date.now(),startTime:start,duration:dur,goalHours:st.goalHours});
-  if(h.length>50)h.pop();
-  S.set('ft_history',JSON.stringify(h));
+function liveInsights(){
+  const h=elapsed/3600, pct=Math.min(100,(h/24)*100);
+  const tl=document.getElementById('tl-prog'); if(tl)tl.style.width=pct+'%';
+  const el=document.getElementById('tl-el'); if(el)el.textContent=`${Math.floor(h)}h ${Math.floor((h%1)*60)}m`;
+  [0,4,8,12,16,20,24].forEach(t=>{ const m=document.getElementById('tm'+t); if(m)m.classList.toggle('hit',h>=t); });
+  const ph=getPhase(h), nx=PHASES.find(p=>p.h>h);
+  const set=(id,v)=>{ const el=document.getElementById(id); if(el&&el.textContent!==v)el.textContent=v; };
+  set('ib-t',ph.bio.title); set('ib-b',ph.bio.body);
+  set('im-t',ph.mind.title); set('im-b',ph.mind.body);
+  set('ip-t',ph.body.title); set('ip-b',ph.body.body);
+  if(nx){ set('ib-nt',nx.bio.title); set('ib-nb',nx.bio.body.slice(0,88)+'…'); }
 }
-function getHistory(){try{return JSON.parse(S.get('ft_history')||'[]')}catch(e){return[]}}
+
+/* ─── HISTORY ───────────────────────────────────────────── */
+function saveHistory(start,dur){
+  const hist=getHistory(); hist.unshift({id:Date.now(),start,dur,goal:st.goal});
+  if(hist.length>60)hist.pop(); S.set('ft2_hist',JSON.stringify(hist));
+}
+function getHistory(){ try{return JSON.parse(S.get('ft2_hist')||'[]')}catch(e){return[]} }
 
 function renderHistory(){
-  const hist=getHistory();
-  const c=document.getElementById('history-content');
+  const hist=getHistory(), c=document.getElementById('history-pad');
   if(!hist.length){
-    c.innerHTML=`<div class="history-empty"><div class="big-icon">🕐</div><p>No fasts recorded yet. Complete your first fast to see history here.</p></div>`;
+    c.innerHTML=`<div class="empty-state">
+      <div class="empty-icon">${ICONS.clock}</div>
+      <div class="empty-title">No history yet</div>
+      <div class="empty-body">Complete your first fast to see your progress tracked here.</div>
+    </div>`;
     return;
   }
-  const avg=hist.reduce((a,b)=>a+b.duration,0)/hist.length;
-  const longest=Math.max(...hist.map(h=>h.duration));
+  const avg=hist.reduce((a,b)=>a+b.dur,0)/hist.length;
+  const lng=Math.max(...hist.map(h=>h.dur));
   const streak=calcStreak(hist);
   c.innerHTML=`
-    <div class="streak-banner fade-up">
+    <div class="streak-card fade-up">
       <div>
-        <div class="streak-num">${streak}</div>
-        <div class="streak-label">Day Streak 🔥</div>
-        <div class="streak-sub">${hist.length} total fasts</div>
+        <div class="streak-num">${streak}<em>🔥</em></div>
+        <div class="streak-lbl">Day Streak</div>
+        <div class="streak-sub">${hist.length} total fasts recorded</div>
       </div>
     </div>
-    <div class="stats-grid">
-      <div class="stat-card"><div class="stat-val">${Math.floor(avg/3600)}<span class="stat-unit">h ${Math.floor((avg%3600)/60)}m</span></div><div class="stat-label">Avg Duration</div></div>
-      <div class="stat-card"><div class="stat-val">${Math.floor(longest/3600)}<span class="stat-unit">h ${Math.floor((longest%3600)/60)}m</span></div><div class="stat-label">Longest Fast</div></div>
+    <div class="stat-row">
+      <div class="stat-cell fade-up">
+        <div class="stat-num">${Math.floor(avg/3600)}<span class="stat-unit">h ${Math.floor((avg%3600)/60)}m</span></div>
+        <div class="stat-lbl">Average Duration</div>
+      </div>
+      <div class="stat-cell fade-up">
+        <div class="stat-num">${Math.floor(lng/3600)}<span class="stat-unit">h ${Math.floor((lng%3600)/60)}m</span></div>
+        <div class="stat-lbl">Longest Fast</div>
+      </div>
     </div>
-    <div class="section-title">Recent Fasts</div>
+    <div class="sec-label fade-up">Recent Fasts</div>
     ${hist.slice(0,30).map(f=>{
-      const h=Math.floor(f.duration/3600),m=Math.floor((f.duration%3600)/60);
-      const d=new Date(f.startTime);
-      const ds=d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-      const ts=d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-      const goal=f.goalHours||16;
-      const pct=f.duration/(goal*3600);
-      const badge=pct>=1?{c:'great',l:'Goal Met ✓'}:pct>=0.75?{c:'good',l:'75%+'}:{c:'ok',l:Math.floor(pct*100)+'%'};
-      return`<div class="history-item fade-up">
+      const h=Math.floor(f.dur/3600),m=Math.floor((f.dur%3600)/60);
+      const d=new Date(f.start);
+      const ds=d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+      const ts=`${pad(d.getHours()%12||12)}:${pad(d.getMinutes())}${d.getHours()<12?'am':'pm'}`;
+      const pct=f.dur/((f.goal||16)*3600);
+      const badge=pct>=1?{c:'great',l:'Goal Met',i:ICONS.check}:pct>=.75?{c:'good',l:'75%+',i:ICONS.star}:{c:'ok',l:Math.floor(pct*100)+'%',i:ICONS.zap};
+      return`<div class="hist-item fade-up">
         <div>
-          <div class="h-date">${ds}</div>
-          <div class="h-duration">${h}h ${m}m</div>
-          <div class="h-meta">Started ${ts} · Goal ${goal}h</div>
+          <div class="hi-date">${ds}</div>
+          <div class="hi-dur">${h}h ${m}m</div>
+          <div class="hi-meta">Started ${ts} · Goal ${f.goal||16}h</div>
         </div>
-        <div class="h-badge ${badge.c}">${badge.l}</div>
+        <div class="hi-badge ${badge.c}">${badge.i}${badge.l}</div>
       </div>`;
     }).join('')}
   `;
 }
+
 function calcStreak(hist){
-  if(!hist.length)return 0;
-  let s=0;const today=new Date();today.setHours(0,0,0,0);let chk=new Date(today);
+  if(!hist.length)return 0; let s=0;
+  const today=new Date(); today.setHours(0,0,0,0); let chk=new Date(today);
   for(const f of hist){
-    const fd=new Date(f.startTime);fd.setHours(0,0,0,0);
+    const fd=new Date(f.start); fd.setHours(0,0,0,0);
     const diff=Math.round((chk-fd)/86400000);
     if(diff===0||diff===1){s++;chk=fd;}else break;
   }
   return s;
 }
 
-// ── NAVIGATION ────────────────────────────────────────────────
+/* ─── NAVIGATION ────────────────────────────────────────── */
 function showPage(name){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
   document.getElementById('nav-'+name).classList.add('active');
-  if(name==='insights'){buildInsightsDOM();if(st.isFasting)renderInsightsLive();}
-  if(name==='history')renderHistory();
+  if(name==='insights'){ buildInsights(); if(st.on) liveInsights(); }
+  if(name==='history') renderHistory();
 }
 
 init();
