@@ -871,21 +871,28 @@ function confirmFast(){
   st.goal = obGoal; st.on = true; st.start = Date.now();
   save(); document.getElementById('onboarding').classList.add('hidden');
   buildGoalChips(); updateUI(); startTick();
+  // Native notification
+  const mealStr = fmtDate(st.lastMeal) + ' ' + fmtClock(st.lastMeal);
+  Notif.fire('fastStarted', [st.goal + 'h', mealStr]);
 }
 
 /* ─── TIMER LOGIC ───────────────────────────────────────── */
 function handleMain(){ st.on ? stopFast() : openOnboarding(); }
 function stopFast(){
+  const dur = fmtElapsed(elapsed);
   saveHistory(st.start,(Date.now()-st.start)/1000);
   st.on=false; st.start=null; st.lastMeal=null;
   clearInterval(ticker); ticker=null; elapsed=0;
   save(); updateUI(); renderHistory();
+  Notif.fire('fastStopped', [dur]);
 }
 function startTick(){
   if(ticker) clearInterval(ticker);
+  Notif.reset();
   ticker=setInterval(()=>{
     elapsed=(Date.now()-st.start)/1000;
     updateTimer();
+    Notif.checkMilestones(elapsed/3600);
     if(document.getElementById('page-insights').classList.contains('active')) liveInsights();
   },1000);
   elapsed=(Date.now()-st.start)/1000; updateTimer();
@@ -1093,6 +1100,53 @@ function showPage(name){
   if(name==='insights'){ buildInsights(); if(st.on) liveInsights(); }
   if(name==='history') renderHistory();
 }
+
+/* ─── NOTIFICATION BRIDGE ───────────────────────────────── */
+const Notif = {
+  // Track which milestones and goal have already been notified this fast
+  _fired: {},
+
+  fire(method, args) {
+    try {
+      if (window.AndroidNotif && typeof window.AndroidNotif[method] === 'function') {
+        window.AndroidNotif[method](...args);
+      }
+    } catch(e) { console.warn('Notif error:', e); }
+  },
+
+  // Called every tick — checks thresholds and fires once per fast per milestone
+  checkMilestones(hoursElapsed) {
+    // Goal reached
+    if (!this._fired['goal'] && hoursElapsed >= st.goal) {
+      this._fired['goal'] = true;
+      this.fire('goalReached', [st.goal + 'h']);
+    }
+    // Phase milestones
+    const milestones = [
+      { h:2,  name:'Transition Phase',       insight:'Insulin declining. Your body is shifting fuel sources.' },
+      { h:4,  name:'Glycogen Depletion',     insight:'Liver glycogen is being used. Fat utilization is ramping up.' },
+      { h:8,  name:'Fat Burning Initiated',  insight:'Lipolysis is in full swing. Early ketone production beginning.' },
+      { h:12, name:'Ketosis Entry',          insight:'Ketone production rising. Your brain is switching to premium fuel.' },
+      { h:16, name:'Autophagy Accelerating', insight:'Cellular cleanup active. Your body is repairing and renewing itself.' },
+      { h:24, name:'Deep Cellular Repair',   insight:'Full autophagy and immune regeneration underway. Remarkable.' },
+    ];
+    for (const m of milestones) {
+      if (!this._fired['h'+m.h] && hoursElapsed >= m.h) {
+        this._fired['h'+m.h] = true;
+        this.fire('phaseMilestone', [m.name, m.h + 'h', m.insight]);
+      }
+    }
+  },
+
+  // Reset fired state when a new fast starts
+  reset() { this._fired = {}; }
+};
+
+// Patch confirmFast to reset notif state on new fast
+const _origConfirm = confirmFast;
+// (already integrated above — Notif.reset() called via startTick)
+
+function startFastNotifReset() { Notif.reset(); }
 
 init();
 </script>
