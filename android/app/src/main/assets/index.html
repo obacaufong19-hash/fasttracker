@@ -4,8 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>VitaTracker</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Figtree:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  /* System font stack - no CDN required, works fully offline */
+  @font-face {
+    font-family: 'Figtree';
+    src: local('Helvetica Neue'), local('Arial'), local('sans-serif');
+  }
+</style>
 <style>
 :root {
   --bg:#080810; --bg2:#0e0e1a; --bg3:#14141f; --card:#12121c; --card2:#1a1a28;
@@ -20,9 +25,9 @@
   --orange:#f59e6b; --orange-dim:rgba(245,158,107,0.1);
   --radius:20px; --radius-sm:12px;
   --shadow:0 8px 32px rgba(0,0,0,0.6); --shadow-sm:0 4px 16px rgba(0,0,0,0.4);
-  --font-display:'Cormorant Garamond',serif;
-  --font-body:'Figtree',sans-serif;
-  --font-mono:'JetBrains Mono',monospace;
+  --font-display:Georgia,'Times New Roman',serif;
+  --font-body:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,sans-serif;
+  --font-mono:'Courier New',Courier,monospace;
   --nav-h:64px;
 }
 [data-theme="light"] {
@@ -39,7 +44,7 @@ input,select{font-family:var(--font-body)}
 ::-webkit-scrollbar{width:0}
 
 /* ── SPLASH ── */
-#splash{position:fixed;inset:0;z-index:999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+#splash{position:fixed;inset:0;z-index:999;background:#080810;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
 #splash.hide{animation:splashOut .6s ease forwards}
 @keyframes splashOut{to{opacity:0;transform:scale(1.04)}}
 .splash-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 40%,rgba(201,169,110,0.07) 0%,transparent 70%)}
@@ -60,8 +65,8 @@ input,select{font-family:var(--font-body)}
 .splash-v{position:absolute;bottom:32px;font-size:10px;color:var(--text4);letter-spacing:.15em;font-family:var(--font-mono)}
 
 /* ── APP ── */
-#app{height:100vh;display:flex;flex-direction:column;overflow:hidden;opacity:0;transition:opacity .4s}
-#app.ready{opacity:1}
+#app{height:100vh;display:flex;flex-direction:column;overflow:hidden;opacity:1;transition:opacity .4s}
+#app.ready{opacity:1}/* opacity always 1 - splash covers on load */
 
 /* ── TOPBAR ── */
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 20px 10px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0}
@@ -598,8 +603,25 @@ select.input{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w
    STORAGE
 ══════════════════════════════════════════════════════════ */
 const S={
-  get(k){try{return window.AndroidStorage?window.AndroidStorage.getItem(k):localStorage.getItem(k)}catch(e){return localStorage.getItem(k)}},
-  set(k,v){try{window.AndroidStorage?window.AndroidStorage.setItem(k,v):localStorage.setItem(k,v)}catch(e){localStorage.setItem(k,v)}},
+  get(k){
+    try{
+      if(window.AndroidStorage){
+        const v=window.AndroidStorage.getItem(k);
+        return v===undefined||v==='null'?null:v;
+      }
+      return localStorage.getItem(k);
+    }catch(e){
+      try{return localStorage.getItem(k)}catch(e2){return null}
+    }
+  },
+  set(k,v){
+    try{
+      if(window.AndroidStorage) window.AndroidStorage.setItem(k,String(v));
+      else localStorage.setItem(k,v);
+    }catch(e){
+      try{localStorage.setItem(k,v)}catch(e2){}
+    }
+  },
 };
 
 /* ════════════════════════════════════════════════════════════
@@ -650,16 +672,38 @@ let waterTarget=2000;
    INIT
 ══════════════════════════════════════════════════════════ */
 function init(){
-  loadTheme(); loadFast(); loadWaterTarget();
-  buildTicks(); buildGoalChips(); buildProtoGrid(); setDefaultDT();
-  setTimeout(()=>{
-    document.getElementById('splash').classList.add('hide');
-    setTimeout(()=>document.getElementById('splash').style.display='none',700);
+  try {
+    loadTheme(); loadFast(); loadWaterTarget();
+    buildTicks(); buildGoalChips(); buildProtoGrid(); setDefaultDT();
+    // Show app immediately, don't wait for fonts
     document.getElementById('app').classList.add('ready');
     updateFastUI();
     if(fast.on) startTick();
-  },2300);
+    // Splash hides after brief delay
+    setTimeout(()=>{
+      const sp = document.getElementById('splash');
+      if(sp){ sp.classList.add('hide'); setTimeout(()=>sp.style.display='none', 600); }
+    }, 1800);
+  } catch(e) {
+    // Last resort recovery - show app even if something fails
+    console.error('Init error:', e);
+    document.getElementById('app').style.opacity = '1';
+    document.getElementById('app').classList.add('ready');
+    const sp = document.getElementById('splash');
+    if(sp) sp.style.display = 'none';
+  }
 }
+
+// Global error handler - prevents blank screen on any JS error
+window.onerror = function(msg, src, line, col, err) {
+  console.error('JS Error:', msg, line, col);
+  // Ensure app is always visible
+  const app = document.getElementById('app');
+  if(app) { app.style.opacity='1'; app.classList.add('ready'); }
+  const sp = document.getElementById('splash');
+  if(sp) sp.style.display='none';
+  return true;
+};
 
 /* ════════════════════════════════════════════════════════════
    THEME
@@ -703,7 +747,7 @@ function closeDialog(id){document.getElementById(id).classList.add('hidden')}
 /* ════════════════════════════════════════════════════════════
    FASTING
 ══════════════════════════════════════════════════════════ */
-function loadFast(){try{const s=JSON.parse(S.get('vt_fast')||'{}');fast.on=!!s.on;fast.start=s.start||null;fast.lastMeal=s.lastMeal||null;fast.goal=s.goal||16}catch(e){}}
+function loadFast(){try{const raw=S.get('vt_fast');const s=raw?JSON.parse(raw):{};fast.on=!!s.on;fast.start=s.start||null;fast.lastMeal=s.lastMeal||null;fast.goal=s.goal||16}catch(e){fast={on:false,start:null,lastMeal:null,goal:16}}}
 function saveFast(){S.set('vt_fast',JSON.stringify(fast))}
 function getPhase(h){let c=PHASES[0];for(const p of PHASES){if(h>=p.h)c=p;else break;}return c}
 
