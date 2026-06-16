@@ -1,11 +1,10 @@
 package com.fasttracker;
 
 import android.app.Activity;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -13,6 +12,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
@@ -29,74 +29,88 @@ import androidx.core.content.ContextCompat;
 public class MainActivity extends Activity {
 
     private WebView webView;
-    private static final String PREFS_NAME   = "FastTrackerPrefs";
-    private static final String CHANNEL_ID   = "fast_tracker_channel";
-    private static final String CHANNEL_MILE = "fast_tracker_milestones";
-    private static final int    PERM_REQ     = 101;
-    private static int          notifId      = 1000;
+    private static final String PREFS    = "FastTrackerPrefs";
+    private static final String CHAN_EVT = "ft_events";
+    private static final int    PERM_REQ = 101;
+    private static int          notifId  = 2000;
+
+    private BroadcastReceiver tickReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            long elapsed = intent.getLongExtra("elapsed", 0);
+            String js = "window.onServiceTick && window.onServiceTick(" + elapsed + ")";
+            webView.post(() -> webView.evaluateJavascript(js, null));
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setFlags(
-            WindowManager.LayoutParams.FLAG_FULLSCREEN,
-            WindowManager.LayoutParams.FLAG_FULLSCREEN
-        );
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            getWindow().setStatusBarColor(Color.parseColor("#080810"));
+
+        // ── EDGE-TO-EDGE: content draws behind status + nav bars ──
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            getWindow().setDecorFitsSystemWindows(false);
+        } else {
+            getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+            );
         }
 
-        createNotificationChannels();
+        // Transparent bars — app background color shows through
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            getWindow().setStatusBarColor(Color.TRANSPARENT);
+            getWindow().setNavigationBarColor(Color.TRANSPARENT);
+        }
+
+        // Allow FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+
         requestNotificationPermission();
 
         webView = new WebView(this);
         setContentView(webView);
 
-        WebSettings s = webView.getSettings();
-        s.setJavaScriptEnabled(true);
-        s.setDomStorageEnabled(true);
-        s.setAllowFileAccess(true);
-        s.setCacheMode(WebSettings.LOAD_NO_CACHE);
+        WebSettings ws = webView.getSettings();
+        ws.setJavaScriptEnabled(true);
+        ws.setDomStorageEnabled(true);
+        ws.setAllowFileAccess(false);
+        ws.setCacheMode(WebSettings.LOAD_DEFAULT);
+        ws.setMediaPlaybackRequiresUserGesture(false);
 
         webView.setWebViewClient(new WebViewClient());
         webView.addJavascriptInterface(new StorageBridge(),      "AndroidStorage");
         webView.addJavascriptInterface(new NotificationBridge(), "AndroidNotif");
+        webView.addJavascriptInterface(new ServiceBridge(),      "AndroidService");
+
+        // Make WebView background transparent so no black flash
+        webView.setBackgroundColor(Color.TRANSPARENT);
+
         webView.loadUrl("file:///android_asset/index.html");
     }
 
-    // ── NOTIFICATION CHANNELS ─────────────────────────────────
-    private void createNotificationChannels() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationManager nm = getSystemService(NotificationManager.class);
-
-            // General actions channel
-            NotificationChannel general = new NotificationChannel(
-                CHANNEL_ID,
-                "Fast Actions",
-                NotificationManager.IMPORTANCE_DEFAULT
-            );
-            general.setDescription("Fast started, stopped, and goal reached notifications");
-            general.enableLights(true);
-            general.setLightColor(Color.parseColor("#c9a96e"));
-            general.enableVibration(true);
-            nm.createNotificationChannel(general);
-
-            // Milestones channel (silent-ish)
-            NotificationChannel miles = new NotificationChannel(
-                CHANNEL_MILE,
-                "Fasting Milestones",
-                NotificationManager.IMPORTANCE_LOW
-            );
-            miles.setDescription("Biological phase milestone notifications");
-            miles.enableLights(true);
-            miles.setLightColor(Color.parseColor("#5cc8c0"));
-            nm.createNotificationChannel(miles);
+    @Override
+    protected void onResume() {
+        super.onResume();
+        IntentFilter filter = new IntentFilter(FastingService.ACTION_TICK);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(tickReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+        } else {
+            registerReceiver(tickReceiver, filter);
         }
+        webView.post(() -> webView.evaluateJavascript(
+            "window.onAppResume && window.onAppResume()", null));
     }
 
-    // ── PERMISSION ────────────────────────────────────────────
+    @Override
+    protected void onPause() {
+        super.onPause();
+        try { unregisterReceiver(tickReceiver); } catch (Exception ignored) {}
+    }
+
     private void requestNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
@@ -108,54 +122,43 @@ public class MainActivity extends Activity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == PERM_REQ) {
-            boolean granted = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
-            // Notify JS of result
-            final String js = "window.onNotifPermission && window.onNotifPermission(" + granted + ")";
-            webView.post(() -> webView.evaluateJavascript(js, null));
+    public void onRequestPermissionsResult(int req, String[] perms, int[] results) {
+        super.onRequestPermissionsResult(req, perms, results);
+        if (req == PERM_REQ) {
+            boolean granted = results.length > 0 && results[0] == PackageManager.PERMISSION_GRANTED;
+            webView.post(() -> webView.evaluateJavascript(
+                "window.onNotifPermission && window.onNotifPermission(" + granted + ")", null));
         }
     }
 
-    // ── HELPER: fire a notification ───────────────────────────
-    private void fireNotification(String channel, String title, String body,
-                                  String bigText, int importance) {
+    private void fireEventNotif(String title, String body, String bigText, int priority) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
                     != PackageManager.PERMISSION_GRANTED) return;
         }
+        Intent tap = new Intent(this, MainActivity.class);
+        tap.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        android.app.PendingIntent pi = android.app.PendingIntent.getActivity(this, 0, tap,
+            android.app.PendingIntent.FLAG_UPDATE_CURRENT | android.app.PendingIntent.FLAG_IMMUTABLE);
 
-        Intent tapIntent = new Intent(this, MainActivity.class);
-        tapIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        PendingIntent pi = PendingIntent.getActivity(this, 0, tapIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-
-        NotificationCompat.Builder b = new NotificationCompat.Builder(this, channel)
+        NotificationCompat.Builder b = new NotificationCompat.Builder(this, CHAN_EVT)
             .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle(title)
-            .setContentText(body)
-            .setPriority(importance)
-            .setContentIntent(pi)
-            .setAutoCancel(true)
-            .setColor(Color.parseColor("#c9a96e"));
+            .setContentTitle(title).setContentText(body)
+            .setPriority(priority).setContentIntent(pi)
+            .setAutoCancel(true).setColor(0xFFC9A96E);
 
-        if (bigText != null && !bigText.isEmpty()) {
+        if (bigText != null)
             b.setStyle(new NotificationCompat.BigTextStyle().bigText(bigText));
-        }
 
         NotificationManagerCompat.from(this).notify(notifId++, b.build());
     }
 
-    // ── HELPER: vibrate ───────────────────────────────────────
     private void doVibrate(long[] pattern) {
         Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         if (v == null) return;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             v.vibrate(VibrationEffect.createWaveform(pattern, -1));
-        } else {
-            v.vibrate(pattern, -1);
-        }
+        } else { v.vibrate(pattern, -1); }
     }
 
     @Override
@@ -164,94 +167,55 @@ public class MainActivity extends Activity {
         else super.onBackPressed();
     }
 
-    // ══════════════════════════════════════════════════════════
-    // STORAGE BRIDGE
-    // ══════════════════════════════════════════════════════════
+    // ══ STORAGE BRIDGE ════════════════════════════════════════
     public class StorageBridge {
         @JavascriptInterface
         public void setItem(String key, String value) {
-            getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit().putString(key, value).apply();
+            if (key == null || !key.matches("[a-zA-Z0-9_]+")) return;
+            getSharedPreferences(PREFS, MODE_PRIVATE).edit().putString(key, value).apply();
         }
         @JavascriptInterface
         public String getItem(String key) {
-            return getSharedPreferences(PREFS_NAME, MODE_PRIVATE).getString(key, null);
+            if (key == null || !key.matches("[a-zA-Z0-9_]+")) return null;
+            return getSharedPreferences(PREFS, MODE_PRIVATE).getString(key, null);
         }
         @JavascriptInterface
         public void removeItem(String key) {
-            getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit().remove(key).apply();
+            if (key == null || !key.matches("[a-zA-Z0-9_]+")) return;
+            getSharedPreferences(PREFS, MODE_PRIVATE).edit().remove(key).apply();
         }
     }
 
-    // ══════════════════════════════════════════════════════════
-    // NOTIFICATION BRIDGE  — called from JavaScript
-    // ══════════════════════════════════════════════════════════
+    // ══ NOTIFICATION BRIDGE ═══════════════════════════════════
     public class NotificationBridge {
-
-        /** Fast started */
         @JavascriptInterface
         public void fastStarted(String goalHours, String lastMeal) {
-            fireNotification(
-                CHANNEL_ID,
-                "⏱ Fast Started",
-                "Your " + goalHours + "h fast has begun. Stay strong.",
-                "Last meal: " + lastMeal + "\nGoal: " + goalHours + " hours — you've got this.",
-                NotificationCompat.PRIORITY_DEFAULT
-            );
-            doVibrate(new long[]{0, 80, 60, 80});
+            String g = goalHours != null ? goalHours.replaceAll("[^0-9hm: ]","") : "?";
+            String m = lastMeal  != null ? lastMeal.replaceAll("[^0-9a-zA-Z:,/ -]","") : "?";
+            fireEventNotif("⏱ Fast Started","Your "+g+" fast has begun.",
+                "Last meal: "+m+"\nGoal: "+g, NotificationCompat.PRIORITY_DEFAULT);
+            doVibrate(new long[]{0,80,60,80});
         }
-
-        /** Fast stopped manually */
         @JavascriptInterface
         public void fastStopped(String duration) {
-            fireNotification(
-                CHANNEL_ID,
-                "⏹ Fast Ended",
-                "You fasted for " + duration + ". Great work.",
-                "Your fast of " + duration + " has been recorded. Rest, rehydrate, and break your fast mindfully.",
-                NotificationCompat.PRIORITY_DEFAULT
-            );
-            doVibrate(new long[]{0, 60, 40, 60, 40, 60});
+            String d = duration != null ? duration.replaceAll("[^0-9:hm ]","") : "?";
+            fireEventNotif("⏹ Fast Ended","You fasted for "+d+". Great work.",
+                "Your fast of "+d+" has been recorded.", NotificationCompat.PRIORITY_DEFAULT);
+            doVibrate(new long[]{0,60,40,60,40,60});
         }
-
-        /** Goal reached */
         @JavascriptInterface
         public void goalReached(String goalHours) {
-            fireNotification(
-                CHANNEL_ID,
-                "🎯 Goal Reached!",
-                "You've completed your " + goalHours + "h fast!",
-                "Outstanding! You hit your " + goalHours + "-hour fasting goal. Your body has been through remarkable biological changes. You can stop now or extend further.",
-                NotificationCompat.PRIORITY_HIGH
-            );
-            doVibrate(new long[]{0, 100, 80, 100, 80, 200});
+            String g = goalHours != null ? goalHours.replaceAll("[^0-9h]","") : "?";
+            fireEventNotif("🎯 Goal Reached!","You completed your "+g+" fast!",
+                "Outstanding! You hit your "+g+" goal.", NotificationCompat.PRIORITY_HIGH);
+            doVibrate(new long[]{0,100,80,100,80,200});
         }
-
-        /** Phase milestone reached */
         @JavascriptInterface
-        public void phaseMilestone(String phaseName, String phaseHour, String insight) {
-            fireNotification(
-                CHANNEL_MILE,
-                "✦ " + phaseHour + "h — " + phaseName,
-                insight,
-                insight,
-                NotificationCompat.PRIORITY_LOW
-            );
-            doVibrate(new long[]{0, 50, 80, 50});
+        public void phaseMilestone(String name, String hour, String insight) {
+            fireEventNotif("✦ "+hour+" — "+name, insight, insight,
+                NotificationCompat.PRIORITY_DEFAULT);
+            doVibrate(new long[]{0,50,80,50});
         }
-
-        /** Reminder: still fasting */
-        @JavascriptInterface
-        public void fastingReminder(String elapsed, String remaining) {
-            fireNotification(
-                CHANNEL_MILE,
-                "⏱ Fasting — " + elapsed + " in",
-                remaining + " remaining to goal. Keep going.",
-                null,
-                NotificationCompat.PRIORITY_LOW
-            );
-        }
-
-        /** Check if notifications are permitted */
         @JavascriptInterface
         public boolean hasPermission() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -260,11 +224,27 @@ public class MainActivity extends Activity {
             }
             return true;
         }
-
-        /** Request permission (re-trigger) */
         @JavascriptInterface
-        public void requestPermission() {
-            requestNotificationPermission();
+        public void requestPermission() { requestNotificationPermission(); }
+    }
+
+    // ══ SERVICE BRIDGE ════════════════════════════════════════
+    public class ServiceBridge {
+        @JavascriptInterface
+        public void startFasting(long startTime, float goalHours) {
+            Intent i = new Intent(MainActivity.this, FastingService.class);
+            i.setAction(FastingService.ACTION_START);
+            i.putExtra("startTime", startTime);
+            i.putExtra("goalHours", goalHours);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(i);
+            } else { startService(i); }
+        }
+        @JavascriptInterface
+        public void stopFasting() {
+            Intent i = new Intent(MainActivity.this, FastingService.class);
+            i.setAction(FastingService.ACTION_STOP);
+            startService(i);
         }
     }
 }
