@@ -389,9 +389,21 @@ select.input{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w
     <div class="ob-label">Fasting Protocol</div>
     <div class="proto-grid" id="proto-grid"></div>
     <div class="ob-label">Last Meal</div>
-    <div class="dt-row">
-      <div class="dt-field"><div class="dt-label">Date</div><input class="dt-input" type="date" id="meal-date"></div>
-      <div class="dt-field"><div class="dt-label">Time</div><input class="dt-input" type="time" id="meal-time"></div>
+    <div class="dt-custom-row">
+      <div class="field">
+        <div class="field-label">Date</div>
+        <button class="picker-trigger" id="meal-date-trigger" onclick="openDateSpinner('meal')">
+          <span class="picker-trigger-val" id="meal-date-display">Today</span>
+          <span class="picker-trigger-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button>
+      </div>
+      <div class="field">
+        <div class="field-label">Time</div>
+        <button class="picker-trigger" id="meal-time-trigger" onclick="openTimeSpinner('meal')">
+          <span class="picker-trigger-val" id="meal-time-display">Select time</span>
+          <span class="picker-trigger-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button>
+      </div>
     </div>
     <button class="btn-primary" onclick="confirmFast()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
@@ -411,14 +423,13 @@ select.input{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       Log Water
     </button>
-    <div class="field"><div class="field-label">Daily Target (ml)</div>
-      <select class="input" id="water-target-sel" onchange="setWaterTarget(this.value)">
-        <option value="1500">1,500 ml (Light)</option>
-        <option value="2000" selected>2,000 ml (Standard)</option>
-        <option value="2500">2,500 ml (Active)</option>
-        <option value="3000">3,000 ml (Athlete)</option>
-        <option value="3500">3,500 ml (High Performance)</option>
-      </select>
+    <div class="field"><div class="field-label">Daily Target</div>
+      <div class="picker-field">
+        <button class="picker-trigger" id="water-target-trigger" onclick="openPicker('water-target')">
+          <span class="picker-trigger-val" id="water-target-display">2,000 ml — Standard</span>
+          <span class="picker-trigger-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button>
+      </div>
     </div>
     <button class="btn-secondary" onclick="closeSheet('water-sheet')">Done</button>
   </div>
@@ -431,27 +442,22 @@ select.input{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w
     <div class="sheet-title">Log <em>Workout</em></div>
     <div class="sheet-sub">Track your exercise and movement session.</div>
     <div class="field"><div class="field-label">Exercise Type</div>
-      <select class="input" id="wk-type">
-        <option value="running">🏃 Running</option>
-        <option value="walking">🚶 Walking</option>
-        <option value="cycling">🚴 Cycling</option>
-        <option value="swimming">🏊 Swimming</option>
-        <option value="weights">🏋 Weight Training</option>
-        <option value="yoga">🧘 Yoga / Stretching</option>
-        <option value="hiit">⚡ HIIT</option>
-        <option value="sport">⚽ Sport</option>
-        <option value="other">💪 Other</option>
-      </select>
+      <div class="picker-field">
+        <button class="picker-trigger" id="wk-type-trigger" onclick="openPicker('wk-type')">
+          <span class="picker-trigger-val" id="wk-type-display">Running</span>
+          <span class="picker-trigger-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button>
+      </div>
     </div>
     <div class="input-row">
       <div class="field"><div class="field-label">Duration (min)</div><input class="input" type="number" id="wk-duration" placeholder="30" min="1" max="600"></div>
       <div class="field"><div class="field-label">Intensity</div>
-        <select class="input" id="wk-intensity">
-          <option value="low">Low</option>
-          <option value="moderate" selected>Moderate</option>
-          <option value="high">High</option>
-          <option value="max">Max</option>
-        </select>
+        <div class="picker-field">
+          <button class="picker-trigger" id="wk-intensity-trigger" onclick="openPicker('wk-intensity')">
+            <span class="picker-trigger-val" id="wk-intensity-display">Moderate</span>
+            <span class="picker-trigger-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+          </button>
+        </div>
       </div>
     </div>
     <div class="field"><div class="field-label">Notes (optional)</div><input class="input" type="text" id="wk-notes" placeholder="e.g. Morning run in the park" maxlength="100"></div>
@@ -469,21 +475,41 @@ select.input{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w
     <div class="sheet-pill"></div>
     <div class="sheet-title">Log <em>Sleep</em></div>
     <div class="sheet-sub">Record your sleep session for analysis.</div>
-    <div class="input-row">
-      <div class="field"><div class="field-label">Bedtime Date</div><input class="input" type="date" id="sl-date"></div>
-      <div class="field"><div class="field-label">Bedtime</div><input class="input" type="time" id="sl-bed"></div>
+    <div class="dt-custom-row">
+      <div class="field"><div class="field-label">Bedtime Date</div>
+        <button class="picker-trigger" onclick="openDateSpinner('sl-bed')">
+          <span class="picker-trigger-val" id="sl-bed-date-display">Yesterday</span>
+          <span class="picker-trigger-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button>
+      </div>
+      <div class="field"><div class="field-label">Bedtime</div>
+        <button class="picker-trigger" onclick="openTimeSpinner('sl-bed')">
+          <span class="picker-trigger-val" id="sl-bed-time-display">10:00 pm</span>
+          <span class="picker-trigger-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button>
+      </div>
     </div>
-    <div class="input-row">
-      <div class="field"><div class="field-label">Wake Date</div><input class="input" type="date" id="sl-wake-date"></div>
-      <div class="field"><div class="field-label">Wake Time</div><input class="input" type="time" id="sl-wake"></div>
+    <div class="dt-custom-row">
+      <div class="field"><div class="field-label">Wake Date</div>
+        <button class="picker-trigger" onclick="openDateSpinner('sl-wake')">
+          <span class="picker-trigger-val" id="sl-wake-date-display">Today</span>
+          <span class="picker-trigger-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button>
+      </div>
+      <div class="field"><div class="field-label">Wake Time</div>
+        <button class="picker-trigger" onclick="openTimeSpinner('sl-wake')">
+          <span class="picker-trigger-val" id="sl-wake-time-display">Select time</span>
+          <span class="picker-trigger-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button>
+      </div>
     </div>
     <div class="field"><div class="field-label">Sleep Quality</div>
-      <select class="input" id="sl-quality">
-        <option value="great">😴 Great — Deep, restful</option>
-        <option value="good" selected>😊 Good — Mostly restful</option>
-        <option value="fair">😐 Fair — Some disruption</option>
-        <option value="poor">😫 Poor — Restless</option>
-      </select>
+      <div class="picker-field">
+        <button class="picker-trigger" id="sl-quality-trigger" onclick="openPicker('sl-quality')">
+          <span class="picker-trigger-val" id="sl-quality-display">😊  Good — Mostly restful</span>
+          <span class="picker-trigger-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button>
+      </div>
     </div>
     <button class="btn-primary" style="margin-bottom:12px" onclick="logSleep()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -552,6 +578,34 @@ select.input{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w
       </button>
     </div>
     <div class="goal-drawer" id="goal-drawer"><div class="gd-title">Fasting Goal</div><div class="goal-chips" id="goal-chips"></div></div>
+
+    <!-- Insights / History toggle row -->
+    <div style="display:flex;gap:8px;width:100%;padding:0 0 4px">
+      <button id="btn-show-insights" onclick="toggleFastSection('insights')"
+        style="flex:1;padding:11px;border-radius:14px;background:var(--bg3);border:1px solid var(--border);font-size:12px;font-weight:600;color:var(--text2);display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+        Insights
+      </button>
+      <button id="btn-show-history" onclick="toggleFastSection('history')"
+        style="flex:1;padding:11px;border-radius:14px;background:var(--bg3);border:1px solid var(--border);font-size:12px;font-weight:600;color:var(--text2);display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        History
+      </button>
+    </div>
+  </div>
+
+  <!-- INSIGHTS SECTION inside Fast page -->
+  <div id="fast-insights-section" style="display:none;padding:0 16px 8px">
+    <div style="height:1px;background:var(--border);margin:8px 0 16px"></div>
+    <div class="sec-label" style="margin-bottom:12px">Biological Insights</div>
+    <div id="fast-insights-inner"></div>
+  </div>
+
+  <!-- HISTORY SECTION inside Fast page -->
+  <div id="fast-history-section" style="display:none;padding:0 16px 24px">
+    <div style="height:1px;background:var(--border);margin:8px 0 16px"></div>
+    <div class="sec-label" style="margin-bottom:12px">Fasting History</div>
+    <div id="fast-history-inner"></div>
   </div>
 
   <!-- WATER PAGE -->
@@ -569,17 +623,9 @@ select.input{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w
     <div class="page-pad" id="sleep-pad"></div>
   </div>
 
-  <!-- INSIGHTS PAGE -->
-  <div class="page" id="page-insights">
-    <div class="page-pad" id="insights-pad"></div>
-  </div>
+  <!-- Insights and History embedded in Fast page -->
 
-  <!-- HISTORY PAGE -->
-  <div class="page" id="page-history">
-    <div class="page-pad" id="history-pad"></div>
-  </div>
-
-  <!-- NAV (6 tabs) -->
+  <!-- NAV (4 tabs) -->
   <div class="nav">
     <button class="nav-btn active" id="nav-fast" onclick="showPage('fast')" aria-label="Fasting">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Fast
@@ -593,12 +639,74 @@ select.input{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w
     <button class="nav-btn" id="nav-sleep" onclick="showPage('sleep')" aria-label="Sleep">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>Sleep
     </button>
-    <button class="nav-btn" id="nav-insights" onclick="showPage('insights')" aria-label="Insights">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>Insights
-    </button>
-    <button class="nav-btn" id="nav-history" onclick="showPage('history')" aria-label="History">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>History
-    </button>
+
+  <!-- PICKER BACKDROP -->
+  <div class="picker-backdrop" id="picker-backdrop" onclick="closePicker()"></div>
+
+  <!-- LIST PICKER -->
+  <div class="picker-panel" id="picker-panel">
+    <div class="picker-panel-header">
+      <span class="picker-panel-title" id="picker-panel-title">Select</span>
+      <button class="picker-panel-done" onclick="closePicker()">Done</button>
+    </div>
+    <div class="picker-options" id="picker-options"></div>
+  </div>
+
+  <!-- DATE SPINNER -->
+  <div class="picker-panel" id="date-spinner-panel">
+    <div class="picker-panel-header">
+      <span class="picker-panel-title" id="date-spinner-title">Select Date</span>
+      <button class="picker-panel-done" onclick="closeDateSpinner()">Done</button>
+    </div>
+    <div style="display:flex;gap:12px;padding:24px 20px;justify-content:center">
+      <div style="display:flex;flex-direction:column;align-items:center;flex:1;gap:0">
+        <div style="font-size:10px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px">Day</div>
+        <button class="spinner-btn" onclick="spinDate('d',1)">+</button>
+        <div class="spinner-val" id="spin-day">01</div>
+        <button class="spinner-btn" onclick="spinDate('d',-1)">−</button>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;flex:1;gap:0">
+        <div style="font-size:10px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px">Month</div>
+        <button class="spinner-btn" onclick="spinDate('m',1)">+</button>
+        <div class="spinner-val" id="spin-month">Jan</div>
+        <button class="spinner-btn" onclick="spinDate('m',-1)">−</button>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;flex:1;gap:0">
+        <div style="font-size:10px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px">Year</div>
+        <button class="spinner-btn" onclick="spinDate('y',1)">+</button>
+        <div class="spinner-val" id="spin-year">2026</div>
+        <button class="spinner-btn" onclick="spinDate('y',-1)">−</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TIME SPINNER -->
+  <div class="picker-panel" id="time-spinner-panel">
+    <div class="picker-panel-header">
+      <span class="picker-panel-title" id="time-spinner-title">Select Time</span>
+      <button class="picker-panel-done" onclick="closeTimeSpinner()">Done</button>
+    </div>
+    <div style="display:flex;gap:16px;padding:24px 20px;justify-content:center;align-items:flex-start">
+      <div style="display:flex;flex-direction:column;align-items:center;flex:1">
+        <div style="font-size:10px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px">Hour</div>
+        <button class="spinner-btn" onclick="spinTime('h',1)">+</button>
+        <div class="spinner-val" id="spin-hour">12</div>
+        <button class="spinner-btn" onclick="spinTime('h',-1)">−</button>
+      </div>
+      <div style="font-family:var(--font-mono);font-size:32px;color:var(--text3);margin-top:56px">:</div>
+      <div style="display:flex;flex-direction:column;align-items:center;flex:1">
+        <div style="font-size:10px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px">Min</div>
+        <button class="spinner-btn" onclick="spinTime('min',1)">+</button>
+        <div class="spinner-val" id="spin-min">00</div>
+        <button class="spinner-btn" onclick="spinTime('min',-1)">−</button>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:38px">
+        <button class="ampm-btn active" id="spin-am" onclick="setAmPm('am')">AM</button>
+        <button class="ampm-btn" id="spin-pm" onclick="setAmPm('pm')">PM</button>
+      </div>
+    </div>
+  </div>
+
   </div>
 </div>
 
@@ -731,8 +839,7 @@ function showPage(name){
   if(name==='water')renderWater();
   if(name==='workout')renderWorkout();
   if(name==='sleep')renderSleep();
-  if(name==='insights'){buildInsights();if(fast.on)liveInsights();}
-  if(name==='history')renderHistory();
+  // insights and history are now embedded in the fast page
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -766,15 +873,31 @@ function buildProtoGrid(){
 function protoDesc(h){return h<=12?'Beginner':h<=14?'Easy IF':h<=16?'Standard':h<=18?'Intermediate':h<=20?'Advanced':h<=24?'OMAD':'Extended'}
 function pickProto(h){obGoal=h;document.querySelectorAll('.proto-btn').forEach((b,i)=>b.classList.toggle('sel',GOALS[i].h===h))}
 function setDefaultDT(){
+  // Set default picker dates/times
+  const now = new Date();
+  const lastH = new Date(now.getTime() - 3600000);
+  dateVals['meal'] = {y:lastH.getFullYear(), m:lastH.getMonth(), d:lastH.getDate()};
+  const hh = lastH.getHours();
+  timeVals['meal'] = {h:hh%12||12, min:lastH.getMinutes(), ampm:hh>=12?'pm':'am'};
+  const mealDisp = `${lastH.getDate()} ${MONTHS[lastH.getMonth()]} ${lastH.getFullYear()}`;
+  const timeDisp = `${hh%12||12}:${pad(lastH.getMinutes())} ${hh>=12?'pm':'am'}`;
+  const mdd = document.getElementById('meal-date-display');
+  const mtd = document.getElementById('meal-time-display');
+  if(mdd) mdd.textContent = mealDisp;
+  if(mtd) mtd.textContent = timeDisp;
+  // original fn body follows:
   const now=new Date();now.setHours(now.getHours()-1);
   document.getElementById('meal-date').value=now.toISOString().split('T')[0];
   document.getElementById('meal-time').value=`${pad(now.getHours())}:${pad(now.getMinutes())}`;
 }
 function openOnboarding(){obGoal=fast.goal;buildProtoGrid();setDefaultDT();document.getElementById('onboarding').classList.remove('hidden')}
 function confirmFast(){
-  const d=document.getElementById('meal-date').value,t=document.getElementById('meal-time').value;
-  if(!d||!t)return;
-  fast.lastMeal=new Date(`${d}T${t}`).getTime();
+  const mealTs = getPickerTimestamp('meal', 'meal');
+  if(!mealTs){ showToast('Please set last meal date and time'); return; }
+  fast.lastMeal = mealTs;
+  const d = 'ok', t = 'ok'; // satisfy rest of function
+  if(!d||!t) return;
+  fast.lastMeal=mealTs;
   fast.goal=obGoal;fast.on=true;fast.start=Date.now();
   saveFast();document.getElementById('onboarding').classList.add('hidden');
   buildGoalChips();updateFastUI();startTick();
@@ -940,9 +1063,9 @@ function renderWater(){
 function getWorkouts(){try{return JSON.parse(S.get('vt_workouts')||'[]')}catch(e){return[]}}
 function saveWorkouts(w){S.set('vt_workouts',JSON.stringify(w))}
 function logWorkout(){
-  const type=document.getElementById('wk-type').value;
+  const type=getPickerVal('wk-type')||'running';
   const dur=parseInt(document.getElementById('wk-duration').value);
-  const intensity=document.getElementById('wk-intensity').value;
+  const intensity=getPickerVal('wk-intensity')||'moderate';
   const notes=document.getElementById('wk-notes').value.trim().substring(0,100);
   if(!dur||dur<1){showToast('Enter a valid duration');return}
   const wt=WORKOUT_TYPES[type];
@@ -1012,6 +1135,22 @@ function renderWorkout(){
 function getSleepLog(){try{return JSON.parse(S.get('vt_sleep')||'[]')}catch(e){return[]}}
 function saveSleepLog(l){S.set('vt_sleep',JSON.stringify(l))}
 function setDefaultSleepDT(){
+  const now = new Date();
+  const yesterday = new Date(now.getTime() - 86400000);
+  dateVals['sl-bed']  = {y:yesterday.getFullYear(), m:yesterday.getMonth(), d:yesterday.getDate()};
+  timeVals['sl-bed']  = {h:10, min:0, ampm:'pm'};
+  dateVals['sl-wake'] = {y:now.getFullYear(), m:now.getMonth(), d:now.getDate()};
+  const wh = now.getHours();
+  timeVals['sl-wake'] = {h:wh%12||12, min:now.getMinutes(), ampm:wh>=12?'pm':'am'};
+  const bedd = document.getElementById('sl-bed-date-display');
+  const bedt = document.getElementById('sl-bed-time-display');
+  const wakd = document.getElementById('sl-wake-date-display');
+  const wakt = document.getElementById('sl-wake-time-display');
+  if(bedd) bedd.textContent = `${yesterday.getDate()} ${MONTHS[yesterday.getMonth()]} ${yesterday.getFullYear()}`;
+  if(bedt) bedt.textContent = '10:00 pm';
+  if(wakd) wakd.textContent = `${now.getDate()} ${MONTHS[now.getMonth()]} ${now.getFullYear()}`;
+  if(wakt) wakt.textContent = `${wh%12||12}:${pad(now.getMinutes())} ${wh>=12?'pm':'am'}`;
+  // original fn body:
   const now=new Date();
   document.getElementById('sl-date').value=new Date(now.getTime()-86400000).toISOString().split('T')[0];
   document.getElementById('sl-bed').value='22:00';
@@ -1019,12 +1158,13 @@ function setDefaultSleepDT(){
   document.getElementById('sl-wake').value=`${pad(now.getHours())}:${pad(now.getMinutes())}`;
 }
 function logSleep(){
-  const bd=document.getElementById('sl-date').value,bt=document.getElementById('sl-bed').value;
-  const wd=document.getElementById('sl-wake-date').value,wt=document.getElementById('sl-wake').value;
-  const quality=document.getElementById('sl-quality').value;
+  const bedTs = getPickerTimestamp('sl-bed', 'sl-bed');
+  const wakeTs = getPickerTimestamp('sl-wake', 'sl-wake');
+  const quality = getPickerVal('sl-quality') || 'good';
+  if(!bedTs){ showToast('Please set bedtime date and time'); return; }
+  if(!wakeTs){ showToast('Please set wake date and time'); return; }
+  const bd='ok',bt='ok',wd='ok',wt='ok'; // satisfy guard below
   if(!bd||!bt||!wd||!wt){showToast('Please fill in all fields');return}
-  const bedTs=new Date(`${bd}T${bt}`).getTime();
-  const wakeTs=new Date(`${wd}T${wt}`).getTime();
   if(wakeTs<=bedTs){showToast('Wake time must be after bedtime');return}
   const durMins=Math.round((wakeTs-bedTs)/60000);
   if(durMins<30||durMins>1440){showToast('Duration must be 30min – 24h');return}
@@ -1196,6 +1336,356 @@ const Notif={
   },
   reset(){this._fired={}}
 };
+
+
+/* ════════════════════════════════════════════════════════════
+   CUSTOM PICKER ENGINE
+══════════════════════════════════════════════════════════ */
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+// Picker state
+let _pickerCurrent = null;
+let _pickerConfig = {};
+
+// Stored picker values (hidden state replacing <input>/<select>)
+const pickerVals = {
+  'water-target': '2000',
+  'wk-type':      'running',
+  'wk-intensity': 'moderate',
+  'sl-quality':   'good',
+};
+const dateVals = {};  // key -> {y,m,d}
+const timeVals = {};  // key -> {h,min,ampm}
+
+// Picker data configs
+const PICKER_DATA = {
+  'water-target': {
+    title: 'Daily Water Target',
+    options: [
+      {val:'1500', label:'1,500 ml — Light'},
+      {val:'2000', label:'2,000 ml — Standard'},
+      {val:'2500', label:'2,500 ml — Active'},
+      {val:'3000', label:'3,000 ml — Athlete'},
+      {val:'3500', label:'3,500 ml — High Performance'},
+    ],
+    displayId: 'water-target-display',
+    onChange: function(val) {
+      setWaterTarget(val);
+    }
+  },
+  'wk-type': {
+    title: 'Exercise Type',
+    options: [
+      {val:'running',  label:'Running'},
+      {val:'walking',  label:'Walking'},
+      {val:'cycling',  label:'Cycling'},
+      {val:'swimming', label:'Swimming'},
+      {val:'weights',  label:'Weight Training'},
+      {val:'yoga',     label:'Yoga / Stretching'},
+      {val:'hiit',     label:'HIIT'},
+      {val:'sport',    label:'Sport'},
+      {val:'other',    label:'Other'},
+    ],
+    displayId: 'wk-type-display',
+  },
+  'wk-intensity': {
+    title: 'Intensity',
+    options: [
+      {val:'low',      label:'Low — Easy effort'},
+      {val:'moderate', label:'Moderate — Steady pace'},
+      {val:'high',     label:'High — Hard effort'},
+      {val:'max',      label:'Max — All out'},
+    ],
+    displayId: 'wk-intensity-display',
+  },
+  'sl-quality': {
+    title: 'Sleep Quality',
+    options: [
+      {val:'great', label:'😴  Great — Deep, restful'},
+      {val:'good',  label:'😊  Good — Mostly restful'},
+      {val:'fair',  label:'😐  Fair — Some disruption'},
+      {val:'poor',  label:'😫  Poor — Restless'},
+    ],
+    displayId: 'sl-quality-display',
+  },
+};
+
+function openPicker(key) {
+  const cfg = PICKER_DATA[key];
+  if (!cfg) return;
+  _pickerCurrent = key;
+  document.getElementById('picker-panel-title').textContent = cfg.title;
+  const cur = pickerVals[key];
+  const opts = document.getElementById('picker-options');
+  opts.innerHTML = cfg.options.map(o => `
+    <div class="picker-option ${o.val===cur?'selected':''}" onclick="selectPickerOption('${key}','${o.val}',this)">
+      <span>${o.label}</span>
+      <span class="picker-option-check"></span>
+    </div>`).join('');
+  document.getElementById('picker-backdrop').classList.add('open');
+  document.getElementById('picker-panel').classList.add('open');
+}
+
+function selectPickerOption(key, val, el) {
+  pickerVals[key] = val;
+  const cfg = PICKER_DATA[key];
+  // Update display text
+  const opt = cfg.options.find(o => o.val === val);
+  if (opt && cfg.displayId) {
+    document.getElementById(cfg.displayId).textContent = opt.label;
+    document.getElementById(cfg.displayId).classList.remove('placeholder');
+  }
+  // Visual selection
+  document.querySelectorAll('#picker-options .picker-option').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+  // Callback
+  if (cfg.onChange) cfg.onChange(val);
+}
+
+function closePicker() {
+  document.getElementById('picker-backdrop').classList.remove('open');
+  document.getElementById('picker-panel').classList.remove('open');
+  document.getElementById('date-spinner-panel').classList.remove('open');
+  document.getElementById('time-spinner-panel').classList.remove('open');
+  _pickerCurrent = null;
+}
+
+/* ── DATE SPINNER ─────────────────────────────────────────── */
+let _dateKey = null;
+let _spinD = 1, _spinM = 0, _spinY = 2026;
+
+function openDateSpinner(key) {
+  _dateKey = key;
+  const now = new Date();
+  const stored = dateVals[key];
+  _spinD = stored ? stored.d : (key.includes('bed') ? now.getDate()-1||1 : now.getDate());
+  _spinM = stored ? stored.m : now.getMonth();
+  _spinY = stored ? stored.y : now.getFullYear();
+  // Clamp
+  if (_spinD < 1) _spinD = now.getDate();
+  renderDateSpinner();
+  const title = key === 'meal' ? 'Last Meal Date' :
+                key === 'sl-bed' ? 'Bedtime Date' : 'Wake Date';
+  document.getElementById('date-spinner-title').textContent = title;
+  document.getElementById('picker-backdrop').classList.add('open');
+  document.getElementById('date-spinner-panel').classList.add('open');
+}
+
+function renderDateSpinner() {
+  const maxD = new Date(_spinY, _spinM+1, 0).getDate();
+  if (_spinD > maxD) _spinD = maxD;
+  document.getElementById('spin-day').textContent = pad(_spinD);
+  document.getElementById('spin-month').textContent = MONTHS[_spinM];
+  document.getElementById('spin-year').textContent = _spinY;
+}
+
+function spinDate(part, delta) {
+  if (part === 'd') {
+    const maxD = new Date(_spinY, _spinM+1, 0).getDate();
+    _spinD = ((_spinD - 1 + delta + maxD) % maxD) + 1;
+  } else if (part === 'm') {
+    _spinM = (_spinM + delta + 12) % 12;
+  } else if (part === 'y') {
+    _spinY = Math.max(2020, Math.min(2030, _spinY + delta));
+  }
+  renderDateSpinner();
+}
+
+function closeDateSpinner() {
+  dateVals[_dateKey] = {y:_spinY, m:_spinM, d:_spinD};
+  const dateStr = `${_spinY}-${pad(_spinM+1)}-${pad(_spinD)}`;
+  const displayStr = `${_spinD} ${MONTHS[_spinM]} ${_spinY}`;
+  // Update display buttons
+  if (_dateKey === 'meal') {
+    document.getElementById('meal-date-display').textContent = displayStr;
+  } else if (_dateKey === 'sl-bed') {
+    document.getElementById('sl-bed-date-display').textContent = displayStr;
+  } else if (_dateKey === 'sl-wake') {
+    document.getElementById('sl-wake-date-display').textContent = displayStr;
+  }
+  closePicker();
+}
+
+/* ── TIME SPINNER ─────────────────────────────────────────── */
+let _timeKey = null;
+let _spinH = 12, _spinMin = 0, _spinAmPm = 'am';
+
+function openTimeSpinner(key) {
+  _timeKey = key;
+  const stored = timeVals[key];
+  const now = new Date();
+  let h = now.getHours();
+  if (stored) {
+    _spinH = stored.h; _spinMin = stored.min; _spinAmPm = stored.ampm;
+  } else {
+    _spinAmPm = h >= 12 ? 'pm' : 'am';
+    _spinH = h % 12 || 12;
+    _spinMin = now.getMinutes();
+  }
+  renderTimeSpinner();
+  const title = key === 'meal' ? 'Last Meal Time' :
+                key === 'sl-bed' ? 'Bedtime' : 'Wake Time';
+  document.getElementById('time-spinner-title').textContent = title;
+  document.getElementById('picker-backdrop').classList.add('open');
+  document.getElementById('time-spinner-panel').classList.add('open');
+}
+
+function renderTimeSpinner() {
+  document.getElementById('spin-hour').textContent = _spinH;
+  document.getElementById('spin-min').textContent = pad(_spinMin);
+  document.getElementById('spin-am').className = 'ampm-btn' + (_spinAmPm==='am'?' active':'');
+  document.getElementById('spin-pm').className = 'ampm-btn' + (_spinAmPm==='pm'?' active':'');
+}
+
+function spinTime(part, delta) {
+  if (part === 'h') {
+    _spinH = (_spinH - 1 + delta + 12) % 12 + 1;
+  } else {
+    _spinMin = (_spinMin + delta + 60) % 60;
+  }
+  renderTimeSpinner();
+}
+
+function setAmPm(val) { _spinAmPm = val; renderTimeSpinner(); }
+
+function closeTimeSpinner() {
+  timeVals[_timeKey] = {h:_spinH, min:_spinMin, ampm:_spinAmPm};
+  const display = `${_spinH}:${pad(_spinMin)} ${_spinAmPm}`;
+  if (_timeKey === 'meal') {
+    document.getElementById('meal-time-display').textContent = display;
+  } else if (_timeKey === 'sl-bed') {
+    document.getElementById('sl-bed-time-display').textContent = display;
+  } else if (_timeKey === 'sl-wake') {
+    document.getElementById('sl-wake-time-display').textContent = display;
+  }
+  closePicker();
+}
+
+// Helper: get timestamp from dateVals+timeVals
+function getPickerTimestamp(dateKey, timeKey) {
+  const dv = dateVals[dateKey];
+  const tv = timeVals[timeKey];
+  if (!dv || !tv) return null;
+  let h = tv.h % 12;
+  if (tv.ampm === 'pm') h += 12;
+  return new Date(dv.y, dv.m, dv.d, h, tv.min, 0).getTime();
+}
+
+// Helper: get just the picker value
+function getPickerVal(key) { return pickerVals[key] || ''; }
+
+/* ── FAST INSIGHTS/HISTORY TOGGLE ─────────────────────────── */
+let _fastSection = null;
+function toggleFastSection(section) {
+  const insEl  = document.getElementById('fast-insights-section');
+  const histEl = document.getElementById('fast-history-section');
+  const btnIns = document.getElementById('btn-show-insights');
+  const btnHis = document.getElementById('btn-show-history');
+
+  if (_fastSection === section) {
+    // collapse
+    insEl.style.display = 'none';
+    histEl.style.display = 'none';
+    _fastSection = null;
+    btnIns.style.background = 'var(--bg3)';
+    btnIns.style.color = 'var(--text2)';
+    btnIns.style.borderColor = 'var(--border)';
+    btnHis.style.background = 'var(--bg3)';
+    btnHis.style.color = 'var(--text2)';
+    btnHis.style.borderColor = 'var(--border)';
+    return;
+  }
+  _fastSection = section;
+
+  if (section === 'insights') {
+    insEl.style.display = 'block';
+    histEl.style.display = 'none';
+    btnIns.style.background = 'var(--gold-dim)';
+    btnIns.style.color = 'var(--gold)';
+    btnIns.style.borderColor = 'var(--gold)';
+    btnHis.style.background = 'var(--bg3)';
+    btnHis.style.color = 'var(--text2)';
+    btnHis.style.borderColor = 'var(--border)';
+    renderFastInsights();
+  } else {
+    histEl.style.display = 'block';
+    insEl.style.display = 'none';
+    btnHis.style.background = 'var(--gold-dim)';
+    btnHis.style.color = 'var(--gold)';
+    btnHis.style.borderColor = 'var(--gold)';
+    btnIns.style.background = 'var(--bg3)';
+    btnIns.style.color = 'var(--text2)';
+    btnIns.style.borderColor = 'var(--border)';
+    renderFastHistory();
+  }
+}
+
+function renderFastInsights() {
+  const el = document.getElementById('fast-insights-inner');
+  if (!fast.on) {
+    el.innerHTML = '<p style="font-size:13px;color:var(--text3);padding:12px 0">Start a fast to see live biological insights.</p>';
+    return;
+  }
+  const h = elapsed / 3600;
+  const ph = getPhase(h);
+  const nx = PHASES.find(p => p.h > h);
+  const pct = Math.min(100, (h/24)*100);
+  el.innerHTML = `
+    <div class="tl-card" style="margin-bottom:12px">
+      <div class="tl-top">
+        <div class="tl-heading">Fasting <em>Journey</em></div>
+        <div class="tl-elapsed">${Math.floor(h)}h ${Math.floor((h%1)*60)}m</div>
+      </div>
+      <div class="tl-bar"><div class="tl-prog" style="width:${pct}%"></div></div>
+      <div class="tl-marks">${[0,4,8,12,16,20,24].map(t=>`<div class="tl-m ${h>=t?'hit':''}"><div class="tl-mh">${t}h</div><div class="tl-md"></div></div>`).join('')}</div>
+    </div>
+    <div class="ic-card bio" style="margin-bottom:8px">
+      <div class="ic-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 15c6.667-6 13.333 0 20-6"/><path d="M2 9c6.667 6 13.333 0 20 6"/></svg></div>
+      <div><div class="ic-cat">Biological</div><div class="ic-title">${ph.bio.title}</div><div class="ic-body">${ph.bio.body}</div></div>
+    </div>
+    <div class="ic-card mind" style="margin-bottom:8px">
+      <div class="ic-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/></svg></div>
+      <div><div class="ic-cat">Mental</div><div class="ic-title">${ph.mind.title}</div><div class="ic-body">${ph.mind.body}</div></div>
+    </div>
+    <div class="ic-card body">
+      <div class="ic-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg></div>
+      <div><div class="ic-cat">Physical</div><div class="ic-title">${ph.body.title}</div><div class="ic-body">${ph.body.body}</div></div>
+    </div>
+    ${nx ? `<div class="ic-card dim nxt" style="margin-top:8px">
+      <div class="ic-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+      <div><div class="ic-cat">Next at ${nx.h}h</div><div class="ic-title">${nx.bio.title}</div><div class="ic-body">${nx.bio.body.slice(0,90)}...</div></div>
+    </div>` : ''}
+  `;
+}
+
+function renderFastHistory() {
+  const hist = getFastHistory();
+  const el = document.getElementById('fast-history-inner');
+  if (!hist.length) {
+    el.innerHTML = '<p style="font-size:13px;color:var(--text3);padding:12px 0">No fasts recorded yet.</p>';
+    return;
+  }
+  const streak = calcStreak(hist);
+  el.innerHTML = `
+    <div style="display:flex;gap:10px;margin-bottom:12px">
+      <div class="stat-cell" style="flex:1"><div class="stat-num">${streak}<span class="stat-unit">🔥</span></div><div class="stat-lbl">Streak</div></div>
+      <div class="stat-cell" style="flex:1"><div class="stat-num">${hist.length}</div><div class="stat-lbl">Total Fasts</div></div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div class="sec-label">Recent</div>
+      <button onclick="exportData()" style="font-size:11px;font-weight:600;color:var(--gold);background:var(--gold-dim);border:1px solid rgba(201,169,110,0.2);padding:5px 12px;border-radius:100px">Export</button>
+    </div>
+    ${hist.slice(0,10).map(f => {
+      const h = Math.floor(f.dur/3600), m = Math.floor((f.dur%3600)/60);
+      const pct = f.dur/((f.goal||16)*3600);
+      const badge = pct>=1?{c:'great',l:'✓ Goal'}:pct>=.75?{c:'good',l:'75%+'}:{c:'ok',l:Math.floor(pct*100)+'%'};
+      return `<div class="hist-item" style="margin-bottom:8px">
+        <div><div class="hi-date">${fmtDateFull(f.start)}</div><div class="hi-dur">${h}h ${m}m</div></div>
+        <div class="hi-badge ${badge.c}">${badge.l}</div>
+      </div>`;
+    }).join('')}
+  `;
+}
 
 init();
 </script>

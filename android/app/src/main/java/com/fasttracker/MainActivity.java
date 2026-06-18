@@ -1,6 +1,7 @@
 package com.fasttracker;
 
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -37,9 +38,14 @@ public class MainActivity extends Activity {
     private BroadcastReceiver tickReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            long elapsed = intent.getLongExtra("elapsed", 0);
-            String js = "window.onServiceTick && window.onServiceTick(" + elapsed + ")";
-            webView.post(() -> webView.evaluateJavascript(js, null));
+            final long elapsed = intent.getLongExtra("elapsed", 0);
+            final String js = "window.onServiceTick && window.onServiceTick(" + elapsed + ")";
+            webView.post(new Runnable() {
+                @Override
+                public void run() {
+                    webView.evaluateJavascript(js, null);
+                }
+            });
         }
     };
 
@@ -49,7 +55,7 @@ public class MainActivity extends Activity {
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 
-        // ── EDGE-TO-EDGE: content draws behind status + nav bars ──
+        // Edge-to-edge rendering
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             getWindow().setDecorFitsSystemWindows(false);
         } else {
@@ -60,14 +66,11 @@ public class MainActivity extends Activity {
             );
         }
 
-        // Transparent bars — app background color shows through
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             getWindow().setStatusBarColor(Color.TRANSPARENT);
             getWindow().setNavigationBarColor(Color.TRANSPARENT);
         }
-
-        // Allow FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
 
         requestNotificationPermission();
 
@@ -79,16 +82,12 @@ public class MainActivity extends Activity {
         ws.setDomStorageEnabled(true);
         ws.setAllowFileAccess(false);
         ws.setCacheMode(WebSettings.LOAD_DEFAULT);
-        ws.setMediaPlaybackRequiresUserGesture(false);
 
+        webView.setBackgroundColor(Color.TRANSPARENT);
         webView.setWebViewClient(new WebViewClient());
         webView.addJavascriptInterface(new StorageBridge(),      "AndroidStorage");
         webView.addJavascriptInterface(new NotificationBridge(), "AndroidNotif");
         webView.addJavascriptInterface(new ServiceBridge(),      "AndroidService");
-
-        // Make WebView background transparent so no black flash
-        webView.setBackgroundColor(Color.TRANSPARENT);
-
         webView.loadUrl("file:///android_asset/index.html");
     }
 
@@ -101,8 +100,12 @@ public class MainActivity extends Activity {
         } else {
             registerReceiver(tickReceiver, filter);
         }
-        webView.post(() -> webView.evaluateJavascript(
-            "window.onAppResume && window.onAppResume()", null));
+        webView.post(new Runnable() {
+            @Override
+            public void run() {
+                webView.evaluateJavascript("window.onAppResume && window.onAppResume()", null);
+            }
+        });
     }
 
     @Override
@@ -125,9 +128,16 @@ public class MainActivity extends Activity {
     public void onRequestPermissionsResult(int req, String[] perms, int[] results) {
         super.onRequestPermissionsResult(req, perms, results);
         if (req == PERM_REQ) {
-            boolean granted = results.length > 0 && results[0] == PackageManager.PERMISSION_GRANTED;
-            webView.post(() -> webView.evaluateJavascript(
-                "window.onNotifPermission && window.onNotifPermission(" + granted + ")", null));
+            final boolean granted = results.length > 0
+                && results[0] == PackageManager.PERMISSION_GRANTED;
+            webView.post(new Runnable() {
+                @Override
+                public void run() {
+                    webView.evaluateJavascript(
+                        "window.onNotifPermission && window.onNotifPermission(" + granted + ")",
+                        null);
+                }
+            });
         }
     }
 
@@ -138,18 +148,21 @@ public class MainActivity extends Activity {
         }
         Intent tap = new Intent(this, MainActivity.class);
         tap.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        android.app.PendingIntent pi = android.app.PendingIntent.getActivity(this, 0, tap,
-            android.app.PendingIntent.FLAG_UPDATE_CURRENT | android.app.PendingIntent.FLAG_IMMUTABLE);
+        PendingIntent pi = PendingIntent.getActivity(this, 0, tap,
+            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         NotificationCompat.Builder b = new NotificationCompat.Builder(this, CHAN_EVT)
             .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle(title).setContentText(body)
-            .setPriority(priority).setContentIntent(pi)
-            .setAutoCancel(true).setColor(0xFFC9A96E);
+            .setContentTitle(title)
+            .setContentText(body)
+            .setPriority(priority)
+            .setContentIntent(pi)
+            .setAutoCancel(true)
+            .setColor(0xFFC9A96E);
 
-        if (bigText != null)
+        if (bigText != null) {
             b.setStyle(new NotificationCompat.BigTextStyle().bigText(bigText));
-
+        }
         NotificationManagerCompat.from(this).notify(notifId++, b.build());
     }
 
@@ -158,7 +171,9 @@ public class MainActivity extends Activity {
         if (v == null) return;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             v.vibrate(VibrationEffect.createWaveform(pattern, -1));
-        } else { v.vibrate(pattern, -1); }
+        } else {
+            v.vibrate(pattern, -1);
+        }
     }
 
     @Override
@@ -190,42 +205,48 @@ public class MainActivity extends Activity {
     public class NotificationBridge {
         @JavascriptInterface
         public void fastStarted(String goalHours, String lastMeal) {
-            String g = goalHours != null ? goalHours.replaceAll("[^0-9hm: ]","") : "?";
-            String m = lastMeal  != null ? lastMeal.replaceAll("[^0-9a-zA-Z:,/ -]","") : "?";
-            fireEventNotif("⏱ Fast Started","Your "+g+" fast has begun.",
-                "Last meal: "+m+"\nGoal: "+g, NotificationCompat.PRIORITY_DEFAULT);
-            doVibrate(new long[]{0,80,60,80});
+            String g = goalHours != null ? goalHours.replaceAll("[^0-9hm: ]", "") : "?";
+            String m = lastMeal  != null ? lastMeal.replaceAll("[^0-9a-zA-Z:,/ -]", "") : "?";
+            fireEventNotif("Fast Started", "Your " + g + " fast has begun.",
+                "Last meal: " + m + "\nGoal: " + g,
+                NotificationCompat.PRIORITY_DEFAULT);
+            doVibrate(new long[]{0, 80, 60, 80});
         }
         @JavascriptInterface
         public void fastStopped(String duration) {
-            String d = duration != null ? duration.replaceAll("[^0-9:hm ]","") : "?";
-            fireEventNotif("⏹ Fast Ended","You fasted for "+d+". Great work.",
-                "Your fast of "+d+" has been recorded.", NotificationCompat.PRIORITY_DEFAULT);
-            doVibrate(new long[]{0,60,40,60,40,60});
+            String d = duration != null ? duration.replaceAll("[^0-9:hm ]", "") : "?";
+            fireEventNotif("Fast Ended", "You fasted for " + d + ". Great work.",
+                "Your fast of " + d + " has been recorded.",
+                NotificationCompat.PRIORITY_DEFAULT);
+            doVibrate(new long[]{0, 60, 40, 60, 40, 60});
         }
         @JavascriptInterface
         public void goalReached(String goalHours) {
-            String g = goalHours != null ? goalHours.replaceAll("[^0-9h]","") : "?";
-            fireEventNotif("🎯 Goal Reached!","You completed your "+g+" fast!",
-                "Outstanding! You hit your "+g+" goal.", NotificationCompat.PRIORITY_HIGH);
-            doVibrate(new long[]{0,100,80,100,80,200});
+            String g = goalHours != null ? goalHours.replaceAll("[^0-9h]", "") : "?";
+            fireEventNotif("Goal Reached!", "You completed your " + g + " fast!",
+                "Outstanding! You hit your " + g + " fasting goal.",
+                NotificationCompat.PRIORITY_HIGH);
+            doVibrate(new long[]{0, 100, 80, 100, 80, 200});
         }
         @JavascriptInterface
         public void phaseMilestone(String name, String hour, String insight) {
-            fireEventNotif("✦ "+hour+" — "+name, insight, insight,
+            fireEventNotif(hour + " — " + name, insight, insight,
                 NotificationCompat.PRIORITY_DEFAULT);
-            doVibrate(new long[]{0,50,80,50});
+            doVibrate(new long[]{0, 50, 80, 50});
         }
         @JavascriptInterface
         public boolean hasPermission() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 return ContextCompat.checkSelfPermission(MainActivity.this,
-                    Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED;
+                    Manifest.permission.POST_NOTIFICATIONS)
+                    == PackageManager.PERMISSION_GRANTED;
             }
             return true;
         }
         @JavascriptInterface
-        public void requestPermission() { requestNotificationPermission(); }
+        public void requestPermission() {
+            requestNotificationPermission();
+        }
     }
 
     // ══ SERVICE BRIDGE ════════════════════════════════════════
@@ -238,7 +259,9 @@ public class MainActivity extends Activity {
             i.putExtra("goalHours", goalHours);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 startForegroundService(i);
-            } else { startService(i); }
+            } else {
+                startService(i);
+            }
         }
         @JavascriptInterface
         public void stopFasting() {
