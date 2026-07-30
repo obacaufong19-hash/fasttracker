@@ -2,533 +2,751 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
 <title>VitaTracker</title>
 <style>
-  /* System font stack - no CDN required, works fully offline */
-  @font-face {
-    font-family: 'Figtree';
-    src: local('Helvetica Neue'), local('Arial'), local('sans-serif');
-  }
-</style>
-<style>
-:root {
-  --sat: env(safe-area-inset-top, 0px);
-  --sab: env(safe-area-inset-bottom, 0px);
-  --sal: env(safe-area-inset-left, 0px);
-  --sar: env(safe-area-inset-right, 0px);
-  --bg:#080810; --bg2:#0e0e1a; --bg3:#14141f; --card:#12121c; --card2:#1a1a28;
-  --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.12);
-  --text:#f0eff8; --text2:#8887a4; --text3:#4a496a; --text4:#2e2d4a;
-  --gold:#c9a96e; --gold2:#e8cc96; --gold-dim:rgba(201,169,110,0.12); --gold-glow:rgba(201,169,110,0.25);
-  --teal:#5cc8c0; --teal-dim:rgba(92,200,192,0.1);
-  --rose:#e07b7b; --rose-dim:rgba(224,123,123,0.1);
-  --sage:#7ec8a0; --sage-dim:rgba(126,200,160,0.1);
-  --blue:#6b9fff; --blue-dim:rgba(107,159,255,0.1);
-  --purple:#a78bfa; --purple-dim:rgba(167,139,250,0.1);
-  --orange:#f59e6b; --orange-dim:rgba(245,158,107,0.1);
-  --radius:20px; --radius-sm:12px;
-  --shadow:0 8px 32px rgba(0,0,0,0.6); --shadow-sm:0 4px 16px rgba(0,0,0,0.4);
-  --font-display:Georgia,'Times New Roman',serif;
-  --font-body:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,sans-serif;
-  --font-mono:'Courier New',Courier,monospace;
-  --nav-h:64px;
+/* ── TOKENS ─────────────────────────────────────────── */
+:root{
+  --bg:#0a0a0f;--bg2:#111118;--bg3:#1a1a24;
+  --card:#14141e;--border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+  --text:#efeffa;--text2:#8888a8;--text3:#4a4a6a;
+  --gold:#c9a96e;--gold2:#e8cc96;--gdim:rgba(201,169,110,0.12);--gglow:rgba(201,169,110,0.22);
+  --teal:#5cc8c0;--tdim:rgba(92,200,192,0.1);
+  --sage:#7ec8a0;--sdim:rgba(126,200,160,0.1);
+  --rose:#e07b7b;--rdim:rgba(224,123,123,0.1);
+  --blue:#6b9fff;--bdim:rgba(107,159,255,0.1);
+  --purple:#a78bfa;--pdim:rgba(167,139,250,0.1);
+  --orange:#f59e6b;
+  --sat:env(safe-area-inset-top,0px);
+  --sab:env(safe-area-inset-bottom,0px);
+  --r:18px;--r2:14px;
+  --mono:'Courier New',monospace;
+  --serif:Georgia,'Times New Roman',serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
 }
-[data-theme="light"] {
-  --bg:#f5f4f0; --bg2:#eeede8; --bg3:#e6e5df; --card:#faf9f6; --card2:#f0efe9;
-  --border:rgba(0,0,0,0.07); --border2:rgba(0,0,0,0.12);
-  --text:#1a1820; --text2:#5a5870; --text3:#9a98b0; --text4:#c8c6d8;
-  --gold:#a07840; --gold2:#c09860; --gold-dim:rgba(160,120,64,0.1); --gold-glow:rgba(160,120,64,0.2);
-  --shadow:0 8px 32px rgba(0,0,0,0.1); --shadow-sm:0 4px 16px rgba(0,0,0,0.06);
+[data-theme=light]{
+  --bg:#f4f3ef;--bg2:#eceae4;--bg3:#e4e2da;
+  --card:#faf9f6;--border:rgba(0,0,0,0.07);--border2:rgba(0,0,0,0.13);
+  --text:#18161e;--text2:#58567a;--text3:#98969e;
+  --gold:#9a6e30;--gold2:#b88c50;--gdim:rgba(154,110,48,0.1);--gglow:rgba(154,110,48,0.18);
 }
+/* ── RESET ──────────────────────────────────────────── */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);height:100%;width:100%;overflow:hidden;transition:background .35s,color .35s;-webkit-font-smoothing:antialiased;margin:0;padding:0}
-button{font-family:var(--font-body);cursor:pointer;border:none;background:none;color:inherit}
-input,select{font-family:var(--font-body)}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);
+  font-family:var(--sans);-webkit-font-smoothing:antialiased}
+button{font-family:var(--sans);cursor:pointer;border:none;background:none;color:inherit;touch-action:manipulation}
+input{font-family:var(--sans)}
 ::-webkit-scrollbar{width:0}
 
-/* ── SPLASH ── */
-#splash{position:fixed;top:0;left:0;right:0;bottom:0;z-index:999;background:#080810;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;animation:autoHideSplash 0.6s 2.5s ease forwards;}
-#splash.hide{opacity:0;pointer-events:none;visibility:hidden}
-@keyframes autoHideSplash{to{opacity:0;visibility:hidden;}}
+/* ── SPLASH ─────────────────────────────────────────── */
+#splash{
+  position:fixed;inset:0;z-index:9999;
+  background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;
+  animation:splashGo 0.5s 2.2s ease forwards;
+}
+@keyframes splashGo{to{opacity:0;visibility:hidden;pointer-events:none}}
+.sp-icon{width:72px;height:72px;border-radius:20px;border:1px solid rgba(201,169,110,0.25);
+  background:linear-gradient(135deg,rgba(201,169,110,0.08),rgba(92,200,192,0.05));
+  display:flex;align-items:center;justify-content:center;margin-bottom:20px}
+.sp-icon svg{width:34px;height:34px}
+.sp-word{font-family:var(--serif);font-size:38px;font-weight:300;color:var(--text);letter-spacing:.01em}
+.sp-word em{color:var(--gold);font-style:italic}
+.sp-tag{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.38em;text-transform:uppercase;margin-top:8px;margin-bottom:32px}
+.sp-bar{width:72px;height:1px;background:var(--border2);border-radius:1px;overflow:hidden}
+.sp-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--teal));
+  animation:spfill 1.8s 0.1s ease forwards;width:0}
+@keyframes spfill{to{width:100%}}
 
-.splash-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 40%,rgba(201,169,110,0.07) 0%,transparent 70%)}
-.splash-ring{position:absolute;border:1px solid rgba(201,169,110,0.08);border-radius:50%}
-.splash-ring:nth-child(2){width:320px;height:320px}
-.splash-ring:nth-child(3){width:220px;height:220px;animation-delay:.15s;border-color:rgba(201,169,110,0.12)}
-.splash-ring:nth-child(4){width:140px;height:140px;animation-delay:.3s;border-color:rgba(201,169,110,0.18)}
+/* ── APP SHELL ──────────────────────────────────────── */
+#app{
+  height:100vh;display:flex;flex-direction:column;
+  padding-top:var(--sat);
+  overflow:hidden;
+}
 
-.splash-content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center}
-.splash-icon-wrap{width:80px;height:80px;border:1px solid rgba(201,169,110,0.25);border-radius:24px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(201,169,110,0.08),rgba(92,200,192,0.05));margin-bottom:20px;box-shadow:0 0 40px rgba(201,169,110,0.1)}
-.splash-icon-wrap svg{width:38px;height:38px}
-.splash-word{font-family:var(--font-display);font-size:40px;font-weight:300;color:var(--text);letter-spacing:.01em;line-height:1}
-.splash-word em{color:var(--gold);font-style:italic}
-.splash-tag{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.4em;text-transform:uppercase;margin-top:10px;margin-bottom:36px}
-.splash-bar{width:80px;height:1px;background:var(--border2);border-radius:1px;overflow:hidden}
-.splash-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--teal));animation:loadFill 1.2s .1s ease forwards;width:0}
-@keyframes loadFill{0%{width:0}100%{width:100%}}
-.splash-v{position:absolute;bottom:32px;font-size:10px;color:var(--text4);letter-spacing:.15em;font-family:var(--font-mono)}
-
-/* ── APP ── */
-#app{height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden;opacity:1;transition:opacity .4s;padding-top:var(--sat);padding-bottom:0;box-sizing:border-box}
-#app.ready{opacity:1}/* opacity always 1 - splash covers on load */
-
-/* ── TOPBAR ── */
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 20px 10px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0}
-.topbar-name{font-family:var(--font-display);font-size:20px;font-weight:400;color:var(--text)}
+/* ── TOPBAR ─────────────────────────────────────────── */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 18px 10px;
+  background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.topbar-name{font-family:var(--serif);font-size:19px;font-weight:400;color:var(--text)}
 .topbar-name em{color:var(--gold);font-style:italic}
-.icon-btn{width:38px;height:38px;border-radius:12px;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text2);transition:all .2s}
-.icon-btn:active{transform:scale(.94)}
-.icon-btn svg{width:18px;height:18px}
+.icon-btn{width:36px;height:36px;border-radius:11px;background:var(--bg3);
+  border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text2)}
+.icon-btn svg{width:17px;height:17px}
 
-/* ── NAV ── */
-.nav{display:flex;background:var(--bg2);border-top:1px solid var(--border);flex-shrink:0;padding-bottom:var(--sab)}
-.nav-btn{flex:1;padding:10px 4px 13px;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--text3);font-size:9px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;transition:color .2s;position:relative}
-.nav-btn svg{width:20px;height:20px;transition:transform .2s}
-.nav-btn.active{color:var(--gold)}
-.nav-btn.active svg{transform:scale(1.08)}
-.nav-btn.active::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:24px;height:2px;background:var(--gold);border-radius:0 0 2px 2px}
+/* ── NAV ────────────────────────────────────────────── */
+.nav{
+  display:flex;background:var(--bg2);border-top:1px solid var(--border);
+  flex-shrink:0;padding-bottom:var(--sab);
+}
+.nb{
+  flex:1;padding:9px 4px 11px;display:flex;flex-direction:column;
+  align-items:center;gap:4px;
+  color:var(--text3);font-size:9px;font-weight:600;letter-spacing:.06em;
+  text-transform:uppercase;position:relative;
+}
+.nb svg{width:20px;height:20px;transition:transform .15s}
+.nb.on{color:var(--gold)}
+.nb.on svg{transform:scale(1.1)}
+.nb.on::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:24px;height:2px;background:var(--gold);border-radius:0 0 2px 2px}
 
-/* ── PAGES ── */
-.page{display:none;flex:1;overflow-y:auto;overflow-x:hidden}
-.page.active{display:flex;flex-direction:column}
-.page-pad{padding:16px 16px 32px;display:flex;flex-direction:column;gap:14px}
+/* ── PAGES ──────────────────────────────────────────── */
+.page{display:none;flex:1;overflow-y:auto;overflow-x:hidden;flex-direction:column}
+.page.on{display:flex}
+.pp{padding:14px 16px 32px;display:flex;flex-direction:column;gap:12px}
 
-/* ── SHARED COMPONENTS ── */
-.sec-label{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--text3);padding-left:2px}
-.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius)}
+/* ── SHARED ─────────────────────────────────────────── */
+.sec{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--text3)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r)}
 .row{display:flex;gap:10px}
-.col{display:flex;flex-direction:column;gap:10px}
+.stat-cell{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:14px}
+.stat-num{font-family:var(--serif);font-size:28px;font-weight:300;color:var(--text);line-height:1}
+.stat-u{font-size:12px;color:var(--text2)}
+.stat-l{font-size:10px;color:var(--text3);margin-top:3px}
+.btn-gold{
+  width:100%;padding:16px;border-radius:var(--r2);
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:#1a1200;font-size:14px;font-weight:700;letter-spacing:.03em;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  box-shadow:0 4px 20px var(--gglow);transition:transform .15s;
+}
+.btn-gold:active{transform:scale(.97)}
+.btn-gold svg{width:15px;height:15px}
+.btn-sec{
+  width:100%;padding:14px;border-radius:var(--r2);
+  background:var(--bg3);border:1px solid var(--border);
+  color:var(--text2);font-size:13px;font-weight:600;transition:transform .15s;
+}
+.btn-sec:active{transform:scale(.97)}
+.empty{
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;padding:40px 24px;gap:10px;text-align:center;
+}
+.empty svg{width:28px;height:28px;color:var(--text3)}
+.empty-t{font-family:var(--serif);font-size:20px;font-weight:300;color:var(--text2)}
+.empty-b{font-size:12px;color:var(--text3);line-height:1.6;max-width:220px}
+.toast{
+  position:fixed;bottom:calc(72px + var(--sab));left:50%;
+  transform:translateX(-50%) translateY(12px);
+  background:var(--card);border:1px solid var(--border2);border-radius:100px;
+  padding:9px 18px;font-size:12px;color:var(--text);
+  opacity:0;transition:all .28s;pointer-events:none;white-space:nowrap;z-index:500;
+}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 
-/* stat cell */
-.stat-cell{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px}
-.stat-num{font-family:var(--font-display);font-size:32px;font-weight:300;color:var(--text);line-height:1}
-.stat-unit{font-size:13px;color:var(--text2);margin-left:2px}
-.stat-lbl{font-size:11px;color:var(--text3);margin-top:4px}
-
-/* progress arc */
-.arc-wrap{position:relative;display:flex;align-items:center;justify-content:center}
-.arc-center{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
-
-/* sheet */
-.sheet-overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;display:flex;align-items:flex-end;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
-.sheet-overlay.hidden{display:none}
-.sheet{width:100%;background:var(--bg2);border:1px solid var(--border2);border-bottom:none;border-radius:28px 28px 0 0;padding:8px 24px calc(44px + var(--sab));animation:sheetUp .38s cubic-bezier(.32,1,.56,1);max-height:90vh;overflow-y:auto}
+/* ── SHEET OVERLAY ──────────────────────────────────── */
+.overlay{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(0,0,0,0.55);backdrop-filter:blur(6px);
+  display:flex;align-items:flex-end;
+}
+.overlay.off{display:none}
+.sheet{
+  width:100%;background:var(--bg2);
+  border:1px solid var(--border2);border-bottom:none;
+  border-radius:24px 24px 0 0;
+  padding:8px 22px calc(32px + var(--sab));
+  animation:sheetUp .32s cubic-bezier(.32,1,.56,1);
+  max-height:88vh;overflow-y:auto;
+}
 @keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.sheet-pill{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:12px auto 20px}
-.sheet-title{font-family:var(--font-display);font-size:26px;font-weight:400;color:var(--text);margin-bottom:4px}
+.sheet-pill{width:34px;height:4px;background:var(--border2);border-radius:2px;margin:10px auto 18px}
+.sheet-title{font-family:var(--serif);font-size:24px;font-weight:300;color:var(--text);margin-bottom:4px}
 .sheet-title em{color:var(--gold);font-style:italic}
-.sheet-sub{font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.5}
+.sheet-sub{font-size:12px;color:var(--text2);margin-bottom:20px;line-height:1.5}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:13px}
+.flabel{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3)}
+.finput{
+  padding:12px 14px;border-radius:12px;
+  background:var(--bg3);border:1.5px solid var(--border);
+  color:var(--text);font-size:15px;outline:none;width:100%;
+  -webkit-appearance:none;appearance:none;transition:border-color .2s;
+}
+.finput:focus{border-color:var(--gold)}
+[data-theme=light] .finput{color-scheme:light}
+.input-2col{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 
-/* inputs */
-.field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
-.field-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3)}
-.input{padding:13px 16px;border-radius:14px;background:var(--bg3);border:1.5px solid var(--border);color:var(--text);font-size:15px;outline:none;width:100%;transition:border-color .2s;-webkit-appearance:none;appearance:none}
-.input:focus{border-color:var(--gold)}
-.input-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-[data-theme="light"] .input{color-scheme:light}
-[data-theme="dark"] .input{color-scheme:dark}
-select.input{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238887a4' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+/* ── CUSTOM PICKER ──────────────────────────────────── */
+.pick-trigger{
+  width:100%;padding:12px 14px;border-radius:12px;
+  background:var(--bg3);border:1.5px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  transition:border-color .2s;
+}
+.pick-trigger:active{border-color:var(--gold)}
+.pick-val{font-size:14px;color:var(--text)}
+.pick-val.ph{color:var(--text3)}
+.pick-arr svg{width:14px;height:14px;color:var(--text3)}
+.picker-wrap{
+  position:fixed;inset:0;z-index:300;
+  display:flex;align-items:flex-end;
+  background:rgba(0,0,0,0.5);backdrop-filter:blur(6px);
+}
+.picker-wrap.off{display:none}
+.picker-sheet{
+  width:100%;background:var(--bg2);
+  border:1px solid var(--border2);border-bottom:none;
+  border-radius:24px 24px 0 0;
+  padding:0 0 calc(16px + var(--sab));
+  animation:sheetUp .32s cubic-bezier(.32,1,.56,1);
+}
+.picker-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 20px 12px;border-bottom:1px solid var(--border);
+}
+.picker-head-title{font-size:13px;font-weight:700;color:var(--text);letter-spacing:.02em}
+.picker-done{
+  font-size:13px;font-weight:700;color:var(--gold);
+  background:var(--gdim);border:1px solid rgba(201,169,110,.2);
+  padding:5px 14px;border-radius:100px;
+}
+.picker-list{max-height:52vh;overflow-y:auto}
+.picker-opt{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 20px;border-bottom:1px solid var(--border);
+  font-size:14px;color:var(--text);
+}
+.picker-opt:active{background:var(--bg3)}
+.picker-opt.sel{color:var(--gold);font-weight:600}
+.picker-check{
+  width:20px;height:20px;border-radius:50%;
+  border:1.5px solid var(--border);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.picker-opt.sel .picker-check{background:var(--gold);border-color:var(--gold)}
+.picker-opt.sel .picker-check::after{content:'';width:6px;height:6px;border-radius:50%;background:#fff}
 
-/* buttons */
-.btn-primary{width:100%;padding:17px;border-radius:16px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a1408;font-size:15px;font-weight:700;letter-spacing:.03em;box-shadow:0 6px 24px var(--gold-glow);transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
-.btn-primary:active{transform:scale(.98)}
-.btn-primary svg{width:17px;height:17px}
-.btn-secondary{width:100%;padding:15px;border-radius:16px;background:var(--bg3);border:1px solid var(--border);color:var(--text2);font-size:14px;font-weight:600;transition:all .2s}
-.btn-secondary:active{transform:scale(.98)}
+/* spinner picker */
+.spin-wrap{display:flex;padding:16px 20px 8px;gap:8px;justify-content:center;align-items:flex-start}
+.spin-col{display:flex;flex-direction:column;align-items:center;gap:0;flex:1}
+.spin-lbl{font-size:9px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+.spin-btn{
+  width:42px;height:42px;border-radius:10px;
+  background:var(--bg3);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;color:var(--text2);
+}
+.spin-btn:active{background:var(--gdim);border-color:var(--gold);color:var(--gold)}
+.spin-val{
+  font-family:var(--mono);font-size:26px;color:var(--text);
+  padding:8px 0;min-width:54px;text-align:center;line-height:1;
+}
+.spin-sep{font-family:var(--mono);font-size:26px;color:var(--text3);padding-top:52px;flex:0}
+.ampm-col{display:flex;flex-direction:column;gap:8px;padding-top:34px;flex:0}
+.ampm-btn{
+  padding:7px 14px;border-radius:100px;font-size:12px;font-weight:700;
+  border:1.5px solid var(--border);color:var(--text2);
+}
+.ampm-btn.sel{background:var(--gdim);border-color:var(--gold);color:var(--gold)}
 
-/* pills */
-.pill-row{display:flex;flex-wrap:wrap;gap:8px}
-.pill{padding:8px 14px;border-radius:100px;background:var(--bg3);border:1px solid var(--border);font-size:12px;font-weight:600;color:var(--text2);transition:all .2s;cursor:pointer}
-.pill:active{transform:scale(.95)}
-.pill.sel{border-color:var(--gold);color:var(--gold);background:var(--gold-dim)}
-.pill.blue.sel{border-color:var(--blue);color:var(--blue);background:var(--blue-dim)}
-.pill.purple.sel{border-color:var(--purple);color:var(--purple);background:var(--purple-dim)}
-.pill.sage.sel{border-color:var(--sage);color:var(--sage);background:var(--sage-dim)}
-
-/* dialog */
-.dialog-overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:300;background:rgba(0,0,0,0.65);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:24px}
-.dialog-overlay.hidden{display:none}
-.dialog-box{background:var(--bg2);border:1px solid var(--border2);border-radius:24px;padding:28px 24px;width:100%;max-width:340px;animation:fadeUp .25s ease}
-.dialog-icon{font-size:36px;text-align:center;margin-bottom:12px}
-.dialog-title{font-family:var(--font-display);font-size:22px;font-weight:400;color:var(--text);text-align:center;margin-bottom:8px}
-.dialog-body{font-size:13px;color:var(--text2);text-align:center;line-height:1.6;margin-bottom:24px}
+/* ── DIALOG ─────────────────────────────────────────── */
+.dialog-wrap{
+  position:fixed;inset:0;z-index:400;
+  background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);
+  display:flex;align-items:center;justify-content:center;padding:24px;
+}
+.dialog-wrap.off{display:none}
+.dialog{background:var(--bg2);border:1px solid var(--border2);border-radius:22px;padding:26px 22px;width:100%;max-width:320px}
+.dialog-icon{font-size:32px;text-align:center;margin-bottom:10px}
+.dialog-title{font-family:var(--serif);font-size:20px;font-weight:300;color:var(--text);text-align:center;margin-bottom:6px}
+.dialog-body{font-size:12px;color:var(--text2);text-align:center;line-height:1.6;margin-bottom:20px}
 .dialog-row{display:flex;gap:10px}
-.dialog-btn{flex:1;padding:15px;border-radius:14px;font-size:14px;font-weight:600;transition:all .18s}
-.dialog-btn:active{transform:scale(.97)}
-.dialog-btn.cancel{background:var(--bg3);border:1px solid var(--border);color:var(--text2)}
-.dialog-btn.confirm-rose{background:var(--rose-dim);border:1px solid rgba(224,123,123,0.25);color:var(--rose)}
+.dialog-btn{flex:1;padding:13px;border-radius:12px;font-size:13px;font-weight:700}
+.dialog-cancel{background:var(--bg3);border:1px solid var(--border);color:var(--text2)}
+.dialog-confirm{background:var(--rdim);border:1px solid rgba(224,123,123,.25);color:var(--rose)}
 
-/* toast */
-.toast{position:fixed;bottom:calc(80px + var(--sab));left:50%;transform:translateX(-50%) translateY(20px);background:var(--card);border:1px solid var(--border2);border-radius:100px;padding:10px 20px;font-size:13px;color:var(--text);opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;box-shadow:var(--shadow-sm);z-index:500}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-/* empty state */
-.empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 32px;gap:12px;text-align:center}
-.empty-icon{width:64px;height:64px;border-radius:18px;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text3)}
-.empty-icon svg{width:28px;height:28px}
-.empty-title{font-family:var(--font-display);font-size:22px;color:var(--text2);font-weight:400}
-.empty-body{font-size:13px;color:var(--text3);line-height:1.6;max-width:260px}
-
-/* ── FASTING PAGE ── */
-.timer-page{align-items:center;padding:20px 20px 24px;gap:18px;background:radial-gradient(ellipse 60% 40% at 50% 0%,rgba(201,169,110,0.05) 0%,transparent 60%)}
-.status-pill{display:inline-flex;align-items:center;gap:7px;padding:7px 16px;border-radius:100px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;transition:all .3s}
-.status-pill.fasting{background:var(--gold-dim);color:var(--gold);border:1px solid rgba(201,169,110,0.2)}
-.status-pill.eating{background:var(--sage-dim);color:var(--sage);border:1px solid rgba(126,200,160,0.2)}
-.status-dot{width:6px;height:6px;border-radius:50%;animation:blink 2.4s ease infinite}
-.fasting .status-dot{background:var(--gold)} .eating .status-dot{background:var(--sage)}
+/* ── FAST PAGE ──────────────────────────────────────── */
+.fast-page{
+  align-items:center;padding:18px 18px 24px;gap:16px;
+  background:radial-gradient(ellipse 70% 40% at 50% 0%,rgba(201,169,110,0.05) 0%,transparent 65%);
+}
+.status-pill{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:7px 16px;border-radius:100px;font-size:11px;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;
+}
+.status-pill.eating{background:var(--sdim);color:var(--sage);border:1px solid rgba(126,200,160,.22)}
+.status-pill.fasting{background:var(--gdim);color:var(--gold);border:1px solid rgba(201,169,110,.22)}
+.sdot{width:6px;height:6px;border-radius:50%;animation:blink 2.4s ease infinite}
+.eating .sdot{background:var(--sage)} .fasting .sdot{background:var(--gold)}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-.ring-wrap{position:relative;width:220px;height:220px}
+
+/* ring */
+.ring-wrap{position:relative;width:210px;height:210px}
 .ring-svg{width:100%;height:100%;transform:rotate(-90deg)}
 .r-track{fill:none;stroke:var(--bg3);stroke-width:2}
-.r-prog{fill:none;stroke-width:2;stroke-linecap:round;stroke-dasharray:628;stroke-dashoffset:628;transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1),stroke .5s}
-.ring-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
-.ring-time{font-family:var(--font-mono);font-size:32px;font-weight:300;color:var(--text);letter-spacing:.04em;line-height:1}
-.ring-status{font-size:10px;color:var(--text3);letter-spacing:.14em;text-transform:uppercase;margin-top:4px}
-.ring-pct{font-size:12px;color:var(--gold);font-weight:600;margin-top:2px}
-.info-strip{display:flex;gap:8px;width:100%}
-.info-chip{flex:1;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:11px 12px}
-.ic-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:4px}
-.ic-val{font-family:var(--font-mono);font-size:12px;color:var(--text);font-weight:400}
-.phase-card{width:100%;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;display:flex;align-items:flex-start;gap:14px;position:relative;overflow:hidden}
-.phase-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:linear-gradient(180deg,var(--gold),var(--teal));border-radius:2px 0 0 2px}
-.phase-ic{width:40px;height:40px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--gold-dim);border:1px solid rgba(201,169,110,0.15)}
-.phase-ic svg{width:20px;height:20px;color:var(--gold)}
-.phase-name{font-size:13px;font-weight:600;color:var(--gold);margin-bottom:3px}
-.phase-body{font-size:12px;color:var(--text2);line-height:1.55}
+.r-prog{fill:none;stroke-width:2;stroke-linecap:round;stroke-dasharray:597;stroke-dashoffset:597;transition:stroke-dashoffset 1s ease,stroke .4s}
+.ring-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring-t{font-family:var(--mono);font-size:30px;color:var(--text);letter-spacing:.04em;line-height:1}
+.ring-s{font-size:10px;color:var(--text3);letter-spacing:.14em;text-transform:uppercase;margin-top:5px}
+.ring-p{font-size:11px;color:var(--gold);font-weight:600;margin-top:3px}
+
+/* info strip */
+.istrip{display:flex;gap:8px;width:100%}
+.ichip{flex:1;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 11px}
+.ichip-l{font-size:9px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text3);margin-bottom:3px}
+.ichip-v{font-family:var(--mono);font-size:12px;color:var(--text)}
+
+/* phase card */
+.phase-card{
+  width:100%;background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r);padding:14px 16px;
+  display:flex;align-items:flex-start;gap:12px;
+  position:relative;overflow:hidden;
+}
+.phase-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;
+  background:linear-gradient(180deg,var(--gold),var(--teal));border-radius:0}
+.phase-ic{width:38px;height:38px;border-radius:11px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--gdim);border:1px solid rgba(201,169,110,.15)}
+.phase-ic svg{width:18px;height:18px;color:var(--gold)}
+.phase-n{font-size:12px;font-weight:600;color:var(--gold);margin-bottom:3px}
+.phase-d{font-size:11px;color:var(--text2);line-height:1.5}
+
+/* cta */
 .cta-row{display:flex;gap:10px;width:100%}
-.btn-cta{flex:1;padding:17px;border-radius:16px;font-size:14px;font-weight:700;letter-spacing:.03em;transition:all .18s;display:flex;align-items:center;justify-content:center;gap:8px}
-.btn-cta svg{width:16px;height:16px}
-.btn-cta:active{transform:scale(.97)}
-.btn-cta.start{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a1408;box-shadow:0 6px 20px var(--gold-glow)}
-.btn-cta.stop{background:var(--rose-dim);color:var(--rose);border:1px solid rgba(224,123,123,0.2)}
-.btn-sq{width:54px;height:54px;border-radius:16px;flex-shrink:0;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text2);transition:all .2s}
-.btn-sq:active{transform:scale(.94)} .btn-sq svg{width:20px;height:20px}
-.goal-drawer{display:none;width:100%;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 16px}
-.goal-drawer.open{display:block}
-.gd-title{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
-.goal-chips{display:flex;flex-wrap:wrap;gap:7px}
-.goal-chip{padding:7px 13px;border-radius:100px;background:var(--bg3);border:1px solid var(--border);font-size:12px;font-weight:600;color:var(--text2);font-family:var(--font-mono);transition:all .2s}
-.goal-chip.sel{background:var(--gold-dim);border-color:var(--gold);color:var(--gold)}
+.btn-stop{
+  flex:1;padding:16px;border-radius:var(--r2);font-size:14px;font-weight:700;
+  background:var(--rdim);color:var(--rose);border:1px solid rgba(224,123,123,.22);
+  display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .15s;
+}
+.btn-stop:active{transform:scale(.97)}
+.btn-stop svg,.btn-start svg{width:15px;height:15px}
+.btn-start{
+  flex:1;padding:16px;border-radius:var(--r2);font-size:14px;font-weight:700;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:#1a1200;display:flex;align-items:center;justify-content:center;gap:8px;
+  box-shadow:0 4px 18px var(--gglow);transition:transform .15s;
+}
+.btn-start:active{transform:scale(.97)}
+.btn-sq{
+  width:52px;height:52px;flex-shrink:0;border-radius:var(--r2);
+  background:var(--card);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;color:var(--text2);
+}
+.btn-sq svg{width:19px;height:19px}
 
-/* ── WATER PAGE ── */
-.water-hero{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;display:flex;flex-direction:column;align-items:center;gap:16px;position:relative;overflow:hidden}
-.water-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 100%,var(--blue-dim) 0%,transparent 70%)}
-.water-wave-wrap{position:relative;width:160px;height:160px}
-.water-svg{width:100%;height:100%}
-.water-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.water-amount{font-family:var(--font-display);font-size:36px;font-weight:300;color:var(--text);line-height:1}
-.water-unit{font-size:12px;color:var(--text3);margin-top:2px;letter-spacing:.06em}
-.water-pct{font-size:12px;font-weight:600;color:var(--blue);margin-top:2px}
-.water-target-row{display:flex;align-items:center;gap:8px;position:relative;z-index:1}
-.water-target-lbl{font-size:12px;color:var(--text2)}
-.water-target-val{font-family:var(--font-mono);font-size:13px;color:var(--blue);font-weight:500}
-.quick-add-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.qa-btn{padding:14px 8px;border-radius:14px;background:var(--card);border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;gap:4px;transition:all .2s}
-.qa-btn:active{transform:scale(.94);background:var(--blue-dim);border-color:var(--blue)}
-.qa-btn svg{width:20px;height:20px;color:var(--blue)}
-.qa-btn-val{font-family:var(--font-mono);font-size:13px;font-weight:500;color:var(--text)}
-.qa-btn-unit{font-size:9px;color:var(--text3);letter-spacing:.06em}
-.water-log-item{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
-.wl-time{font-size:11px;color:var(--text3)}
-.wl-amount{font-family:var(--font-mono);font-size:16px;font-weight:500;color:var(--blue)}
-.wl-del{width:28px;height:28px;border-radius:8px;background:var(--rose-dim);display:flex;align-items:center;justify-content:center;color:var(--rose)}
-.wl-del svg{width:13px;height:13px}
+/* goal drawer */
+.gdrawer{display:none;width:100%;background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:13px 14px}
+.gdrawer.on{display:block}
+.gdrawer-t{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:9px}
+.gchips{display:flex;flex-wrap:wrap;gap:7px}
+.gchip{
+  padding:6px 12px;border-radius:100px;background:var(--bg3);
+  border:1px solid var(--border);font-size:11px;font-weight:600;
+  color:var(--text2);font-family:var(--mono);
+}
+.gchip.sel{background:var(--gdim);border-color:var(--gold);color:var(--gold)}
 
-/* ── WORKOUT PAGE ── */
-.workout-summary{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;position:relative;overflow:hidden}
-.workout-summary::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 50% at 100% 0%,var(--purple-dim) 0%,transparent 60%)}
-.ws-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;position:relative;z-index:1;margin-top:14px}
-.ws-stat{text-align:center}
-.ws-val{font-family:var(--font-display);font-size:26px;font-weight:300;color:var(--text);line-height:1}
-.ws-unit{font-size:11px;color:var(--text2)}
-.ws-lbl{font-size:10px;color:var(--text3);margin-top:3px;letter-spacing:.04em}
-.workout-item{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
-.wi-left{display:flex;align-items:center;gap:12px}
-.wi-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.wi-icon svg{width:18px;height:18px}
-.wi-name{font-size:14px;font-weight:600;color:var(--text)}
-.wi-meta{font-size:11px;color:var(--text3);margin-top:2px}
-.wi-right{text-align:right}
-.wi-dur{font-family:var(--font-mono);font-size:14px;font-weight:500;color:var(--text)}
-.wi-cal{font-size:11px;color:var(--text3);margin-top:2px}
-.intensity-bar{height:3px;border-radius:2px;margin-top:6px;min-width:40px}
+/* sub-section toggles */
+.sub-row{display:flex;gap:8px;width:100%}
+.sub-btn{
+  flex:1;padding:10px;border-radius:12px;background:var(--bg3);
+  border:1px solid var(--border);font-size:11px;font-weight:600;
+  color:var(--text2);display:flex;align-items:center;justify-content:center;gap:5px;
+  transition:all .2s;
+}
+.sub-btn svg{width:13px;height:13px}
+.sub-btn.sel{background:var(--gdim);border-color:var(--gold);color:var(--gold)}
+.sub-section{display:none;width:100%}
+.sub-section.on{display:block}
 
-/* ── SLEEP PAGE ── */
-.sleep-hero{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;position:relative;overflow:hidden}
-.sleep-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 20% 50%,rgba(167,139,250,0.08) 0%,transparent 60%)}
-.sleep-arc-wrap{position:relative;z-index:1;display:flex;justify-content:center;margin-bottom:16px}
-.sleep-stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;position:relative;z-index:1}
-.sleep-stat{background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:12px;text-align:center}
-.ss-val{font-family:var(--font-display);font-size:22px;font-weight:300;color:var(--text);line-height:1}
-.ss-lbl{font-size:9px;color:var(--text3);margin-top:3px;letter-spacing:.06em;text-transform:uppercase}
-.sleep-log-item{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 16px}
-.sli-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.sli-date{font-size:12px;color:var(--text3)}
-.sli-quality{padding:3px 10px;border-radius:100px;font-size:10px;font-weight:700;letter-spacing:.06em}
-.sli-quality.great{background:var(--sage-dim);color:var(--sage)}
-.sli-quality.good{background:var(--blue-dim);color:var(--blue)}
-.sli-quality.fair{background:var(--gold-dim);color:var(--gold)}
-.sli-quality.poor{background:var(--rose-dim);color:var(--rose)}
-.sli-times{display:flex;align-items:center;gap:8px}
-.sli-time-block{flex:1;background:var(--bg3);border-radius:10px;padding:8px 10px}
-.sli-time-lbl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
-.sli-time-val{font-family:var(--font-mono);font-size:14px;color:var(--text);margin-top:2px}
-.sli-arrow{color:var(--text3)} .sli-arrow svg{width:14px;height:14px}
-.sli-dur{font-family:var(--font-display);font-size:20px;font-weight:300;color:var(--purple);margin-left:auto}
-
-/* weekly bars */
-.week-bars{display:flex;align-items:flex-end;justify-content:space-between;gap:6px;height:80px;padding:0 4px}
-.bar-col{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1}
-.bar-track{flex:1;width:100%;background:var(--bg3);border-radius:4px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end}
-.bar-fill{width:100%;border-radius:4px;transition:height .6s ease}
-.bar-day{font-size:9px;color:var(--text3);letter-spacing:.04em}
-
-/* ── INSIGHTS PAGE ── */
-.tl-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px}
-.tl-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px}
-.tl-heading{font-family:var(--font-display);font-size:20px;font-weight:400;color:var(--text)}
-.tl-heading em{color:var(--gold);font-style:italic}
-.tl-elapsed{font-family:var(--font-mono);font-size:13px;color:var(--gold);background:var(--gold-dim);padding:4px 10px;border-radius:8px}
-.tl-bar{height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-bottom:10px}
-.tl-prog{height:100%;background:linear-gradient(90deg,var(--gold),var(--teal));border-radius:2px;width:0;transition:width .8s ease}
+/* insights inside fast */
+.tl-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px}
+.tl-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.tl-title{font-family:var(--serif);font-size:17px;color:var(--text)}
+.tl-title em{color:var(--gold);font-style:italic}
+.tl-el{font-family:var(--mono);font-size:12px;color:var(--gold);background:var(--gdim);padding:3px 9px;border-radius:7px}
+.tl-bar{height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-bottom:9px}
+.tl-prog{height:100%;background:linear-gradient(90deg,var(--gold),var(--teal));border-radius:2px;width:0;transition:width .8s}
 .tl-marks{display:flex;justify-content:space-between}
-.tl-m{display:flex;flex-direction:column;align-items:center;gap:5px}
-.tl-mh{font-family:var(--font-mono);font-size:9px;color:var(--text4);transition:color .3s}
-.tl-md{width:5px;height:5px;border-radius:50%;background:var(--bg3);transition:background .3s}
-.tl-m.hit .tl-mh{color:var(--gold)} .tl-m.hit .tl-md{background:var(--gold)}
-.ic-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;display:flex;gap:14px;align-items:flex-start}
-.ic-card.dim{opacity:.42}
-.ic-ic{width:42px;height:42px;border-radius:13px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border:1px solid transparent}
-.ic-ic svg{width:20px;height:20px}
-.ic-card.bio .ic-ic{background:var(--teal-dim);border-color:rgba(92,200,192,0.15);color:var(--teal)}
-.ic-card.mind .ic-ic{background:var(--gold-dim);border-color:rgba(201,169,110,0.15);color:var(--gold)}
-.ic-card.body .ic-ic{background:var(--sage-dim);border-color:rgba(126,200,160,0.15);color:var(--sage)}
+.tlm{display:flex;flex-direction:column;align-items:center;gap:4px}
+.tlm-h{font-family:var(--mono);font-size:8px;color:var(--text3);transition:color .3s}
+.tlm-d{width:5px;height:5px;border-radius:50%;background:var(--bg3);transition:background .3s}
+.tlm.hit .tlm-h{color:var(--gold)} .tlm.hit .tlm-d{background:var(--gold)}
+.ic-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+  padding:14px;display:flex;gap:12px;align-items:flex-start;margin-top:10px;
+}
+.ic-card.dim{opacity:.4}
+.ic-ic{width:38px;height:38px;border-radius:11px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;border:1px solid transparent}
+.ic-ic svg{width:18px;height:18px}
+.ic-card.bio .ic-ic{background:var(--tdim);border-color:rgba(92,200,192,.15);color:var(--teal)}
+.ic-card.mind .ic-ic{background:var(--gdim);border-color:rgba(201,169,110,.15);color:var(--gold)}
+.ic-card.body .ic-ic{background:var(--sdim);border-color:rgba(126,200,160,.15);color:var(--sage)}
 .ic-card.nxt .ic-ic{background:var(--bg3);border-color:var(--border);color:var(--text3)}
-.ic-cat{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px}
+.ic-cat{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:3px}
 .bio .ic-cat{color:var(--teal)} .mind .ic-cat{color:var(--gold)} .body .ic-cat{color:var(--sage)} .nxt .ic-cat{color:var(--text3)}
-.ic-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;line-height:1.3}
-.ic-body{font-size:12px;color:var(--text2);line-height:1.65}
-.ic-card.dim .ic-title{color:var(--text2)}
-.idle-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px;gap:14px;text-align:center}
-.idle-icon{width:72px;height:72px;border-radius:20px;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text3)}
-.idle-icon svg{width:32px;height:32px}
-.idle-title{font-family:var(--font-display);font-size:22px;color:var(--text);font-weight:400}
-.idle-title em{color:var(--gold);font-style:italic}
-.idle-body{font-size:13px;color:var(--text2);line-height:1.6;max-width:260px}
+.ic-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px;line-height:1.3}
+.ic-body{font-size:11px;color:var(--text2);line-height:1.6}
 
-/* ── HISTORY PAGE ── */
-.streak-card{background:linear-gradient(135deg,rgba(201,169,110,0.08),rgba(92,200,192,0.06));border:1px solid rgba(201,169,110,0.15);border-radius:var(--radius);padding:20px;display:flex;align-items:center;gap:16px}
-.streak-num{font-family:var(--font-display);font-size:52px;font-weight:300;color:var(--gold);line-height:1}
-.streak-lbl{font-size:13px;font-weight:600;color:var(--text)}
-.streak-sub{font-size:11px;color:var(--text2);margin-top:3px}
-.hist-item{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between}
-.hi-date{font-size:11px;color:var(--text3);margin-bottom:4px}
-.hi-dur{font-family:var(--font-display);font-size:24px;font-weight:300;color:var(--text);line-height:1}
-.hi-meta{font-size:10px;color:var(--text3);margin-top:4px}
-.hi-badge{padding:6px 12px;border-radius:100px;font-size:11px;font-weight:700}
-.hi-badge.great{background:var(--sage-dim);color:var(--sage)}
-.hi-badge.good{background:var(--gold-dim);color:var(--gold)}
-.hi-badge.ok{background:var(--rose-dim);color:var(--rose)}
-
-/* ── OB SHEET ── */
-.ob-sheet{width:100%;background:var(--bg2);border:1px solid var(--border2);border-bottom:none;border-radius:28px 28px 0 0;padding:8px 24px calc(40px + var(--sab));animation:sheetUp .38s cubic-bezier(.32,1,.56,1)}
-.ob-pill{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:12px auto 24px}
-.ob-title{font-family:var(--font-display);font-size:28px;font-weight:400;color:var(--text);margin-bottom:4px}
-.ob-title em{color:var(--gold);font-style:italic}
-.ob-sub{font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.5}
-.ob-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
-.proto-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px}
-.proto-btn{padding:12px 4px 10px;border-radius:14px;background:var(--bg3);border:1px solid var(--border);transition:all .2s;text-align:center}
+/* ── PROTO GRID ─────────────────────────────────────── */
+.proto-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:18px}
+.proto-btn{padding:11px 4px 9px;border-radius:12px;background:var(--bg3);
+  border:1px solid var(--border);text-align:center;transition:all .18s}
 .proto-btn:active{transform:scale(.95)}
-.proto-name{font-family:var(--font-mono);font-size:12px;font-weight:500;color:var(--text2);display:block}
-.proto-desc{font-size:9px;color:var(--text3);margin-top:3px;display:block}
-.proto-btn.sel{background:var(--gold-dim);border-color:var(--gold)}
-.proto-btn.sel .proto-name{color:var(--gold)} .proto-btn.sel .proto-desc{color:var(--gold);opacity:.7}
-.dt-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
-.dt-field{display:flex;flex-direction:column;gap:6px}
-.dt-label{font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.08em;text-transform:uppercase}
-.dt-input{padding:13px 14px;border-radius:14px;background:var(--bg3);border:1.5px solid var(--border);color:var(--text);font-family:var(--font-mono);font-size:14px;outline:none;width:100%;-webkit-appearance:none;appearance:none;transition:border-color .2s}
-.dt-input:focus{border-color:var(--gold)}
+.proto-n{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--text2);display:block}
+.proto-d{font-size:9px;color:var(--text3);margin-top:2px;display:block}
+.proto-btn.sel{background:var(--gdim);border-color:var(--gold)}
+.proto-btn.sel .proto-n{color:var(--gold)} .proto-btn.sel .proto-d{color:var(--gold);opacity:.7}
 
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.fade-up{animation:fadeUp .3s ease both}
-.fade-up:nth-child(1){animation-delay:.03s} .fade-up:nth-child(2){animation-delay:.07s}
-.fade-up:nth-child(3){animation-delay:.11s} .fade-up:nth-child(4){animation-delay:.15s}
-.fade-up:nth-child(5){animation-delay:.19s} .fade-up:nth-child(6){animation-delay:.23s}
+/* ── WATER PAGE ─────────────────────────────────────── */
+.water-hero{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+  padding:22px;display:flex;flex-direction:column;align-items:center;gap:14px;
+  position:relative;overflow:hidden;
+}
+.water-hero::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 60% at 50% 100%,var(--bdim) 0%,transparent 70%)}
+.w-ring-wrap{position:relative;width:150px;height:150px}
+.w-ring-svg{width:100%;height:100%}
+.w-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.w-amt{font-family:var(--serif);font-size:32px;font-weight:300;color:var(--text);line-height:1}
+.w-unit{font-size:11px;color:var(--text3);letter-spacing:.06em;margin-top:1px}
+.w-pct{font-size:11px;color:var(--blue);font-weight:600;margin-top:2px}
+.w-tgt-row{display:flex;align-items:center;gap:7px;position:relative;z-index:1}
+.w-tgt-row svg{width:14px;height:14px;color:var(--blue)}
+.w-tgt-l{font-size:12px;color:var(--text2)}
+.w-tgt-v{font-family:var(--mono);font-size:13px;color:var(--blue)}
+.qa-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.qa-btn{
+  padding:13px 6px;border-radius:13px;background:var(--card);
+  border:1px solid var(--border);display:flex;flex-direction:column;
+  align-items:center;gap:4px;transition:all .18s;
+}
+.qa-btn:active{transform:scale(.93);background:var(--bdim);border-color:var(--blue)}
+.qa-btn svg{width:19px;height:19px;color:var(--blue)}
+.qa-v{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--text)}
+.qa-u{font-size:9px;color:var(--text3)}
+.wlog-item{
+  background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:11px 14px;display:flex;align-items:center;justify-content:space-between;
+}
+.wl-time{font-size:11px;color:var(--text3)}
+.wl-amt{font-family:var(--mono);font-size:15px;font-weight:500;color:var(--blue)}
+.wl-del{
+  width:26px;height:26px;border-radius:7px;background:var(--rdim);
+  display:flex;align-items:center;justify-content:center;color:var(--rose);
+}
+.wl-del svg{width:12px;height:12px}
+
+/* ── WORKOUT PAGE ───────────────────────────────────── */
+.wo-summary{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+  padding:18px;position:relative;overflow:hidden;
+}
+.wo-summary::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 70% 50% at 100% 0%,var(--pdim) 0%,transparent 60%)}
+.wo-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;position:relative;z-index:1;margin-top:12px}
+.wo-stat{text-align:center}
+.wo-v{font-family:var(--serif);font-size:24px;font-weight:300;color:var(--text);line-height:1}
+.wo-u{font-size:10px;color:var(--text2)}
+.wo-l{font-size:9px;color:var(--text3);margin-top:2px;letter-spacing:.04em}
+.wo-item{
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:13px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;
+}
+.wo-ic{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.wo-ic svg{width:17px;height:17px}
+.wo-name{font-size:13px;font-weight:600;color:var(--text)}
+.wo-meta{font-size:10px;color:var(--text3);margin-top:2px}
+.wo-note{font-size:10px;color:var(--text3);font-style:italic;margin-top:1px}
+.wo-dur{font-family:var(--mono);font-size:14px;font-weight:500;color:var(--text);text-align:right}
+.wo-cal{font-size:10px;color:var(--text3);text-align:right;margin-top:2px}
+.ibar{height:2px;border-radius:2px;margin-top:5px;min-width:36px}
+.del-btn{font-size:10px;color:var(--rose);background:var(--rdim);padding:3px 7px;border-radius:6px;margin-top:4px}
+
+/* ── SLEEP PAGE ─────────────────────────────────────── */
+.sleep-hero{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px;position:relative;overflow:hidden}
+.sleep-hero::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 60% at 20% 50%,var(--pdim) 0%,transparent 60%)}
+.sl-arc{position:relative;z-index:1;display:flex;justify-content:center;margin-bottom:14px}
+.sl-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;position:relative;z-index:1}
+.sl-stat{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:11px;text-align:center}
+.sl-sv{font-family:var(--serif);font-size:20px;font-weight:300;color:var(--text);line-height:1}
+.sl-sl{font-size:9px;color:var(--text3);margin-top:2px;letter-spacing:.06em;text-transform:uppercase}
+.sl-item{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:13px 14px}
+.sl-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.sl-date{font-size:11px;color:var(--text3)}
+.sl-q{padding:2px 9px;border-radius:100px;font-size:10px;font-weight:700}
+.sl-q.great{background:var(--sdim);color:var(--sage)}
+.sl-q.good{background:var(--bdim);color:var(--blue)}
+.sl-q.fair{background:var(--gdim);color:var(--gold)}
+.sl-q.poor{background:var(--rdim);color:var(--rose)}
+.sl-times{display:flex;align-items:center;gap:7px}
+.sl-tb{flex:1;background:var(--bg3);border-radius:9px;padding:7px 9px}
+.sl-tl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
+.sl-tv{font-family:var(--mono);font-size:13px;color:var(--text);margin-top:1px}
+.sl-arr svg{width:13px;height:13px;color:var(--text3)}
+.sl-dur{font-family:var(--serif);font-size:19px;font-weight:300;color:var(--purple);margin-left:auto}
+.week-bars{display:flex;align-items:flex-end;justify-content:space-between;gap:5px;height:72px}
+.bar-col{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1}
+.bar-track{flex:1;width:100%;background:var(--bg3);border-radius:4px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end}
+.bar-fill{width:100%;border-radius:4px}
+.bar-day{font-size:8px;color:var(--text3)}
+
+/* ── HISTORY ────────────────────────────────────────── */
+.streak-card{
+  background:linear-gradient(135deg,rgba(201,169,110,.09),rgba(92,200,192,.06));
+  border:1px solid rgba(201,169,110,.16);border-radius:var(--r);padding:18px;
+}
+.streak-n{font-family:var(--serif);font-size:48px;font-weight:300;color:var(--gold);line-height:1}
+.streak-l{font-size:12px;font-weight:600;color:var(--text)}
+.streak-s{font-size:11px;color:var(--text2);margin-top:2px}
+.hist-item{
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:13px 14px;display:flex;align-items:center;justify-content:space-between;
+}
+.hi-date{font-size:11px;color:var(--text3);margin-bottom:3px}
+.hi-dur{font-family:var(--serif);font-size:22px;font-weight:300;color:var(--text);line-height:1}
+.hi-meta{font-size:10px;color:var(--text3);margin-top:3px}
+.hi-b{padding:5px 11px;border-radius:100px;font-size:11px;font-weight:700}
+.hi-b.great{background:var(--sdim);color:var(--sage)}
+.hi-b.good{background:var(--gdim);color:var(--gold)}
+.hi-b.ok{background:var(--rdim);color:var(--rose)}
+
+/* ── ANIM ───────────────────────────────────────────── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.fu{animation:fadeUp .28s ease both}
 </style>
 </head>
 <body>
 
-<!-- SPLASH -->
+<!-- SPLASH: auto-dismisses via CSS, no JS needed -->
 <div id="splash">
-  <div class="splash-bg"></div>
-  <div class="splash-ring"></div><div class="splash-ring"></div><div class="splash-ring"></div>
-  <div class="splash-content">
-    <div class="splash-icon-wrap">
-      <svg viewBox="0 0 40 40" fill="none" stroke="#c9a96e" stroke-width="1.5" stroke-linecap="round">
-        <circle cx="20" cy="20" r="14"/>
-        <path d="M20 12v8l5 3"/>
-        <circle cx="20" cy="20" r="1.5" fill="#c9a96e" stroke="none"/>
-        <path d="M8 30 Q10 26 14 28" stroke="#5cc8c0" stroke-width="1"/>
-        <path d="M32 30 Q30 26 26 28" stroke="#7ec8a0" stroke-width="1"/>
-      </svg>
-    </div>
-    <div class="splash-word">Vita<em>Tracker</em></div>
-    <div class="splash-tag">Your wellness companion</div>
-    <div class="splash-bar"><div class="splash-fill"></div></div>
+  <div class="sp-icon">
+    <svg viewBox="0 0 40 40" fill="none" stroke="#c9a96e" stroke-width="1.5" stroke-linecap="round">
+      <circle cx="20" cy="20" r="13"/><path d="M20 13v7l4 2.5"/>
+      <circle cx="20" cy="20" r="1.5" fill="#c9a96e" stroke="none"/>
+    </svg>
   </div>
-  <div class="splash-v">v3.0</div>
+  <div class="sp-word">Vita<em>Tracker</em></div>
+  <div class="sp-tag">Your wellness companion</div>
+  <div class="sp-bar"><div class="sp-fill"></div></div>
 </div>
 
-<!-- ONBOARDING (Fast) -->
-<div id="onboarding" class="sheet-overlay hidden">
-  <div class="ob-sheet">
-    <div class="ob-pill"></div>
-    <div class="ob-title">Begin your <em>fast</em></div>
-    <div class="ob-sub">Select your protocol and when you last ate.</div>
-    <div class="ob-label">Fasting Protocol</div>
+<!-- DIALOGS -->
+<div class="dialog-wrap off" id="stop-dlg">
+  <div class="dialog">
+    <div class="dialog-icon">⏸</div>
+    <div class="dialog-title">Stop your fast?</div>
+    <div class="dialog-body" id="stop-dlg-body">This will save your session to history.</div>
+    <div class="dialog-row">
+      <button class="dialog-btn dialog-cancel" onclick="D.close('stop-dlg')">Keep Going</button>
+      <button class="dialog-btn dialog-confirm" onclick="confirmStop()">Stop Fast</button>
+    </div>
+  </div>
+</div>
+
+<!-- FAST START SHEET -->
+<div class="overlay off" id="fast-sheet">
+  <div class="sheet">
+    <div class="sheet-pill"></div>
+    <div class="sheet-title">Begin your <em>fast</em></div>
+    <div class="sheet-sub">Choose protocol and when you last ate.</div>
+    <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:10px">Protocol</div>
     <div class="proto-grid" id="proto-grid"></div>
-    <div class="ob-label">Last Meal</div>
-    <div class="dt-custom-row">
+    <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:10px">Last Meal</div>
+    <div class="input-2col" style="margin-bottom:18px">
       <div class="field">
-        <div class="field-label">Date</div>
-        <button class="picker-trigger" id="meal-date-trigger" onclick="openDateSpinner('meal')">
-          <span class="picker-trigger-val" id="meal-date-display">Today</span>
-          <span class="picker-trigger-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+        <div class="flabel">Date</div>
+        <button class="pick-trigger" onclick="PK.openDate('meal')">
+          <span class="pick-val ph" id="meal-date-v">Select date</span>
+          <span class="pick-arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></span>
         </button>
       </div>
       <div class="field">
-        <div class="field-label">Time</div>
-        <button class="picker-trigger" id="meal-time-trigger" onclick="openTimeSpinner('meal')">
-          <span class="picker-trigger-val" id="meal-time-display">Select time</span>
-          <span class="picker-trigger-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+        <div class="flabel">Time</div>
+        <button class="pick-trigger" onclick="PK.openTime('meal')">
+          <span class="pick-val ph" id="meal-time-v">Select time</span>
+          <span class="pick-arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></span>
         </button>
       </div>
     </div>
-    <button class="btn-primary" onclick="confirmFast()">
+    <button class="btn-gold" onclick="confirmFast()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
       Start Fasting
     </button>
+    <button class="btn-sec" style="margin-top:10px" onclick="D.close('fast-sheet')">Cancel</button>
   </div>
 </div>
 
-<!-- WATER LOG SHEET -->
-<div id="water-sheet" class="sheet-overlay hidden">
+<!-- WATER SHEET -->
+<div class="overlay off" id="water-sheet">
   <div class="sheet">
     <div class="sheet-pill"></div>
     <div class="sheet-title">Log <em>Water</em></div>
-    <div class="sheet-sub">Add a custom amount or use quick-add buttons.</div>
-    <div class="field"><div class="field-label">Amount (ml)</div><input class="input" type="number" id="water-custom-input" placeholder="e.g. 350" min="1" max="2000"></div>
-    <button class="btn-primary" style="margin-bottom:12px" onclick="addWaterCustom()">
+    <div class="sheet-sub">Add a custom amount or tap quick-add.</div>
+    <div class="field"><div class="flabel">Amount (ml)</div>
+      <input class="finput" type="number" id="w-custom" placeholder="e.g. 350" min="1" max="2000">
+    </div>
+    <button class="btn-gold" style="margin-bottom:12px" onclick="addWaterCustom()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       Log Water
     </button>
-    <div class="field"><div class="field-label">Daily Target</div>
-      <div class="picker-field">
-        <button class="picker-trigger" id="water-target-trigger" onclick="openPicker('water-target')">
-          <span class="picker-trigger-val" id="water-target-display">2,000 ml — Standard</span>
-          <span class="picker-trigger-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></span>
-        </button>
-      </div>
+    <div class="field"><div class="flabel">Daily Target</div>
+      <button class="pick-trigger" onclick="PK.openList('water-target')">
+        <span class="pick-val" id="water-target-v">2,000 ml — Standard</span>
+        <span class="pick-arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+      </button>
     </div>
-    <button class="btn-secondary" onclick="closeSheet('water-sheet')">Done</button>
+    <button class="btn-sec" onclick="D.close('water-sheet')">Done</button>
   </div>
 </div>
 
-<!-- WORKOUT LOG SHEET -->
-<div id="workout-sheet" class="sheet-overlay hidden">
+<!-- WORKOUT SHEET -->
+<div class="overlay off" id="wo-sheet">
   <div class="sheet">
     <div class="sheet-pill"></div>
     <div class="sheet-title">Log <em>Workout</em></div>
-    <div class="sheet-sub">Track your exercise and movement session.</div>
-    <div class="field"><div class="field-label">Exercise Type</div>
-      <div class="picker-field">
-        <button class="picker-trigger" id="wk-type-trigger" onclick="openPicker('wk-type')">
-          <span class="picker-trigger-val" id="wk-type-display">Running</span>
-          <span class="picker-trigger-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+    <div class="sheet-sub">Track your exercise session.</div>
+    <div class="field"><div class="flabel">Exercise Type</div>
+      <button class="pick-trigger" onclick="PK.openList('wo-type')">
+        <span class="pick-val" id="wo-type-v">Running</span>
+        <span class="pick-arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+      </button>
+    </div>
+    <div class="input-2col">
+      <div class="field"><div class="flabel">Duration (min)</div>
+        <input class="finput" type="number" id="wo-dur" placeholder="30" min="1" max="600">
+      </div>
+      <div class="field"><div class="flabel">Intensity</div>
+        <button class="pick-trigger" onclick="PK.openList('wo-intensity')">
+          <span class="pick-val" id="wo-intensity-v">Moderate</span>
+          <span class="pick-arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></span>
         </button>
       </div>
     </div>
-    <div class="input-row">
-      <div class="field"><div class="field-label">Duration (min)</div><input class="input" type="number" id="wk-duration" placeholder="30" min="1" max="600"></div>
-      <div class="field"><div class="field-label">Intensity</div>
-        <div class="picker-field">
-          <button class="picker-trigger" id="wk-intensity-trigger" onclick="openPicker('wk-intensity')">
-            <span class="picker-trigger-val" id="wk-intensity-display">Moderate</span>
-            <span class="picker-trigger-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></span>
-          </button>
-        </div>
-      </div>
+    <div class="field"><div class="flabel">Notes (optional)</div>
+      <input class="finput" type="text" id="wo-notes" placeholder="e.g. Morning run" maxlength="80">
     </div>
-    <div class="field"><div class="field-label">Notes (optional)</div><input class="input" type="text" id="wk-notes" placeholder="e.g. Morning run in the park" maxlength="100"></div>
-    <button class="btn-primary" style="margin-bottom:12px" onclick="logWorkout()">
+    <button class="btn-gold" style="margin-bottom:10px" onclick="logWorkout()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Log Workout
+      Save Workout
     </button>
-    <button class="btn-secondary" onclick="closeSheet('workout-sheet')">Cancel</button>
+    <button class="btn-sec" onclick="D.close('wo-sheet')">Cancel</button>
   </div>
 </div>
 
-<!-- SLEEP LOG SHEET -->
-<div id="sleep-sheet" class="sheet-overlay hidden">
+<!-- SLEEP SHEET -->
+<div class="overlay off" id="sleep-sheet">
   <div class="sheet">
     <div class="sheet-pill"></div>
     <div class="sheet-title">Log <em>Sleep</em></div>
-    <div class="sheet-sub">Record your sleep session for analysis.</div>
-    <div class="dt-custom-row">
-      <div class="field"><div class="field-label">Bedtime Date</div>
-        <button class="picker-trigger" onclick="openDateSpinner('sl-bed')">
-          <span class="picker-trigger-val" id="sl-bed-date-display">Yesterday</span>
-          <span class="picker-trigger-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+    <div class="sheet-sub">Record your sleep for analysis.</div>
+    <div class="input-2col">
+      <div class="field"><div class="flabel">Bedtime Date</div>
+        <button class="pick-trigger" onclick="PK.openDate('sl-bed')">
+          <span class="pick-val ph" id="sl-bed-date-v">Select</span>
+          <span class="pick-arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></span>
         </button>
       </div>
-      <div class="field"><div class="field-label">Bedtime</div>
-        <button class="picker-trigger" onclick="openTimeSpinner('sl-bed')">
-          <span class="picker-trigger-val" id="sl-bed-time-display">10:00 pm</span>
-          <span class="picker-trigger-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></span>
-        </button>
-      </div>
-    </div>
-    <div class="dt-custom-row">
-      <div class="field"><div class="field-label">Wake Date</div>
-        <button class="picker-trigger" onclick="openDateSpinner('sl-wake')">
-          <span class="picker-trigger-val" id="sl-wake-date-display">Today</span>
-          <span class="picker-trigger-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></span>
-        </button>
-      </div>
-      <div class="field"><div class="field-label">Wake Time</div>
-        <button class="picker-trigger" onclick="openTimeSpinner('sl-wake')">
-          <span class="picker-trigger-val" id="sl-wake-time-display">Select time</span>
-          <span class="picker-trigger-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+      <div class="field"><div class="flabel">Bedtime</div>
+        <button class="pick-trigger" onclick="PK.openTime('sl-bed')">
+          <span class="pick-val ph" id="sl-bed-time-v">Select</span>
+          <span class="pick-arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></span>
         </button>
       </div>
     </div>
-    <div class="field"><div class="field-label">Sleep Quality</div>
-      <div class="picker-field">
-        <button class="picker-trigger" id="sl-quality-trigger" onclick="openPicker('sl-quality')">
-          <span class="picker-trigger-val" id="sl-quality-display">😊  Good — Mostly restful</span>
-          <span class="picker-trigger-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+    <div class="input-2col">
+      <div class="field"><div class="flabel">Wake Date</div>
+        <button class="pick-trigger" onclick="PK.openDate('sl-wake')">
+          <span class="pick-val ph" id="sl-wake-date-v">Select</span>
+          <span class="pick-arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button>
+      </div>
+      <div class="field"><div class="flabel">Wake Time</div>
+        <button class="pick-trigger" onclick="PK.openTime('sl-wake')">
+          <span class="pick-val ph" id="sl-wake-time-v">Select</span>
+          <span class="pick-arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></span>
         </button>
       </div>
     </div>
-    <button class="btn-primary" style="margin-bottom:12px" onclick="logSleep()">
+    <div class="field"><div class="flabel">Sleep Quality</div>
+      <button class="pick-trigger" onclick="PK.openList('sl-quality')">
+        <span class="pick-val" id="sl-quality-v">Good — Mostly restful</span>
+        <span class="pick-arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+      </button>
+    </div>
+    <button class="btn-gold" style="margin-bottom:10px" onclick="logSleep()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       Save Sleep
     </button>
-    <button class="btn-secondary" onclick="closeSheet('sleep-sheet')">Cancel</button>
+    <button class="btn-sec" onclick="D.close('sleep-sheet')">Cancel</button>
   </div>
 </div>
 
-<!-- STOP CONFIRM -->
-<div class="dialog-overlay hidden" id="stop-dialog">
-  <div class="dialog-box">
-    <div class="dialog-icon">⏸</div>
-    <div class="dialog-title">Stop your fast?</div>
-    <div class="dialog-body" id="dialog-body">This will end your fast and save it to history.</div>
-    <div class="dialog-row">
-      <button class="dialog-btn cancel" onclick="closeDialog('stop-dialog')">Keep Going</button>
-      <button class="dialog-btn confirm-rose" onclick="confirmStop()">Stop Fast</button>
+<!-- PICKER (list) -->
+<div class="picker-wrap off" id="pk-list-wrap">
+  <div class="picker-sheet">
+    <div class="picker-head">
+      <span class="picker-head-title" id="pk-list-title">Select</span>
+      <button class="picker-done" onclick="PK.closeList()">Done</button>
+    </div>
+    <div class="picker-list" id="pk-list-opts"></div>
+  </div>
+</div>
+
+<!-- PICKER (date spinner) -->
+<div class="picker-wrap off" id="pk-date-wrap">
+  <div class="picker-sheet">
+    <div class="picker-head">
+      <span class="picker-head-title" id="pk-date-title">Select Date</span>
+      <button class="picker-done" onclick="PK.closeDate()">Done</button>
+    </div>
+    <div class="spin-wrap">
+      <div class="spin-col">
+        <div class="spin-lbl">Day</div>
+        <button class="spin-btn" onclick="PK.spinD(1)">+</button>
+        <div class="spin-val" id="sp-day">01</div>
+        <button class="spin-btn" onclick="PK.spinD(-1)">−</button>
+      </div>
+      <div class="spin-col">
+        <div class="spin-lbl">Month</div>
+        <button class="spin-btn" onclick="PK.spinM(1)">+</button>
+        <div class="spin-val" id="sp-mon">Jan</div>
+        <button class="spin-btn" onclick="PK.spinM(-1)">−</button>
+      </div>
+      <div class="spin-col">
+        <div class="spin-lbl">Year</div>
+        <button class="spin-btn" onclick="PK.spinY(1)">+</button>
+        <div class="spin-val" id="sp-yr">2026</div>
+        <button class="spin-btn" onclick="PK.spinY(-1)">−</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PICKER (time spinner) -->
+<div class="picker-wrap off" id="pk-time-wrap">
+  <div class="picker-sheet">
+    <div class="picker-head">
+      <span class="picker-head-title" id="pk-time-title">Select Time</span>
+      <button class="picker-done" onclick="PK.closeTime()">Done</button>
+    </div>
+    <div class="spin-wrap">
+      <div class="spin-col">
+        <div class="spin-lbl">Hour</div>
+        <button class="spin-btn" onclick="PK.spinH(1)">+</button>
+        <div class="spin-val" id="sp-hr">12</div>
+        <button class="spin-btn" onclick="PK.spinH(-1)">−</button>
+      </div>
+      <div class="spin-sep">:</div>
+      <div class="spin-col">
+        <div class="spin-lbl">Min</div>
+        <button class="spin-btn" onclick="PK.spinMin(1)">+</button>
+        <div class="spin-val" id="sp-min">00</div>
+        <button class="spin-btn" onclick="PK.spinMin(-1)">−</button>
+      </div>
+      <div class="ampm-col">
+        <button class="ampm-btn sel" id="sp-am" onclick="PK.setAP('am')">AM</button>
+        <button class="ampm-btn" id="sp-pm" onclick="PK.setAP('pm')">PM</button>
+      </div>
     </div>
   </div>
 </div>
@@ -540,272 +758,236 @@ select.input{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w
 <div id="app">
   <div class="topbar">
     <div class="topbar-name">Vita<em>Tracker</em></div>
-    <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" aria-label="Toggle theme">
+    <button class="icon-btn" onclick="toggleTheme()" aria-label="Toggle theme">
       <svg id="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-      <svg id="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      <svg id="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>
     </button>
   </div>
 
-  <!-- FAST PAGE -->
-  <div class="page timer-page active" id="page-fast">
-    <div id="status-pill" class="status-pill eating"><div class="status-dot"></div><span id="status-txt">Eating Window</span></div>
+  <!-- FAST -->
+  <div class="page on fast-page" id="pg-fast">
+    <div id="status-pill" class="status-pill eating"><div class="sdot"></div><span id="status-txt">Eating Window</span></div>
     <div class="ring-wrap">
-      <svg class="ring-svg" viewBox="0 0 220 220">
-        <circle class="r-track" cx="110" cy="110" r="100"/>
+      <svg class="ring-svg" viewBox="0 0 200 200">
+        <circle class="r-track" cx="100" cy="100" r="95"/>
         <g id="ticks"></g>
-        <circle class="r-prog" id="r-prog" cx="110" cy="110" r="100"/>
+        <circle class="r-prog" id="r-prog" cx="100" cy="100" r="95"/>
       </svg>
       <div class="ring-inner">
-        <div class="ring-time" id="ring-time">00:00:00</div>
-        <div class="ring-status" id="ring-status">ready to begin</div>
-        <div class="ring-pct" id="ring-pct"></div>
+        <div class="ring-t" id="ring-t">00:00:00</div>
+        <div class="ring-s" id="ring-s">ready to begin</div>
+        <div class="ring-p" id="ring-p"></div>
       </div>
     </div>
-    <div class="info-strip" id="info-strip" style="display:none">
-      <div class="info-chip"><div class="ic-label">Started</div><div class="ic-val" id="chip-start">—</div></div>
-      <div class="info-chip"><div class="ic-label">Last Meal</div><div class="ic-val" id="chip-meal">—</div></div>
-      <div class="info-chip"><div class="ic-label">Goal</div><div class="ic-val" id="chip-goal">16h</div></div>
+    <div class="istrip" id="istrip" style="display:none">
+      <div class="ichip"><div class="ichip-l">Started</div><div class="ichip-v" id="ic-start">—</div></div>
+      <div class="ichip"><div class="ichip-l">Last Meal</div><div class="ichip-v" id="ic-meal">—</div></div>
+      <div class="ichip"><div class="ichip-l">Goal</div><div class="ichip-v" id="ic-goal">16h</div></div>
     </div>
-    <div class="phase-card" id="phase-card">
+    <div class="phase-card">
       <div class="phase-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg></div>
-      <div><div class="phase-name" id="phase-name">Ready to Fast</div><div class="phase-body" id="phase-body">Tap start to begin tracking with live biological insights.</div></div>
+      <div><div class="phase-n" id="phase-n">Ready to Fast</div><div class="phase-d" id="phase-d">Tap start to begin with live biological insights.</div></div>
     </div>
     <div class="cta-row">
-      <button class="btn-cta start" id="main-btn" onclick="handleMain()" aria-label="Start or stop fast">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>Start Fast
+      <button class="btn-start" id="main-btn" onclick="handleMain()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Start Fast
       </button>
-      <button class="btn-sq" onclick="toggleGoalDrawer()" aria-label="Set fasting goal">
+      <button class="btn-sq" onclick="toggleGoalDrawer()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
       </button>
     </div>
-    <div class="goal-drawer" id="goal-drawer"><div class="gd-title">Fasting Goal</div><div class="goal-chips" id="goal-chips"></div></div>
-
-    <!-- Insights / History toggle row -->
-    <div style="display:flex;gap:8px;width:100%;padding:0 0 4px">
-      <button id="btn-show-insights" onclick="toggleFastSection('insights')"
-        style="flex:1;padding:11px;border-radius:14px;background:var(--bg3);border:1px solid var(--border);font-size:12px;font-weight:600;color:var(--text2);display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+    <div class="gdrawer" id="gdrawer"><div class="gdrawer-t">Fasting Goal</div><div class="gchips" id="gchips"></div></div>
+    <div class="sub-row">
+      <button class="sub-btn" id="sub-ins-btn" onclick="toggleSub('ins')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
         Insights
       </button>
-      <button id="btn-show-history" onclick="toggleFastSection('history')"
-        style="flex:1;padding:11px;border-radius:14px;background:var(--bg3);border:1px solid var(--border);font-size:12px;font-weight:600;color:var(--text2);display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <button class="sub-btn" id="sub-his-btn" onclick="toggleSub('his')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
         History
       </button>
     </div>
+    <div class="sub-section" id="sub-ins" style="padding-bottom:8px"></div>
+    <div class="sub-section" id="sub-his" style="padding-bottom:8px"></div>
   </div>
 
-  <!-- INSIGHTS SECTION inside Fast page -->
-  <div id="fast-insights-section" style="display:none;padding:0 16px 8px">
-    <div style="height:1px;background:var(--border);margin:8px 0 16px"></div>
-    <div class="sec-label" style="margin-bottom:12px">Biological Insights</div>
-    <div id="fast-insights-inner"></div>
-  </div>
+  <!-- WATER -->
+  <div class="page" id="pg-water"><div class="pp" id="water-pp"></div></div>
 
-  <!-- HISTORY SECTION inside Fast page -->
-  <div id="fast-history-section" style="display:none;padding:0 16px 24px">
-    <div style="height:1px;background:var(--border);margin:8px 0 16px"></div>
-    <div class="sec-label" style="margin-bottom:12px">Fasting History</div>
-    <div id="fast-history-inner"></div>
-  </div>
+  <!-- WORKOUT -->
+  <div class="page" id="pg-workout"><div class="pp" id="wo-pp"></div></div>
 
-  <!-- WATER PAGE -->
-  <div class="page" id="page-water">
-    <div class="page-pad" id="water-pad"></div>
-  </div>
+  <!-- SLEEP -->
+  <div class="page" id="pg-sleep"><div class="pp" id="sleep-pp"></div></div>
 
-  <!-- WORKOUT PAGE -->
-  <div class="page" id="page-workout">
-    <div class="page-pad" id="workout-pad"></div>
-  </div>
-
-  <!-- SLEEP PAGE -->
-  <div class="page" id="page-sleep">
-    <div class="page-pad" id="sleep-pad"></div>
-  </div>
-
-  <!-- Insights and History embedded in Fast page -->
-
-  <!-- NAV (4 tabs) -->
+  <!-- NAV -->
   <div class="nav">
-    <button class="nav-btn active" id="nav-fast" onclick="showPage('fast')" aria-label="Fasting">
+    <button class="nb on" id="nb-fast" onclick="showPage('fast')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Fast
     </button>
-    <button class="nav-btn" id="nav-water" onclick="showPage('water')" aria-label="Water">
+    <button class="nb" id="nb-water" onclick="showPage('water')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>Water
     </button>
-    <button class="nav-btn" id="nav-workout" onclick="showPage('workout')" aria-label="Workout">
+    <button class="nb" id="nb-workout" onclick="showPage('workout')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M6.5 6.5h11M17.5 17.5l-5-5 5-5"/><circle cx="6" cy="6" r="1.5"/><circle cx="18" cy="18" r="1.5"/></svg>Move
     </button>
-    <button class="nav-btn" id="nav-sleep" onclick="showPage('sleep')" aria-label="Sleep">
+    <button class="nb" id="nb-sleep" onclick="showPage('sleep')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>Sleep
     </button>
-
-  <!-- PICKER BACKDROP -->
-  <div class="picker-backdrop" id="picker-backdrop" onclick="closePicker()"></div>
-
-  <!-- LIST PICKER -->
-  <div class="picker-panel" id="picker-panel">
-    <div class="picker-panel-header">
-      <span class="picker-panel-title" id="picker-panel-title">Select</span>
-      <button class="picker-panel-done" onclick="closePicker()">Done</button>
-    </div>
-    <div class="picker-options" id="picker-options"></div>
-  </div>
-
-  <!-- DATE SPINNER -->
-  <div class="picker-panel" id="date-spinner-panel">
-    <div class="picker-panel-header">
-      <span class="picker-panel-title" id="date-spinner-title">Select Date</span>
-      <button class="picker-panel-done" onclick="closeDateSpinner()">Done</button>
-    </div>
-    <div style="display:flex;gap:12px;padding:24px 20px;justify-content:center">
-      <div style="display:flex;flex-direction:column;align-items:center;flex:1;gap:0">
-        <div style="font-size:10px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px">Day</div>
-        <button class="spinner-btn" onclick="spinDate('d',1)">+</button>
-        <div class="spinner-val" id="spin-day">01</div>
-        <button class="spinner-btn" onclick="spinDate('d',-1)">−</button>
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:center;flex:1;gap:0">
-        <div style="font-size:10px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px">Month</div>
-        <button class="spinner-btn" onclick="spinDate('m',1)">+</button>
-        <div class="spinner-val" id="spin-month">Jan</div>
-        <button class="spinner-btn" onclick="spinDate('m',-1)">−</button>
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:center;flex:1;gap:0">
-        <div style="font-size:10px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px">Year</div>
-        <button class="spinner-btn" onclick="spinDate('y',1)">+</button>
-        <div class="spinner-val" id="spin-year">2026</div>
-        <button class="spinner-btn" onclick="spinDate('y',-1)">−</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- TIME SPINNER -->
-  <div class="picker-panel" id="time-spinner-panel">
-    <div class="picker-panel-header">
-      <span class="picker-panel-title" id="time-spinner-title">Select Time</span>
-      <button class="picker-panel-done" onclick="closeTimeSpinner()">Done</button>
-    </div>
-    <div style="display:flex;gap:16px;padding:24px 20px;justify-content:center;align-items:flex-start">
-      <div style="display:flex;flex-direction:column;align-items:center;flex:1">
-        <div style="font-size:10px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px">Hour</div>
-        <button class="spinner-btn" onclick="spinTime('h',1)">+</button>
-        <div class="spinner-val" id="spin-hour">12</div>
-        <button class="spinner-btn" onclick="spinTime('h',-1)">−</button>
-      </div>
-      <div style="font-family:var(--font-mono);font-size:32px;color:var(--text3);margin-top:56px">:</div>
-      <div style="display:flex;flex-direction:column;align-items:center;flex:1">
-        <div style="font-size:10px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px">Min</div>
-        <button class="spinner-btn" onclick="spinTime('min',1)">+</button>
-        <div class="spinner-val" id="spin-min">00</div>
-        <button class="spinner-btn" onclick="spinTime('min',-1)">−</button>
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:38px">
-        <button class="ampm-btn active" id="spin-am" onclick="setAmPm('am')">AM</button>
-        <button class="ampm-btn" id="spin-pm" onclick="setAmPm('pm')">PM</button>
-      </div>
-    </div>
-  </div>
-
   </div>
 </div>
 
 <script>
-/* ════════════════════════════════════════════════════════════
-   STORAGE
-══════════════════════════════════════════════════════════ */
-const S={
-  get:function(k){
-    try{
-      var v=null;
-      if(window.AndroidStorage){
-        v=window.AndroidStorage.getItem(k);
-      } else {
-        v=localStorage.getItem(k);
-      }
-      if(v===null||v===undefined||v==='null'||v==='undefined') return null;
-      return v;
-    }catch(e){
-      try{var x=localStorage.getItem(k);return(x==='null'||x===undefined)?null:x;}
-      catch(e2){return null;}
-    }
-  },
-  set:function(k,v){
-    try{
-      if(window.AndroidStorage) window.AndroidStorage.setItem(k,String(v));
-      else localStorage.setItem(k,String(v));
-    }catch(e){
-      try{localStorage.setItem(k,String(v));}catch(e2){}
-    }
-  },
+'use strict';
+/* ════ STORAGE ════════════════════════════════════════ */
+var S={
+  get:function(k){try{var v=window.AndroidStorage?window.AndroidStorage.getItem(k):localStorage.getItem(k);return(v&&v!=='null'&&v!=='undefined')?v:null}catch(e){try{return localStorage.getItem(k)}catch(e2){return null}}},
+  set:function(k,v){try{if(window.AndroidStorage)window.AndroidStorage.setItem(k,String(v));else localStorage.setItem(k,String(v))}catch(e){try{localStorage.setItem(k,String(v))}catch(e2){}}}
 };
 
-/* ════════════════════════════════════════════════════════════
-   FASTING DATA
-══════════════════════════════════════════════════════════ */
-const PHASES=[
-  {h:0, icon:'coffee',name:'Fed State',desc:'Digesting your last meal. Insulin elevated, glucose is primary fuel.',
-   bio:{title:'Digestion Active',body:'Insulin is high — cells absorb glucose, liver stores glycogen. Fat burning is paused while your body runs on meal energy.'},
-   mind:{title:'Post-Meal Calm',body:'Mild post-meal drowsiness is normal (postprandial somnolence). Serotonin slightly elevated from carbohydrate intake.'},
-   body:{title:'Active Digestion',body:'Temperature slightly elevated as digestion generates heat. Gut is actively processing — energy is steady.'}},
-  {h:2, icon:'leaf',name:'Transition Phase',desc:'Insulin declining. Body shifting away from meal-derived fuel.',
-   bio:{title:'Insulin Declining',body:'Blood glucose normalizing. Glucagon rises, signaling the liver to mobilize stored glycogen. The metabolic shift begins.'},
-   mind:{title:'Clarity Returning',body:'As insulin drops, post-meal fog lifts. Many notice a gentle sharpening of focus.'},
-   body:{title:'Stomach Emptying',body:'Ghrelin (hunger hormone) begins rising gently. Hunger comes in waves — it passes.'}},
-  {h:4, icon:'fire',name:'Glycogen Depletion',desc:'Liver glycogen actively used. Fat utilization ramping up.',
-   bio:{title:'Glycogenolysis Active',body:'Liver breaks down glycogen to sustain blood sugar. Free fatty acids enter the bloodstream as backup fuel.'},
-   mind:{title:'Steady Alertness',body:'Norepinephrine rises — an ancient evolutionary sharpening of focus during food scarcity.'},
-   body:{title:'Energy Stable',body:'Hunger peaks and passes in waves every 90 minutes. Staying hydrated dramatically reduces perceived hunger.'}},
-  {h:8, icon:'fire',name:'Fat Burning Initiated',desc:'Glycogen depleting. Lipolysis in full swing. Early ketogenesis.',
-   bio:{title:'Lipolysis Accelerating',body:'Triglycerides broken into glycerol and fatty acids. Liver begins ketone production. Growth hormone rises to protect muscle.'},
-   mind:{title:'BDNF Rising',body:'Brain-derived neurotrophic factor increases, supporting neuroplasticity and memory. Focus sharpens noticeably.'},
-   body:{title:'The Metabolic Switch',body:'Brief energy dip possible as fuel sources transition — then a second wind as ketones begin. Hunger often paradoxically decreases.'}},
-  {h:12, icon:'star',name:'Ketosis Entry',desc:'Meaningful ketone production. Approaching metabolic ketosis.',
-   bio:{title:'Ketone Production Rising',body:'Beta-hydroxybutyrate (BHB) climbing. Ketones cross the blood-brain barrier, fueling neurons more efficiently than glucose.'},
-   mind:{title:'The Fasting Clarity',body:'Crystal-clear thinking, reduced mental chatter, calm grounded energy. Ancient meditators sought this state deliberately.'},
-   body:{title:'True Fat Burning',body:'Fat oxidation now dominant. Inflammation markers begin declining. The body runs clean on ketone fuel.'}},
-  {h:16, icon:'recycle',name:'Autophagy Accelerating',desc:'Cellular self-cleaning in full effect. Anti-aging mechanisms active.',
-   bio:{title:'Autophagy Ramping Up',body:'AMPK triggers autophagy — the cell\'s cleanup protocol. Damaged proteins and mitochondria are recycled. Linked to longevity.'},
-   mind:{title:'Deep Cognitive Enhancement',body:'BDNF significantly elevated, supporting memory and new neural connections. Dopamine receptor sensitivity may increase.'},
-   body:{title:'Cellular Renewal',body:'Growth hormone peaks (2–3× baseline). Lean muscle preserved while fat burns. Energy often surprisingly high.'}},
-  {h:24, icon:'star',name:'Deep Cellular Repair',desc:'Full autophagy, immune regeneration, profound metabolic reset.',
-   bio:{title:'Immune Regeneration',body:'Stem cell production upregulates. Damaged immune cells cleared and replaced. Sirtuins — longevity proteins — maximally active.'},
-   mind:{title:'Transcendent Clarity',body:'Reduced neuroinflammation, peak BDNF, and maximum ketones create a unique cognitive state ancient traditions prized.'},
-   body:{title:'Maximum Fat Adaptation',body:'Every cell runs on ketones. Insulin near zero. Anti-inflammatory cytokines elevated. Deep tissue repair underway.'}}
+/* ════ CONSTANTS ══════════════════════════════════════ */
+var MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+var GOALS=[{l:'12:12',h:12},{l:'14:10',h:14},{l:'16:8',h:16},{l:'18:6',h:18},{l:'20:4',h:20},{l:'24h',h:24},{l:'36h',h:36},{l:'48h',h:48}];
+var WT_TYPES={running:{l:'Running',c:'var(--orange)',cal:10},walking:{l:'Walking',c:'var(--sage)',cal:4},cycling:{l:'Cycling',c:'var(--blue)',cal:8},swimming:{l:'Swimming',c:'var(--teal)',cal:9},weights:{l:'Weights',c:'var(--purple)',cal:6},yoga:{l:'Yoga',c:'var(--gold)',cal:3},hiit:{l:'HIIT',c:'var(--rose)',cal:12},sport:{l:'Sport',c:'var(--orange)',cal:8},other:{l:'Other',c:'var(--text2)',cal:5}};
+var WT_MULT={low:.7,moderate:1,high:1.3,max:1.6};
+var PHASES=[
+  {h:0,n:'Fed State',d:'Digesting your last meal. Insulin elevated, glucose is primary fuel.',bio:{t:'Digestion Active',b:'Insulin is high — cells absorb glucose, liver stores glycogen. No fat burning yet.'},mind:{t:'Post-Meal Calm',b:'Mild drowsiness is normal. Serotonin slightly elevated from carbohydrate intake.'},body:{t:'Active Digestion',b:'Temperature slightly elevated as digestion generates heat. Gut is actively working.'}},
+  {h:2,n:'Transition Phase',d:'Insulin declining. Body shifting away from meal-derived fuel.',bio:{t:'Insulin Declining',b:'Glucagon rises, signaling the liver to mobilize stored glycogen. Shift begins.'},mind:{t:'Clarity Returning',b:'Post-meal fog lifts. Many notice a gentle sharpening of focus.'},body:{t:'Stomach Emptying',b:'Ghrelin begins rising gently. Hunger comes in waves — it passes.'}},
+  {h:4,n:'Glycogen Depletion',d:'Liver glycogen actively used. Fat utilization ramping up.',bio:{t:'Glycogenolysis Active',b:'Liver breaks down glycogen. Free fatty acids enter the bloodstream as backup fuel.'},mind:{t:'Steady Alertness',b:'Norepinephrine rises — an evolutionary sharpening of focus during scarcity.'},body:{t:'Energy Stable',b:'Hunger peaks and passes in 90-min waves. Water significantly reduces hunger.'}},
+  {h:8,n:'Fat Burning Initiated',d:'Glycogen depleting. Lipolysis in full swing. Early ketogenesis.',bio:{t:'Lipolysis Accelerating',b:'Triglycerides break into fatty acids. Liver begins ketone production. Growth hormone rises.'},mind:{t:'BDNF Rising',b:'Brain-derived neurotrophic factor increases, supporting neuroplasticity and memory.'},body:{t:'The Metabolic Switch',b:'Brief dip then a second wind. Hunger paradoxically decreases as ketones suppress ghrelin.'}},
+  {h:12,n:'Ketosis Entry',d:'Meaningful ketone production. Approaching metabolic ketosis.',bio:{t:'Ketone Production Rising',b:'BHB crosses the blood-brain barrier, fueling neurons more efficiently than glucose.'},mind:{t:'The Fasting Clarity',b:'Crystal-clear thinking, reduced mental chatter, calm grounded energy.'},body:{t:'True Fat Burning',b:'Fat oxidation dominant. Inflammation markers begin declining.'}},
+  {h:16,n:'Autophagy Accelerating',d:'Cellular self-cleaning in full effect. Anti-aging mechanisms active.',bio:{t:'Autophagy Ramping Up',b:'AMPK triggers autophagy — damaged proteins and mitochondria are recycled.'},mind:{t:'Deep Cognitive Enhancement',b:'BDNF significantly elevated, supporting memory and new neural connections.'},body:{t:'Cellular Renewal',b:'Growth hormone peaks (2–3× baseline). Energy often surprisingly high.'}},
+  {h:24,n:'Deep Cellular Repair',d:'Full autophagy, immune regeneration, profound metabolic reset.',bio:{t:'Immune Regeneration',b:'Stem cell production upregulates. Sirtuins — longevity proteins — maximally active.'},mind:{t:'Transcendent Clarity',b:'Reduced neuroinflammation + peak BDNF + ketones = unique cognitive state.'},body:{t:'Maximum Fat Adaptation',b:'Every cell runs on ketones. Anti-inflammatory cytokines elevated.'}}
 ];
-const GOALS=[{label:'12:12',h:12},{label:'14:10',h:14},{label:'16:8',h:16},{label:'18:6',h:18},{label:'20:4',h:20},{label:'24h',h:24},{label:'36h',h:36},{label:'48h',h:48}];
-const WORKOUT_TYPES={running:{label:'Running',color:'var(--orange)',cal:10},walking:{label:'Walking',color:'var(--sage)',cal:4},cycling:{label:'Cycling',color:'var(--blue)',cal:8},swimming:{label:'Swimming',color:'var(--teal)',cal:9},weights:{label:'Weights',color:'var(--purple)',cal:6},yoga:{label:'Yoga',color:'var(--gold)',cal:3},hiit:{label:'HIIT',color:'var(--rose)',cal:12},sport:{label:'Sport',color:'var(--orange)',cal:8},other:{label:'Other',color:'var(--text2)',cal:5}};
-const INTENSITY_MULT={low:.7,moderate:1,high:1.3,max:1.6};
 
-/* ════════════════════════════════════════════════════════════
-   STATE
-══════════════════════════════════════════════════════════ */
-let fast={on:false,start:null,lastMeal:null,goal:16};
-let elapsed=0, ticker=null, isDark=true;
-let waterTarget=2000;
+/* ════ STATE ══════════════════════════════════════════ */
+var fast={on:false,start:null,lastMeal:null,goal:16};
+var elapsed=0,ticker=null,isDark=true,waterTarget=2000;
+var pickerVals={'water-target':'2000','wo-type':'running','wo-intensity':'moderate','sl-quality':'good'};
+var dateVals={},timeVals={},obGoal=16,activeSub=null;
 
-/* ════════════════════════════════════════════════════════════
-   INIT
-══════════════════════════════════════════════════════════ */
-function init(){
-  try { loadTheme(); } catch(e) {}
-  try { loadFast(); } catch(e) {}
-  try { loadWaterTarget(); } catch(e) {}
-  try { buildTicks(); } catch(e) {}
-  try { buildGoalChips(); } catch(e) {}
-  try { buildProtoGrid(); } catch(e) {}
-  try { setDefaultDT(); } catch(e) {}
-  try { updateFastUI(); } catch(e) {}
-  try { if(fast && fast.on) startTick(); } catch(e) {}
-}
+/* ════ UTILS ══════════════════════════════════════════ */
+function p2(n){return String(n).padStart(2,'0')}
+function fmtE(s){return p2(Math.floor(s/3600))+':'+p2(Math.floor((s%3600)/60))+':'+p2(Math.floor(s%60))}
+function fmtCk(ts){var d=new Date(ts);var h=d.getHours();return p2(h%12||12)+':'+p2(d.getMinutes())+(h<12?'am':'pm')}
+function fmtDt(ts){var d=new Date(ts);return d.getDate()+' '+MONTHS[d.getMonth()]+' '+d.getFullYear()}
+function fmtDF(ts){var d=new Date(ts);return['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]+', '+MONTHS[d.getMonth()]+' '+d.getDate()}
+function tod0(){var d=new Date();d.setHours(0,0,0,0);return d.getTime()}
+function showToast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(function(){t.classList.remove('on')},2600)}
+function getPhase(h){var c=PHASES[0];for(var i=0;i<PHASES.length;i++){if(h>=PHASES[i].h)c=PHASES[i];else break;}return c}
 
-window.onerror = function(){ return true; };
+/* ════ DIALOG / OVERLAY MANAGER ══════════════════════ */
+var D={
+  open:function(id){var el=document.getElementById(id);if(el){el.classList.remove('off');el.classList.remove('hidden')}},
+  close:function(id){var el=document.getElementById(id);if(el){el.classList.add('off')}}
+};
 
-/* ════════════════════════════════════════════════════════════
-   THEME
-══════════════════════════════════════════════════════════ */
-function loadTheme(){isDark=(S.get('vt_theme')||'dark')==='dark';applyTheme()}
+/* ════ PICKER ENGINE ══════════════════════════════════ */
+var PK={
+  _lKey:null,_dKey:null,_tKey:null,
+  _d:1,_m:0,_y:2026,_h:12,_min:0,_ap:'am',
+  LISTS:{
+    'water-target':{title:'Daily Water Target',opts:[{v:'1500',l:'1,500 ml — Light'},{v:'2000',l:'2,000 ml — Standard'},{v:'2500',l:'2,500 ml — Active'},{v:'3000',l:'3,000 ml — Athlete'},{v:'3500',l:'3,500 ml — High Performance'}],dispId:'water-target-v'},
+    'wo-type':{title:'Exercise Type',opts:[{v:'running',l:'Running'},{v:'walking',l:'Walking'},{v:'cycling',l:'Cycling'},{v:'swimming',l:'Swimming'},{v:'weights',l:'Weight Training'},{v:'yoga',l:'Yoga / Stretching'},{v:'hiit',l:'HIIT'},{v:'sport',l:'Sport'},{v:'other',l:'Other'}],dispId:'wo-type-v'},
+    'wo-intensity':{title:'Intensity',opts:[{v:'low',l:'Low — Easy effort'},{v:'moderate',l:'Moderate — Steady pace'},{v:'high',l:'High — Hard effort'},{v:'max',l:'Max — All out'}],dispId:'wo-intensity-v'},
+    'sl-quality':{title:'Sleep Quality',opts:[{v:'great',l:'Great — Deep, restful'},{v:'good',l:'Good — Mostly restful'},{v:'fair',l:'Fair — Some disruption'},{v:'poor',l:'Poor — Restless'}],dispId:'sl-quality-v'}
+  },
+  openList:function(key){
+    this._lKey=key;
+    var cfg=this.LISTS[key];if(!cfg)return;
+    document.getElementById('pk-list-title').textContent=cfg.title;
+    var cur=pickerVals[key];
+    var html='';
+    for(var i=0;i<cfg.opts.length;i++){
+      var o=cfg.opts[i];
+      var sel=o.v===cur?' sel':'';
+      html+='<div class="picker-opt'+sel+'" data-v="'+o.v+'" onclick="PK.selOpt(this)"><span>'+o.l+'</span><div class="picker-check"></div></div>';
+    }
+    document.getElementById('pk-list-opts').innerHTML=html;
+    document.getElementById('pk-list-wrap').classList.remove('off');
+  },
+  selOpt:function(el){
+    var key=this._lKey;var cfg=this.LISTS[key];if(!cfg)return;
+    var v=el.getAttribute('data-v');
+    pickerVals[key]=v;
+    var opts=document.querySelectorAll('#pk-list-opts .picker-opt');
+    for(var i=0;i<opts.length;i++)opts[i].classList.remove('sel');
+    el.classList.add('sel');
+    var dispEl=document.getElementById(cfg.dispId);
+    if(dispEl){var opt=cfg.opts.filter(function(o){return o.v===v})[0];if(opt)dispEl.textContent=opt.l;}
+    if(key==='water-target'){waterTarget=parseInt(v);S.set('vt_water_target',v);renderWater();}
+  },
+  closeList:function(){document.getElementById('pk-list-wrap').classList.add('off')},
+  openDate:function(key){
+    this._dKey=key;
+    var stored=dateVals[key];
+    var now=new Date();
+    if(stored){this._d=stored.d;this._m=stored.m;this._y=stored.y;}
+    else if(key.indexOf('bed')!==-1){var yst=new Date(now-86400000);this._d=yst.getDate();this._m=yst.getMonth();this._y=yst.getFullYear();}
+    else{this._d=now.getDate();this._m=now.getMonth();this._y=now.getFullYear();}
+    var titles={'meal':'Last Meal Date','sl-bed':'Bedtime Date','sl-wake':'Wake Date'};
+    document.getElementById('pk-date-title').textContent=titles[key]||'Select Date';
+    this._renderDate();
+    document.getElementById('pk-date-wrap').classList.remove('off');
+  },
+  _renderDate:function(){
+    var max=new Date(this._y,this._m+1,0).getDate();
+    if(this._d>max)this._d=max;
+    document.getElementById('sp-day').textContent=p2(this._d);
+    document.getElementById('sp-mon').textContent=MONTHS[this._m];
+    document.getElementById('sp-yr').textContent=this._y;
+  },
+  spinD:function(n){var max=new Date(this._y,this._m+1,0).getDate();this._d=((this._d-1+n+max)%max)+1;this._renderDate()},
+  spinM:function(n){this._m=(this._m+n+12)%12;this._renderDate()},
+  spinY:function(n){this._y=Math.max(2020,Math.min(2030,this._y+n));this._renderDate()},
+  closeDate:function(){
+    var key=this._dKey;
+    dateVals[key]={d:this._d,m:this._m,y:this._y};
+    var disp=this._d+' '+MONTHS[this._m]+' '+this._y;
+    var ids={'meal':'meal-date-v','sl-bed':'sl-bed-date-v','sl-wake':'sl-wake-date-v'};
+    var el=document.getElementById(ids[key]);
+    if(el){el.textContent=disp;el.classList.remove('ph');}
+    document.getElementById('pk-date-wrap').classList.add('off');
+  },
+  openTime:function(key){
+    this._tKey=key;
+    var stored=timeVals[key];
+    var now=new Date();
+    if(stored){this._h=stored.h;this._min=stored.min;this._ap=stored.ap;}
+    else{var hh=now.getHours();this._ap=hh>=12?'pm':'am';this._h=hh%12||12;this._min=now.getMinutes();}
+    var titles={'meal':'Last Meal Time','sl-bed':'Bedtime','sl-wake':'Wake Time'};
+    document.getElementById('pk-time-title').textContent=titles[key]||'Select Time';
+    this._renderTime();
+    document.getElementById('pk-time-wrap').classList.remove('off');
+  },
+  _renderTime:function(){
+    document.getElementById('sp-hr').textContent=this._h;
+    document.getElementById('sp-min').textContent=p2(this._min);
+    document.getElementById('sp-am').className='ampm-btn'+(this._ap==='am'?' sel':'');
+    document.getElementById('sp-pm').className='ampm-btn'+(this._ap==='pm'?' sel':'');
+  },
+  spinH:function(n){this._h=(this._h-1+n+12)%12+1;this._renderTime()},
+  spinMin:function(n){this._min=(this._min+n+60)%60;this._renderTime()},
+  setAP:function(v){this._ap=v;this._renderTime()},
+  closeTime:function(){
+    var key=this._tKey;
+    timeVals[key]={h:this._h,min:this._min,ap:this._ap};
+    var disp=this._h+':'+p2(this._min)+' '+this._ap;
+    var ids={'meal':'meal-time-v','sl-bed':'sl-bed-time-v','sl-wake':'sl-wake-time-v'};
+    var el=document.getElementById(ids[key]);
+    if(el){el.textContent=disp;el.classList.remove('ph');}
+    document.getElementById('pk-time-wrap').classList.add('off');
+  },
+  getTS:function(dk,tk){
+    var dv=dateVals[dk],tv=timeVals[tk];
+    if(!dv||!tv)return null;
+    var h=tv.h%12+(tv.ap==='pm'?12:0);
+    return new Date(dv.y,dv.m,dv.d,h,tv.min,0).getTime();
+  }
+};
+
+/* ════ THEME ══════════════════════════════════════════ */
 function toggleTheme(){isDark=!isDark;S.set('vt_theme',isDark?'dark':'light');applyTheme()}
 function applyTheme(){
   document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
@@ -813,881 +995,311 @@ function applyTheme(){
   document.getElementById('icon-sun').style.display=isDark?'none':'block';
 }
 
-/* ════════════════════════════════════════════════════════════
-   NAVIGATION
-══════════════════════════════════════════════════════════ */
+/* ════ NAVIGATION ═════════════════════════════════════ */
 function showPage(name){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('page-'+name).classList.add('active');
-  document.getElementById('nav-'+name).classList.add('active');
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on')});
+  document.querySelectorAll('.nb').forEach(function(b){b.classList.remove('on')});
+  document.getElementById('pg-'+name).classList.add('on');
+  document.getElementById('nb-'+name).classList.add('on');
   if(name==='water')renderWater();
   if(name==='workout')renderWorkout();
   if(name==='sleep')renderSleep();
-  // insights and history are now embedded in the fast page
 }
 
-/* ════════════════════════════════════════════════════════════
-   UTILS
-══════════════════════════════════════════════════════════ */
-function pad(n){return String(n).padStart(2,'0')}
-function fmtElapsed(s){return`${pad(Math.floor(s/3600))}:${pad(Math.floor((s%3600)/60))}:${pad(Math.floor(s%60))}`}
-function fmtClock(ts){const d=new Date(ts);return`${pad(d.getHours()%12||12)}:${pad(d.getMinutes())}${d.getHours()<12?'am':'pm'}`}
-function fmtDate(ts){const d=new Date(ts);return d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}
-function fmtDateFull(ts){const d=new Date(ts);return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}
-function today0(){const d=new Date();d.setHours(0,0,0,0);return d.getTime()}
-function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800)}
-function closeSheet(id){document.getElementById(id).classList.add('hidden')}
-function closeDialog(id){document.getElementById(id).classList.add('hidden')}
-
-/* ════════════════════════════════════════════════════════════
-   FASTING
-══════════════════════════════════════════════════════════ */
+/* ════ FAST ═══════════════════════════════════════════ */
 function loadFast(){
   try{
     var raw=S.get('vt_fast');
-    if(!raw||raw==='null'||raw==='undefined'){fast={on:false,start:null,lastMeal:null,goal:16};return;}
+    if(!raw)return;
     var s=JSON.parse(raw);
-    fast.on=!!s.on;
-    fast.start=s.start||null;
-    fast.lastMeal=s.lastMeal||null;
-    fast.goal=s.goal||16;
-    // Safety: if start time is in future or >7 days ago, reset
-    if(fast.start){
-      var age=Date.now()-fast.start;
-      if(age<0||age>604800000){fast={on:false,start:null,lastMeal:null,goal:16};}
-    }
-  }catch(e){fast={on:false,start:null,lastMeal:null,goal:16};}
+    fast.on=!!s.on;fast.start=s.start||null;fast.lastMeal=s.lastMeal||null;fast.goal=s.goal||16;
+    if(fast.start&&(Date.now()-fast.start>604800000||fast.start>Date.now()))
+      fast={on:false,start:null,lastMeal:null,goal:16};
+  }catch(e){fast={on:false,start:null,lastMeal:null,goal:16}}
 }
 function saveFast(){S.set('vt_fast',JSON.stringify(fast))}
-function getPhase(h){let c=PHASES[0];for(const p of PHASES){if(h>=p.h)c=p;else break;}return c}
 
-let obGoal=16;
+function buildTicks(){
+  var html='';
+  for(var i=0;i<60;i++){
+    var a=(i/60)*2*Math.PI,inner=i%5===0?83:88,outer=92;
+    var x1=100+inner*Math.sin(a),y1=100-inner*Math.cos(a),x2=100+outer*Math.sin(a),y2=100-outer*Math.cos(a);
+    html+='<line x1="'+x1.toFixed(1)+'" y1="'+y1.toFixed(1)+'" x2="'+x2.toFixed(1)+'" y2="'+y2.toFixed(1)+'" stroke="var(--border)" stroke-width="'+(i%5===0?1:.5)+'"/>';
+  }
+  document.getElementById('ticks').innerHTML=html;
+}
+
+function buildGoalChips(){
+  document.getElementById('gchips').innerHTML=GOALS.map(function(g){
+    return '<div class="gchip'+(g.h===fast.goal?' sel':'')+'" onclick="setGoal('+g.h+')">'+g.l+'</div>';
+  }).join('');
+}
+function setGoal(h){fast.goal=h;saveFast();buildGoalChips();if(fast.on)updateRing()}
+function toggleGoalDrawer(){document.getElementById('gdrawer').classList.toggle('on')}
+
 function buildProtoGrid(){
-  document.getElementById('proto-grid').innerHTML=GOALS.map(g=>`
-    <button class="proto-btn ${g.h===obGoal?'sel':''}" onclick="pickProto(${g.h})">
-      <span class="proto-name">${g.label}</span>
-      <span class="proto-desc">${protoDesc(g.h)}</span>
-    </button>`).join('');
+  document.getElementById('proto-grid').innerHTML=GOALS.map(function(g){
+    var desc=g.h<=12?'Beginner':g.h<=14?'Easy IF':g.h<=16?'Standard':g.h<=18?'Intermediate':g.h<=20?'Advanced':g.h<=24?'OMAD':'Extended';
+    return '<button class="proto-btn'+(g.h===obGoal?' sel':'')+'" onclick="obGoal='+g.h+';buildProtoGrid()"><span class="proto-n">'+g.l+'</span><span class="proto-d">'+desc+'</span></button>';
+  }).join('');
 }
-function protoDesc(h){return h<=12?'Beginner':h<=14?'Easy IF':h<=16?'Standard':h<=18?'Intermediate':h<=20?'Advanced':h<=24?'OMAD':'Extended'}
-function pickProto(h){obGoal=h;document.querySelectorAll('.proto-btn').forEach((b,i)=>b.classList.toggle('sel',GOALS[i].h===h))}
-function setDefaultDT(){
-  // Set default picker dates/times
-  const now = new Date();
-  const lastH = new Date(now.getTime() - 3600000);
-  dateVals['meal'] = {y:lastH.getFullYear(), m:lastH.getMonth(), d:lastH.getDate()};
-  const hh = lastH.getHours();
-  timeVals['meal'] = {h:hh%12||12, min:lastH.getMinutes(), ampm:hh>=12?'pm':'am'};
-  const mealDisp = `${lastH.getDate()} ${MONTHS[lastH.getMonth()]} ${lastH.getFullYear()}`;
-  const timeDisp = `${hh%12||12}:${pad(lastH.getMinutes())} ${hh>=12?'pm':'am'}`;
-  const mdd = document.getElementById('meal-date-display');
-  const mtd = document.getElementById('meal-time-display');
-  if(mdd) mdd.textContent = mealDisp;
-  if(mtd) mtd.textContent = timeDisp;
-  // original fn body follows:
-  const now=new Date();now.setHours(now.getHours()-1);
-  document.getElementById('meal-date').value=now.toISOString().split('T')[0];
-  document.getElementById('meal-time').value=`${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
+function handleMain(){
+  if(fast.on){
+    var h=Math.floor(elapsed/3600),m=Math.floor((elapsed%3600)/60);
+    document.getElementById('stop-dlg-body').textContent='You\'ve fasted '+h+'h '+m+'m. Stop and save to history?';
+    D.open('stop-dlg');
+  } else {
+    obGoal=fast.goal;
+    buildProtoGrid();
+    // set default picker dates
+    var now=new Date(),lastH=new Date(now-3600000);
+    dateVals['meal']={d:lastH.getDate(),m:lastH.getMonth(),y:lastH.getFullYear()};
+    timeVals['meal']={h:lastH.getHours()%12||12,min:lastH.getMinutes(),ap:lastH.getHours()>=12?'pm':'am'};
+    document.getElementById('meal-date-v').textContent=fmtDt(lastH.getTime());
+    document.getElementById('meal-date-v').classList.remove('ph');
+    document.getElementById('meal-time-v').textContent=(lastH.getHours()%12||12)+':'+p2(lastH.getMinutes())+(lastH.getHours()>=12?'pm':'am');
+    document.getElementById('meal-time-v').classList.remove('ph');
+    D.open('fast-sheet');
+  }
 }
-function openOnboarding(){obGoal=fast.goal;buildProtoGrid();setDefaultDT();document.getElementById('onboarding').classList.remove('hidden')}
+
 function confirmFast(){
-  const mealTs = getPickerTimestamp('meal', 'meal');
-  if(!mealTs){ showToast('Please set last meal date and time'); return; }
-  fast.lastMeal = mealTs;
-  const d = 'ok', t = 'ok'; // satisfy rest of function
-  if(!d||!t) return;
-  fast.lastMeal=mealTs;
-  fast.goal=obGoal;fast.on=true;fast.start=Date.now();
-  saveFast();document.getElementById('onboarding').classList.add('hidden');
-  buildGoalChips();updateFastUI();startTick();
-  Notif.fire('fastStarted',[fast.goal+'h',fmtDate(fast.lastMeal)+' '+fmtClock(fast.lastMeal)]);
+  var ts=PK.getTS('meal','meal');
+  if(!ts){showToast('Set your last meal time');return}
+  fast.goal=obGoal;fast.lastMeal=ts;fast.on=true;fast.start=Date.now();
+  saveFast();D.close('fast-sheet');buildGoalChips();updateFastUI();startTick();
+  try{if(window.AndroidNotif)window.AndroidNotif.fastStarted(fast.goal+'h',fmtDt(ts)+' '+fmtCk(ts))}catch(e){}
   try{if(window.AndroidService)window.AndroidService.startFasting(fast.start,fast.goal)}catch(e){}
-  showToast('Fast started — timer running in background');
+  showToast('Fast started — tracking in background');
 }
-function handleMain(){fast.on?showStopDialog():openOnboarding()}
-function showStopDialog(){
-  const h=Math.floor(elapsed/3600),m=Math.floor((elapsed%3600)/60);
-  document.getElementById('dialog-body').textContent=`You've fasted for ${h}h ${m}m. Stopping will save this session.`;
-  document.getElementById('stop-dialog').classList.remove('hidden');
-}
-function confirmStop(){closeDialog('stop-dialog');stopFast()}
-function stopFast(){
-  const dur=fmtElapsed(elapsed);
+
+function confirmStop(){
+  D.close('stop-dlg');
+  var dur=fmtE(elapsed);
   saveFastHistory(fast.start,(Date.now()-fast.start)/1000);
-  fast.on=false;fast.start=null;fast.lastMeal=null;
+  fast={on:false,start:null,lastMeal:null,goal:fast.goal};
   clearInterval(ticker);ticker=null;elapsed=0;
-  saveFast();updateFastUI();renderHistory();
-  Notif.fire('fastStopped',[dur]);
+  saveFast();updateFastUI();
+  try{if(window.AndroidNotif)window.AndroidNotif.fastStopped(dur)}catch(e){}
   try{if(window.AndroidService)window.AndroidService.stopFasting()}catch(e){}
   showToast('Fast saved to history');
 }
+
 function startTick(){
   if(ticker)clearInterval(ticker);
-  Notif.reset();
-  ticker=setInterval(()=>{elapsed=(Date.now()-fast.start)/1000;updateTimer();Notif.checkMilestones(elapsed/3600);if(document.getElementById('page-insights').classList.contains('active'))liveInsights()},1000);
-  elapsed=(Date.now()-fast.start)/1000;updateTimer();
+  ticker=setInterval(function(){
+    elapsed=(Date.now()-fast.start)/1000;
+    updateTimerDisplay();updateRing();updatePhase();
+    checkMilestones(elapsed/3600);
+  },1000);
+  elapsed=(Date.now()-fast.start)/1000;
+  updateTimerDisplay();updateRing();updatePhase();
 }
-function buildTicks(){
-  let h='';
-  for(let i=0;i<60;i++){const a=(i/60)*2*Math.PI,inner=i%5===0?88:93,outer=97;const x1=110+inner*Math.sin(a),y1=110-inner*Math.cos(a),x2=110+outer*Math.sin(a),y2=110-outer*Math.cos(a);h+=`<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="var(--border)" stroke-width="${i%5===0?1:.5}"/>`}
-  document.getElementById('ticks').innerHTML=h;
+
+function updateTimerDisplay(){
+  var h=elapsed/3600,pct=Math.min(100,(h/fast.goal)*100);
+  document.getElementById('ring-t').textContent=fmtE(elapsed);
+  document.getElementById('ring-s').textContent='elapsed';
+  document.getElementById('ring-p').textContent=Math.floor(pct)+'% of '+fast.goal+'h goal';
+  if(fast.start)document.getElementById('ic-start').textContent=fmtCk(fast.start);
+  if(fast.lastMeal)document.getElementById('ic-meal').textContent=fmtDt(fast.lastMeal);
+  document.getElementById('ic-goal').textContent=fast.goal+'h';
 }
-function updateTimer(){
-  const h=elapsed/3600,pct=Math.min(1,h/fast.goal),circ=628;
-  document.getElementById('ring-time').textContent=fmtElapsed(elapsed);
-  document.getElementById('ring-status').textContent='elapsed';
-  document.getElementById('ring-pct').textContent=`${Math.floor(pct*100)}% of ${fast.goal}h goal`;
+function updateRing(){
+  var pct=Math.min(1,(elapsed/3600)/fast.goal);
+  var circ=597;
   document.getElementById('r-prog').style.strokeDashoffset=circ-(circ*pct);
   document.getElementById('r-prog').style.stroke=pct<.33?'#c9a96e':pct<.66?'#5cc8c0':'#7ec8a0';
-  if(fast.start)document.getElementById('chip-start').textContent=fmtClock(fast.start);
-  if(fast.lastMeal)document.getElementById('chip-meal').textContent=fmtDate(fast.lastMeal)+' '+fmtClock(fast.lastMeal);
-  document.getElementById('chip-goal').textContent=fast.goal+'h';
-  const ph=getPhase(h);
-  document.getElementById('phase-name').textContent=ph.name;
-  document.getElementById('phase-body').textContent=ph.desc;
+}
+function updatePhase(){
+  var ph=getPhase(elapsed/3600);
+  document.getElementById('phase-n').textContent=ph.n;
+  document.getElementById('phase-d').textContent=ph.d;
 }
 function updateFastUI(){
-  const on=fast.on;
-  document.getElementById('status-pill').className='status-pill '+(on?'fasting':'eating');
+  var on=fast.on;
+  var pill=document.getElementById('status-pill');
+  pill.className='status-pill '+(on?'fasting':'eating');
   document.getElementById('status-txt').textContent=on?'Fasting':'Eating Window';
-  const mb=document.getElementById('main-btn');
-  mb.className='btn-cta '+(on?'stop':'start');
-  mb.innerHTML=on?`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> Stop Fast`:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg> Start Fast`;
-  document.getElementById('info-strip').style.display=on?'flex':'none';
-  if(!on){document.getElementById('ring-time').textContent='00:00:00';document.getElementById('ring-status').textContent='ready to begin';document.getElementById('ring-pct').textContent='';document.getElementById('r-prog').style.strokeDashoffset='628';document.getElementById('r-prog').style.stroke='#c9a96e';document.getElementById('phase-name').textContent='Ready to Fast';document.getElementById('phase-body').textContent='Tap start to begin with live biological insights.'}
+  var mb=document.getElementById('main-btn');
+  mb.className=on?'btn-stop':'btn-start';
+  mb.innerHTML=on?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> Stop Fast':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg> Start Fast';
+  document.getElementById('istrip').style.display=on?'flex':'none';
+  if(!on){document.getElementById('ring-t').textContent='00:00:00';document.getElementById('ring-s').textContent='ready to begin';document.getElementById('ring-p').textContent='';document.getElementById('r-prog').style.strokeDashoffset='597';document.getElementById('r-prog').style.stroke='#c9a96e';document.getElementById('phase-n').textContent='Ready to Fast';document.getElementById('phase-d').textContent='Tap start to begin with live biological insights.';}
   buildGoalChips();
 }
-function buildGoalChips(){document.getElementById('goal-chips').innerHTML=GOALS.map(g=>`<div class="goal-chip ${g.h===fast.goal?'sel':''}" onclick="setGoal(${g.h})">${g.label}</div>`).join('')}
-function setGoal(h){fast.goal=h;saveFast();buildGoalChips();if(fast.on)updateTimer()}
-function toggleGoalDrawer(){document.getElementById('goal-drawer').classList.toggle('open')}
-function saveFastHistory(start,dur){const h=getFastHistory();h.unshift({id:Date.now(),start,dur,goal:fast.goal});if(h.length>60)h.pop();S.set('vt_fast_hist',JSON.stringify(h))}
-function getFastHistory(){try{return JSON.parse(S.get('vt_fast_hist')||'[]')}catch(e){return[]}}
 
-window.onServiceTick=function(ms){elapsed=ms/1000;updateTimer();Notif.checkMilestones(elapsed/3600);if(document.getElementById('page-insights').classList.contains('active'))liveInsights()};
-window.onAppResume=function(){loadFast();if(fast.on&&fast.start){elapsed=(Date.now()-fast.start)/1000;updateTimer();updateFastUI()}};
-
-/* ════════════════════════════════════════════════════════════
-   WATER TRACKER
-══════════════════════════════════════════════════════════ */
-function loadWaterTarget(){waterTarget=parseInt(S.get('vt_water_target')||'2000')}
-function setWaterTarget(v){waterTarget=parseInt(v);S.set('vt_water_target',v);renderWater()}
-function getWaterLog(){try{return JSON.parse(S.get('vt_water_log')||'[]')}catch(e){return[]}}
-function saveWaterLog(log){S.set('vt_water_log',JSON.stringify(log))}
-function getTodayWater(){
-  const log=getWaterLog(),t=today0();
-  return log.filter(e=>e.ts>=t&&e.ts<t+86400000);
-}
-function addWater(ml){
-  const log=getWaterLog();
-  log.unshift({id:Date.now(),ts:Date.now(),ml});
-  saveWaterLog(log);renderWater();
-  showToast(`+${ml}ml logged`);
-  try{if(window.AndroidNotif)window.AndroidNotif.fastStarted}catch(e){}
-}
-function addWaterCustom(){
-  const v=parseInt(document.getElementById('water-custom-input').value);
-  if(!v||v<1||v>2000){showToast('Enter a valid amount (1–2000ml)');return}
-  addWater(v);
-  document.getElementById('water-custom-input').value='';
-  closeSheet('water-sheet');
-}
-function deleteWater(id){
-  const log=getWaterLog().filter(e=>e.id!==id);
-  saveWaterLog(log);renderWater();showToast('Entry removed');
-}
-function renderWater(){
-  const todayLog=getTodayWater();
-  const total=todayLog.reduce((a,b)=>a+b.ml,0);
-  const pct=Math.min(100,(total/waterTarget)*100);
-  const circ=408;const offset=circ-(circ*(pct/100));
-
-  document.getElementById('water-pad').innerHTML=`
-    <div class="water-hero fade-up">
-      <div class="water-wave-wrap">
-        <svg class="water-svg" viewBox="0 0 140 140">
-          <circle cx="70" cy="70" r="65" fill="none" stroke="var(--bg3)" stroke-width="6"/>
-          <circle cx="70" cy="70" r="65" fill="none" stroke="var(--blue)" stroke-width="6"
-            stroke-linecap="round" stroke-dasharray="${circ}" stroke-dashoffset="${offset}"
-            transform="rotate(-90 70 70)" style="transition:stroke-dashoffset .8s ease"/>
-        </svg>
-        <div class="water-center">
-          <div class="water-amount">${(total/1000).toFixed(2)}</div>
-          <div class="water-unit">LITRES</div>
-          <div class="water-pct">${Math.floor(pct)}% of goal</div>
-        </div>
-      </div>
-      <div class="water-target-row">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
-        <span class="water-target-lbl">Daily target</span>
-        <span class="water-target-val">${(waterTarget/1000).toFixed(1)}L</span>
-      </div>
-    </div>
-
-    <div class="sec-label fade-up">Quick Add</div>
-    <div class="quick-add-grid fade-up">
-      ${[[100,'Espresso'],[250,'Cup'],[330,'Can'],[500,'Bottle']].map(([ml,lbl])=>`
-        <button class="qa-btn" onclick="addWater(${ml})">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
-          <div class="qa-btn-val">${ml}ml</div>
-          <div class="qa-btn-unit">${lbl}</div>
-        </button>`).join('')}
-    </div>
-
-    <div style="display:flex;gap:8px" class="fade-up">
-      <button class="btn-primary" style="flex:1" onclick="document.getElementById('water-sheet').classList.remove('hidden')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Add Custom
-      </button>
-    </div>
-
-    <div class="sec-label fade-up">Today's Log</div>
-    ${todayLog.length===0?`<div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg></div><div class="empty-title">No entries yet</div><div class="empty-body">Tap quick-add or the + button to log your water intake.</div></div>`
-    :todayLog.map(e=>`
-      <div class="water-log-item fade-up">
-        <div><div class="wl-time">${fmtClock(e.ts)}</div></div>
-        <div class="wl-amount">${e.ml} ml</div>
-        <button class="wl-del" onclick="deleteWater(${e.id})" aria-label="Delete entry">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>`).join('')}
-  `;
-  // sync target selector
-  const sel=document.getElementById('water-target-sel');
-  if(sel)sel.value=waterTarget;
+/* milestone tracker */
+var _mFired={};
+function checkMilestones(h){
+  if(!_mFired.goal&&h>=fast.goal){_mFired.goal=true;try{if(window.AndroidNotif)window.AndroidNotif.goalReached(fast.goal+'h')}catch(e){}}
+  [{h:2,n:'Transition Phase',i:'Insulin declining. Body shifting fuel sources.'},{h:4,n:'Glycogen Depletion',i:'Fat utilization ramping up.'},{h:8,n:'Fat Burning Initiated',i:'Lipolysis in full swing.'},{h:12,n:'Ketosis Entry',i:'Ketone production rising.'},{h:16,n:'Autophagy Accelerating',i:'Cellular cleanup active.'},{h:24,n:'Deep Cellular Repair',i:'Full autophagy underway.'}].forEach(function(m){
+    if(!_mFired['h'+m.h]&&h>=m.h){_mFired['h'+m.h]=true;try{if(window.AndroidNotif)window.AndroidNotif.phaseMilestone(m.n,m.h+'h',m.i)}catch(e){}}
+  });
 }
 
-/* ════════════════════════════════════════════════════════════
-   WORKOUT TRACKER
-══════════════════════════════════════════════════════════ */
-function getWorkouts(){try{return JSON.parse(S.get('vt_workouts')||'[]')}catch(e){return[]}}
-function saveWorkouts(w){S.set('vt_workouts',JSON.stringify(w))}
-function logWorkout(){
-  const type=getPickerVal('wk-type')||'running';
-  const dur=parseInt(document.getElementById('wk-duration').value);
-  const intensity=getPickerVal('wk-intensity')||'moderate';
-  const notes=document.getElementById('wk-notes').value.trim().substring(0,100);
-  if(!dur||dur<1){showToast('Enter a valid duration');return}
-  const wt=WORKOUT_TYPES[type];
-  const cal=Math.round(dur*wt.cal*INTENSITY_MULT[intensity]);
-  const ws=getWorkouts();
-  ws.unshift({id:Date.now(),ts:Date.now(),type,dur,intensity,cal,notes});
-  if(ws.length>100)ws.pop();
-  saveWorkouts(ws);
-  closeSheet('workout-sheet');
-  showPage('workout');
-  showToast(`${wt.label} logged — ~${cal} kcal`);
-  document.getElementById('wk-duration').value='';
-  document.getElementById('wk-notes').value='';
-}
-function deleteWorkout(id){const ws=getWorkouts().filter(w=>w.id!==id);saveWorkouts(ws);renderWorkout();showToast('Workout removed')}
-
-function renderWorkout(){
-  const ws=getWorkouts();
-  const todayWs=ws.filter(w=>w.ts>=today0());
-  const todayMins=todayWs.reduce((a,b)=>a+b.dur,0);
-  const todayCal=todayWs.reduce((a,b)=>a+b.cal,0);
-  const p=document.getElementById('workout-pad');
-  p.innerHTML=`
-    <div class="workout-summary fade-up">
-      <div class="sec-label">Today's Activity</div>
-      <div class="ws-stats">
-        <div class="ws-stat"><div class="ws-val">${todayWs.length}</div><div class="ws-lbl">Sessions</div></div>
-        <div class="ws-stat"><div class="ws-val">${todayMins}<span class="ws-unit">min</span></div><div class="ws-lbl">Active Time</div></div>
-        <div class="ws-stat"><div class="ws-val">${todayCal}<span class="ws-unit">kcal</span></div><div class="ws-lbl">Burned</div></div>
-      </div>
-    </div>
-    <button class="btn-primary fade-up" onclick="document.getElementById('workout-sheet').classList.remove('hidden')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Log Workout
-    </button>
-    <div class="sec-label fade-up">Recent Sessions</div>
-    ${ws.length===0
-      ? `<div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div><div class="empty-title">No workouts yet</div><div class="empty-body">Log your first workout to start tracking movement and activity.</div></div>`
-      : ws.slice(0,30).map(w=>{
-          const wt=WORKOUT_TYPES[w.type]||WORKOUT_TYPES.other;
-          const intPct={low:25,moderate:55,high:80,max:100}[w.intensity]||55;
-          const intColor={low:'var(--sage)',moderate:'var(--blue)',high:'var(--orange)',max:'var(--rose)'}[w.intensity]||'var(--blue)';
-          return `<div class="workout-item fade-up">
-            <div class="wi-left">
-              <div class="wi-icon" style="background:${wt.color}18;border:1px solid ${wt.color}30">
-                <svg viewBox="0 0 24 24" fill="none" stroke="${wt.color}" stroke-width="1.8" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-              </div>
-              <div>
-                <div class="wi-name">${wt.label}</div>
-                <div class="wi-meta">${fmtDateFull(w.ts)} · ${w.intensity}</div>
-                ${w.notes?`<div class="wi-meta" style="margin-top:2px;font-style:italic">${w.notes}</div>`:''}
-                <div class="intensity-bar" style="background:${intColor}20"><div style="height:100%;width:${intPct}%;background:${intColor};border-radius:2px"></div></div>
-              </div>
-            </div>
-            <div class="wi-right">
-              <div class="wi-dur">${w.dur}m</div>
-              <div class="wi-cal">${w.cal} kcal</div>
-              <button onclick="deleteWorkout(${w.id})" style="font-size:10px;color:var(--rose);margin-top:4px;background:var(--rose-dim);padding:3px 8px;border-radius:6px">remove</button>
-            </div>
-          </div>`;
-        }).join('')
-    }
-  `;
-}
-
-/* SLEEP */
-function getSleepLog(){try{return JSON.parse(S.get('vt_sleep')||'[]')}catch(e){return[]}}
-function saveSleepLog(l){S.set('vt_sleep',JSON.stringify(l))}
-function setDefaultSleepDT(){
-  const now = new Date();
-  const yesterday = new Date(now.getTime() - 86400000);
-  dateVals['sl-bed']  = {y:yesterday.getFullYear(), m:yesterday.getMonth(), d:yesterday.getDate()};
-  timeVals['sl-bed']  = {h:10, min:0, ampm:'pm'};
-  dateVals['sl-wake'] = {y:now.getFullYear(), m:now.getMonth(), d:now.getDate()};
-  const wh = now.getHours();
-  timeVals['sl-wake'] = {h:wh%12||12, min:now.getMinutes(), ampm:wh>=12?'pm':'am'};
-  const bedd = document.getElementById('sl-bed-date-display');
-  const bedt = document.getElementById('sl-bed-time-display');
-  const wakd = document.getElementById('sl-wake-date-display');
-  const wakt = document.getElementById('sl-wake-time-display');
-  if(bedd) bedd.textContent = `${yesterday.getDate()} ${MONTHS[yesterday.getMonth()]} ${yesterday.getFullYear()}`;
-  if(bedt) bedt.textContent = '10:00 pm';
-  if(wakd) wakd.textContent = `${now.getDate()} ${MONTHS[now.getMonth()]} ${now.getFullYear()}`;
-  if(wakt) wakt.textContent = `${wh%12||12}:${pad(now.getMinutes())} ${wh>=12?'pm':'am'}`;
-  // original fn body:
-  const now=new Date();
-  document.getElementById('sl-date').value=new Date(now.getTime()-86400000).toISOString().split('T')[0];
-  document.getElementById('sl-bed').value='22:00';
-  document.getElementById('sl-wake-date').value=now.toISOString().split('T')[0];
-  document.getElementById('sl-wake').value=`${pad(now.getHours())}:${pad(now.getMinutes())}`;
-}
-function logSleep(){
-  const bedTs = getPickerTimestamp('sl-bed', 'sl-bed');
-  const wakeTs = getPickerTimestamp('sl-wake', 'sl-wake');
-  const quality = getPickerVal('sl-quality') || 'good';
-  if(!bedTs){ showToast('Please set bedtime date and time'); return; }
-  if(!wakeTs){ showToast('Please set wake date and time'); return; }
-  const bd='ok',bt='ok',wd='ok',wt='ok'; // satisfy guard below
-  if(!bd||!bt||!wd||!wt){showToast('Please fill in all fields');return}
-  if(wakeTs<=bedTs){showToast('Wake time must be after bedtime');return}
-  const durMins=Math.round((wakeTs-bedTs)/60000);
-  if(durMins<30||durMins>1440){showToast('Duration must be 30min – 24h');return}
-  const sl=getSleepLog();
-  sl.unshift({id:Date.now(),bedTs,wakeTs,durMins,quality});
-  if(sl.length>90)sl.pop();
-  saveSleepLog(sl);
-  closeSheet('sleep-sheet');
-  showPage('sleep');
-  showToast(`Sleep logged — ${Math.floor(durMins/60)}h ${durMins%60}m`);
-}
-function deleteSleep(id){const sl=getSleepLog().filter(s=>s.id!==id);saveSleepLog(sl);renderSleep();showToast('Entry removed')}
-function sleepScore(q){return{great:100,good:75,fair:50,poor:25}[q]||50}
-function renderSleep(){
-  const sl=getSleepLog();
-  const last=sl[0]||null;
-  const week=sl.slice(0,7);
-  const avgMins=week.length?Math.round(week.reduce((a,b)=>a+b.durMins,0)/week.length):0;
-  const avgScore=week.length?Math.round(week.reduce((a,b)=>a+sleepScore(b.quality),0)/week.length):0;
-  const lastDurH=last?Math.floor(last.durMins/60):0;
-  const lastDurM=last?last.durMins%60:0;
-  const sleepPct=Math.min(100,(avgMins/480)*100);
-  const circ=376; const offset=circ-(circ*(sleepPct/100));
-  const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  const weekBars=week.slice(0,7).reverse();
-  const p=document.getElementById('sleep-pad');
-  p.innerHTML=`
-    <div class="sleep-hero fade-up">
-      <div class="sec-label" style="margin-bottom:14px">Last Night</div>
-      ${last?`
-        <div class="sleep-arc-wrap">
-          <svg width="140" height="140" viewBox="0 0 140 140">
-            <circle cx="70" cy="70" r="60" fill="none" stroke="var(--bg3)" stroke-width="6"/>
-            <circle cx="70" cy="70" r="60" fill="none" stroke="var(--purple)" stroke-width="6"
-              stroke-linecap="round" stroke-dasharray="${circ}" stroke-dashoffset="${offset}"
-              transform="rotate(-90 70 70)" style="transition:stroke-dashoffset .8s ease"/>
-          </svg>
-          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
-            <div style="font-family:var(--font-display);font-size:30px;font-weight:300;color:var(--text);line-height:1">${lastDurH}h ${lastDurM}m</div>
-            <div style="font-size:10px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-top:4px">sleep time</div>
-          </div>
-        </div>
-        <div class="sleep-stats-row">
-          <div class="sleep-stat"><div class="ss-val">${fmtClock(last.bedTs)}</div><div class="ss-lbl">Bedtime</div></div>
-          <div class="sleep-stat"><div class="ss-val">${fmtClock(last.wakeTs)}</div><div class="ss-lbl">Wake</div></div>
-          <div class="sleep-stat"><div class="ss-val">${{great:'😴',good:'😊',fair:'😐',poor:'😫'}[last.quality]}</div><div class="ss-lbl">${last.quality.charAt(0).toUpperCase()+last.quality.slice(1)}</div></div>
-        </div>`
-      :`<div style="text-align:center;padding:20px 0;color:var(--text3);font-size:13px">No sleep logged yet</div>`}
-    </div>
-    ${week.length>1?`
-    <div class="card fade-up" style="padding:18px">
-      <div class="sec-label" style="margin-bottom:14px">7-Day Analysis</div>
-      <div class="row" style="gap:10px;margin-bottom:16px">
-        <div class="stat-cell" style="flex:1"><div class="stat-num">${Math.floor(avgMins/60)}<span class="stat-unit">h ${avgMins%60}m</span></div><div class="stat-lbl">Avg Sleep</div></div>
-        <div class="stat-cell" style="flex:1"><div class="stat-num">${avgScore}<span class="stat-unit">%</span></div><div class="stat-lbl">Quality Score</div></div>
-      </div>
-      <div class="week-bars">
-        ${weekBars.map(s=>{
-          const ht=(s.durMins/480)*100;
-          const col=sleepScore(s.quality)>=75?'var(--purple)':sleepScore(s.quality)>=50?'var(--blue)':'var(--rose)';
-          const d=new Date(s.wakeTs);
-          return`<div class="bar-col"><div class="bar-track"><div class="bar-fill" style="height:${Math.min(100,ht)}%;background:${col}"></div></div><div class="bar-day">${days[d.getDay()]}</div></div>`;
-        }).join('')}
-      </div>
-    </div>`:''}
-    <button class="btn-primary fade-up" onclick="setDefaultSleepDT();document.getElementById('sleep-sheet').classList.remove('hidden')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Log Sleep
-    </button>
-    <div class="sec-label fade-up">Sleep History</div>
-    ${sl.length===0
-      ?`<div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></div><div class="empty-title">No sleep logged</div><div class="empty-body">Start logging your sleep to get daily and weekly analysis.</div></div>`
-      :sl.slice(0,20).map(s=>{
-          const dh=Math.floor(s.durMins/60),dm=s.durMins%60;
-          return`<div class="sleep-log-item fade-up">
-            <div class="sli-top"><span class="sli-date">${fmtDateFull(s.bedTs)}</span><span class="sli-quality ${s.quality}">${s.quality.toUpperCase()}</span></div>
-            <div class="sli-times">
-              <div class="sli-time-block"><div class="sli-time-lbl">Bedtime</div><div class="sli-time-val">${fmtClock(s.bedTs)}</div></div>
-              <div class="sli-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
-              <div class="sli-time-block"><div class="sli-time-lbl">Wake</div><div class="sli-time-val">${fmtClock(s.wakeTs)}</div></div>
-              <div class="sli-dur">${dh}h ${dm}m</div>
-            </div>
-            <button onclick="deleteSleep(${s.id})" style="font-size:10px;color:var(--rose);margin-top:8px;background:var(--rose-dim);padding:3px 8px;border-radius:6px">remove</button>
-          </div>`;
-        }).join('')}
-  `;
-}
-
-/* INSIGHTS */
-function buildInsights(){
-  const p=document.getElementById('insights-pad');
-  if(!fast.on){
-    p.innerHTML=`<div class="idle-state"><div class="idle-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg></div><div class="idle-title">Track your <em>biology</em></div><div class="idle-body">Start a fast to see real-time biological, mental, and physical insights update as your body transitions through each phase.</div></div>`;
-    return;
+/* sub-sections (insights/history inside fast page) */
+function toggleSub(name){
+  var btn=document.getElementById('sub-'+name+'-btn');
+  var sec=document.getElementById('sub-'+name);
+  if(activeSub===name){
+    btn.classList.remove('sel');sec.classList.remove('on');activeSub=null;return;
   }
-  const h=elapsed/3600,pct=Math.min(100,(h/24)*100);
-  const ph=getPhase(h),nx=PHASES.find(p=>p.h>h);
-  const marks=[0,4,8,12,16,20,24];
-  p.innerHTML=`
-    <div class="sec-label fade-up">Progress Timeline</div>
-    <div class="tl-card fade-up">
-      <div class="tl-top"><div class="tl-heading">Fasting <em>Journey</em></div><div class="tl-elapsed" id="tl-el">${Math.floor(h)}h ${Math.floor((h%1)*60)}m</div></div>
-      <div class="tl-bar"><div class="tl-prog" id="tl-prog" style="width:${pct}%"></div></div>
-      <div class="tl-marks">${marks.map(t=>`<div class="tl-m ${h>=t?'hit':''}" id="tm${t}"><div class="tl-mh">${t}h</div><div class="tl-md"></div></div>`).join('')}</div>
-    </div>
-    <div class="sec-label fade-up">Biological</div>
-    <div class="ic-card bio fade-up"><div class="ic-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 15c6.667-6 13.333 0 20-6"/><path d="M2 9c6.667 6 13.333 0 20 6"/></svg></div><div><div class="ic-cat">Biological</div><div class="ic-title" id="ib-t">${ph.bio.title}</div><div class="ic-body" id="ib-b">${ph.bio.body}</div></div></div>
-    ${nx?`<div class="ic-card dim nxt fade-up"><div class="ic-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div><div class="ic-cat">Next at ${nx.h}h</div><div class="ic-title" id="ib-nt">${nx.bio.title}</div><div class="ic-body" id="ib-nb">${nx.bio.body.slice(0,88)}...</div></div></div>`:''}
-    <div class="sec-label fade-up">Mental State</div>
-    <div class="ic-card mind fade-up"><div class="ic-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/></svg></div><div><div class="ic-cat">Mental</div><div class="ic-title" id="im-t">${ph.mind.title}</div><div class="ic-body" id="im-b">${ph.mind.body}</div></div></div>
-    <div class="sec-label fade-up">Physical</div>
-    <div class="ic-card body fade-up"><div class="ic-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg></div><div><div class="ic-cat">Physical</div><div class="ic-title" id="ip-t">${ph.body.title}</div><div class="ic-body" id="ip-b">${ph.body.body}</div></div></div>
-  `;
+  if(activeSub){
+    document.getElementById('sub-'+activeSub+'-btn').classList.remove('sel');
+    document.getElementById('sub-'+activeSub).classList.remove('on');
+  }
+  activeSub=name;btn.classList.add('sel');sec.classList.add('on');
+  if(name==='ins')renderFastInsights();
+  if(name==='his')renderFastHistory();
 }
-function liveInsights(){
-  const h=elapsed/3600,pct=Math.min(100,(h/24)*100);
-  const tl=document.getElementById('tl-prog');if(tl)tl.style.width=pct+'%';
-  const el=document.getElementById('tl-el');if(el)el.textContent=`${Math.floor(h)}h ${Math.floor((h%1)*60)}m`;
-  [0,4,8,12,16,20,24].forEach(t=>{const m=document.getElementById('tm'+t);if(m)m.classList.toggle('hit',h>=t)});
-  const ph=getPhase(h),nx=PHASES.find(p=>p.h>h);
-  const set=(id,v)=>{const e=document.getElementById(id);if(e&&e.textContent!==v)e.textContent=v};
-  set('ib-t',ph.bio.title);set('ib-b',ph.bio.body);set('im-t',ph.mind.title);set('im-b',ph.mind.body);set('ip-t',ph.body.title);set('ip-b',ph.body.body);
-  if(nx){set('ib-nt',nx.bio.title);set('ib-nb',nx.bio.body.slice(0,88)+'...')}
+function renderFastInsights(){
+  var el=document.getElementById('sub-ins');
+  if(!fast.on){el.innerHTML='<p style="font-size:12px;color:var(--text3);padding:10px 0">Start a fast to see live biological insights.</p>';return}
+  var h=elapsed/3600,pct=Math.min(100,(h/24)*100);
+  var ph=getPhase(h),nx=null;
+  for(var i=0;i<PHASES.length;i++){if(PHASES[i].h>h){nx=PHASES[i];break}}
+  var marks=[0,4,8,12,16,20,24];
+  var mHtml=marks.map(function(t){return'<div class="tlm'+(h>=t?' hit':'')+'"><div class="tlm-h">'+t+'h</div><div class="tlm-d"></div></div>'}).join('');
+  el.innerHTML='<div class="tl-card"><div class="tl-top"><div class="tl-title">Fasting <em>Journey</em></div><div class="tl-el">'+Math.floor(h)+'h '+Math.floor((h%1)*60)+'m</div></div><div class="tl-bar"><div class="tl-prog" style="width:'+pct+'%"></div></div><div class="tl-marks">'+mHtml+'</div></div>'
+  +'<div class="ic-card bio"><div class="ic-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 15c6.667-6 13.333 0 20-6"/><path d="M2 9c6.667 6 13.333 0 20 6"/></svg></div><div><div class="ic-cat">Biological</div><div class="ic-title">'+ph.bio.t+'</div><div class="ic-body">'+ph.bio.b+'</div></div></div>'
+  +'<div class="ic-card mind"><div class="ic-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/></svg></div><div><div class="ic-cat">Mental</div><div class="ic-title">'+ph.mind.t+'</div><div class="ic-body">'+ph.mind.b+'</div></div></div>'
+  +'<div class="ic-card body"><div class="ic-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg></div><div><div class="ic-cat">Physical</div><div class="ic-title">'+ph.body.t+'</div><div class="ic-body">'+ph.body.b+'</div></div></div>'
+  +(nx?'<div class="ic-card nxt dim"><div class="ic-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div><div class="ic-cat">Next at '+nx.h+'h</div><div class="ic-title">'+nx.bio.t+'</div><div class="ic-body">'+nx.bio.b.slice(0,80)+'…</div></div></div>':'');
 }
 
-/* HISTORY */
-function calcStreak(hist){if(!hist.length)return 0;let s=0;const t0=new Date();t0.setHours(0,0,0,0);let chk=new Date(t0);for(const f of hist){const fd=new Date(f.start);fd.setHours(0,0,0,0);const diff=Math.round((chk-fd)/86400000);if(diff===0||diff===1){s++;chk=fd}else break}return s}
+function saveFastHistory(start,dur){var h=getFH();h.unshift({id:Date.now(),start:start,dur:dur,goal:fast.goal});if(h.length>60)h.pop();S.set('vt_fh',JSON.stringify(h))}
+function getFH(){try{var r=S.get('vt_fh');return r?JSON.parse(r):[]}catch(e){return[]}}
+function calcStreak(hist){if(!hist.length)return 0;var s=0,t0=new Date();t0.setHours(0,0,0,0);var chk=new Date(t0);for(var i=0;i<hist.length;i++){var fd=new Date(hist[i].start);fd.setHours(0,0,0,0);var diff=Math.round((chk-fd)/86400000);if(diff===0||diff===1){s++;chk=fd}else break}return s}
+function renderFastHistory(){
+  var hist=getFH();var el=document.getElementById('sub-his');
+  if(!hist.length){el.innerHTML='<p style="font-size:12px;color:var(--text3);padding:10px 0">No fasts recorded yet.</p>';return}
+  var streak=calcStreak(hist);
+  var html='<div style="display:flex;gap:8px;margin-bottom:10px"><div class="stat-cell" style="flex:1"><div class="stat-num">'+streak+'<span class="stat-u"> 🔥</span></div><div class="stat-l">Streak</div></div><div class="stat-cell" style="flex:1"><div class="stat-num">'+hist.length+'</div><div class="stat-l">Total Fasts</div></div></div>';
+  html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div class="sec">Recent</div><button onclick="exportData()" style="font-size:11px;font-weight:600;color:var(--gold);background:var(--gdim);border:1px solid rgba(201,169,110,.2);padding:5px 11px;border-radius:100px">Export</button></div>';
+  hist.slice(0,8).forEach(function(f){
+    var h=Math.floor(f.dur/3600),m=Math.floor((f.dur%3600)/60);
+    var pct=f.dur/((f.goal||16)*3600);
+    var badge=pct>=1?{c:'great',l:'Goal Met'}:pct>=.75?{c:'good',l:'75%+'}:{c:'ok',l:Math.floor(pct*100)+'%'};
+    html+='<div class="hist-item" style="margin-bottom:7px"><div><div class="hi-date">'+fmtDF(f.start)+'</div><div class="hi-dur">'+h+'h '+m+'m</div></div><div class="hi-b '+badge.c+'">'+badge.l+'</div></div>';
+  });
+  el.innerHTML=html;
+}
 function exportData(){
-  const hist=getFastHistory();if(!hist.length){showToast('No fasts to export');return}
-  const rows=['Date,Duration (min),Goal (h),Completed'];
-  for(const f of hist){const d=new Date(f.start).toISOString().split('T')[0];const mins=Math.round(f.dur/60);const done=f.dur/((f.goal||16)*3600)>=1?'Yes':'No';rows.push(`${d},${mins},${f.goal||16},${done}`)}
-  const csv=rows.join('\n'),blob=new Blob([csv],{type:'text/csv'}),url=URL.createObjectURL(blob),a=document.createElement('a');
-  a.href=url;a.download='vitatrack_fasts.csv';a.click();URL.revokeObjectURL(url);showToast('Exported');
-}
-function renderHistory(){
-  const hist=getFastHistory(),c=document.getElementById('history-pad');
-  if(!hist.length){c.innerHTML=`<div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="empty-title">No history yet</div><div class="empty-body">Complete your first fast to see history here.</div></div>`;return}
-  const avg=hist.reduce((a,b)=>a+b.dur,0)/hist.length;
-  const lng=Math.max(...hist.map(h=>h.dur));
-  const streak=calcStreak(hist);
-  c.innerHTML=`
-    <div class="streak-card fade-up"><div><div class="streak-num">${streak}🔥</div><div class="streak-lbl">Day Streak</div><div class="streak-sub">${hist.length} total fasts</div></div></div>
-    <div class="row">
-      <div class="stat-cell fade-up" style="flex:1"><div class="stat-num">${Math.floor(avg/3600)}<span class="stat-unit">h ${Math.floor((avg%3600)/60)}m</span></div><div class="stat-lbl">Avg Duration</div></div>
-      <div class="stat-cell fade-up" style="flex:1"><div class="stat-num">${Math.floor(lng/3600)}<span class="stat-unit">h ${Math.floor((lng%3600)/60)}m</span></div><div class="stat-lbl">Longest Fast</div></div>
-    </div>
-    <div style="display:flex;align-items:center;justify-content:space-between" class="fade-up">
-      <div class="sec-label">Recent Fasts</div>
-      <button onclick="exportData()" style="font-size:11px;font-weight:600;color:var(--gold);background:var(--gold-dim);border:1px solid rgba(201,169,110,0.2);padding:6px 12px;border-radius:100px">Export CSV</button>
-    </div>
-    ${hist.slice(0,30).map(f=>{
-      const h=Math.floor(f.dur/3600),m=Math.floor((f.dur%3600)/60);
-      const d=new Date(f.start);
-      const ts=`${pad(d.getHours()%12||12)}:${pad(d.getMinutes())}${d.getHours()<12?'am':'pm'}`;
-      const pct=f.dur/((f.goal||16)*3600);
-      const badge=pct>=1?{c:'great',l:'Goal Met'}:pct>=.75?{c:'good',l:'75%+'}:{c:'ok',l:Math.floor(pct*100)+'%'};
-      return`<div class="hist-item fade-up"><div><div class="hi-date">${fmtDateFull(f.start)}</div><div class="hi-dur">${h}h ${m}m</div><div class="hi-meta">Started ${ts} · Goal ${f.goal||16}h</div></div><div class="hi-badge ${badge.c}">${badge.l}</div></div>`;
-    }).join('')}
-  `;
+  var hist=getFH();if(!hist.length){showToast('No fasts to export');return}
+  var rows=['Date,Duration (min),Goal (h),Completed'];
+  hist.forEach(function(f){rows.push(new Date(f.start).toISOString().split('T')[0]+','+Math.round(f.dur/60)+','+(f.goal||16)+','+(f.dur/((f.goal||16)*3600)>=1?'Yes':'No'))});
+  var blob=new Blob([rows.join('\n')],{type:'text/csv'});
+  var url=URL.createObjectURL(blob);var a=document.createElement('a');
+  a.href=url;a.download='vitatrack_fasts.csv';a.click();URL.revokeObjectURL(url);
+  showToast('Exported');
 }
 
-/* NOTIFICATIONS */
-const Notif={
-  _fired:{},
-  fire(method,args){try{if(window.AndroidNotif&&typeof window.AndroidNotif[method]==='function')window.AndroidNotif[method](...args)}catch(e){}},
-  checkMilestones(h){
-    if(!this._fired.goal&&h>=fast.goal){this._fired.goal=true;this.fire('goalReached',[fast.goal+'h'])}
-    [{h:2,name:'Transition Phase',insight:'Insulin declining. Your body is shifting fuel sources.'},{h:4,name:'Glycogen Depletion',insight:'Liver glycogen being used. Fat utilization ramping up.'},{h:8,name:'Fat Burning Initiated',insight:'Lipolysis in full swing. Early ketone production beginning.'},{h:12,name:'Ketosis Entry',insight:'Ketone production rising. Your brain is switching to premium fuel.'},{h:16,name:'Autophagy Accelerating',insight:'Cellular cleanup active. Your body is repairing and renewing.'},{h:24,name:'Deep Cellular Repair',insight:'Full autophagy and immune regeneration underway.'}].forEach(m=>{if(!this._fired['h'+m.h]&&h>=m.h){this._fired['h'+m.h]=true;this.fire('phaseMilestone',[m.name,m.h+'h',m.insight])}});
-  },
-  reset(){this._fired={}}
-};
-
-
-/* ════════════════════════════════════════════════════════════
-   CUSTOM PICKER ENGINE
-══════════════════════════════════════════════════════════ */
-const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-
-// Picker state
-let _pickerCurrent = null;
-let _pickerConfig = {};
-
-// Stored picker values (hidden state replacing <input>/<select>)
-const pickerVals = {
-  'water-target': '2000',
-  'wk-type':      'running',
-  'wk-intensity': 'moderate',
-  'sl-quality':   'good',
-};
-const dateVals = {};  // key -> {y,m,d}
-const timeVals = {};  // key -> {h,min,ampm}
-
-// Picker data configs
-const PICKER_DATA = {
-  'water-target': {
-    title: 'Daily Water Target',
-    options: [
-      {val:'1500', label:'1,500 ml — Light'},
-      {val:'2000', label:'2,000 ml — Standard'},
-      {val:'2500', label:'2,500 ml — Active'},
-      {val:'3000', label:'3,000 ml — Athlete'},
-      {val:'3500', label:'3,500 ml — High Performance'},
-    ],
-    displayId: 'water-target-display',
-    onChange: function(val) {
-      setWaterTarget(val);
-    }
-  },
-  'wk-type': {
-    title: 'Exercise Type',
-    options: [
-      {val:'running',  label:'Running'},
-      {val:'walking',  label:'Walking'},
-      {val:'cycling',  label:'Cycling'},
-      {val:'swimming', label:'Swimming'},
-      {val:'weights',  label:'Weight Training'},
-      {val:'yoga',     label:'Yoga / Stretching'},
-      {val:'hiit',     label:'HIIT'},
-      {val:'sport',    label:'Sport'},
-      {val:'other',    label:'Other'},
-    ],
-    displayId: 'wk-type-display',
-  },
-  'wk-intensity': {
-    title: 'Intensity',
-    options: [
-      {val:'low',      label:'Low — Easy effort'},
-      {val:'moderate', label:'Moderate — Steady pace'},
-      {val:'high',     label:'High — Hard effort'},
-      {val:'max',      label:'Max — All out'},
-    ],
-    displayId: 'wk-intensity-display',
-  },
-  'sl-quality': {
-    title: 'Sleep Quality',
-    options: [
-      {val:'great', label:'😴  Great — Deep, restful'},
-      {val:'good',  label:'😊  Good — Mostly restful'},
-      {val:'fair',  label:'😐  Fair — Some disruption'},
-      {val:'poor',  label:'😫  Poor — Restless'},
-    ],
-    displayId: 'sl-quality-display',
-  },
-};
-
-function openPicker(key) {
-  const cfg = PICKER_DATA[key];
-  if (!cfg) return;
-  _pickerCurrent = key;
-  document.getElementById('picker-panel-title').textContent = cfg.title;
-  const cur = pickerVals[key];
-  const opts = document.getElementById('picker-options');
-  opts.innerHTML = cfg.options.map(o => `
-    <div class="picker-option ${o.val===cur?'selected':''}" onclick="selectPickerOption('${key}','${o.val}',this)">
-      <span>${o.label}</span>
-      <span class="picker-option-check"></span>
-    </div>`).join('');
-  document.getElementById('picker-backdrop').classList.add('open');
-  document.getElementById('picker-panel').classList.add('open');
+/* ════ WATER ══════════════════════════════════════════ */
+function getWaterLog(){try{var r=S.get('vt_wl');return r?JSON.parse(r):[]}catch(e){return[]}}
+function saveWaterLog(l){S.set('vt_wl',JSON.stringify(l))}
+function getTodayWater(){var t=tod0();return getWaterLog().filter(function(e){return e.ts>=t&&e.ts<t+86400000})}
+function addWater(ml){var l=getWaterLog();l.unshift({id:Date.now(),ts:Date.now(),ml:ml});saveWaterLog(l);renderWater();showToast('+'+ml+'ml logged')}
+function addWaterCustom(){var v=parseInt(document.getElementById('w-custom').value);if(!v||v<1||v>2000){showToast('Enter 1–2000ml');return}addWater(v);document.getElementById('w-custom').value='';D.close('water-sheet')}
+function deleteWater(id){saveWaterLog(getWaterLog().filter(function(e){return e.id!==id}));renderWater();showToast('Removed')}
+function renderWater(){
+  var log=getTodayWater(),total=log.reduce(function(a,b){return a+b.ml},0);
+  var pct=Math.min(100,(total/waterTarget)*100);
+  var circ=377,off=circ-(circ*(pct/100));
+  var el=document.getElementById('water-pp');
+  el.innerHTML='<div class="water-hero fu"><div class="w-ring-wrap"><svg class="w-ring-svg" viewBox="0 0 130 130"><circle cx="65" cy="65" r="60" fill="none" stroke="var(--bg3)" stroke-width="5"/><circle cx="65" cy="65" r="60" fill="none" stroke="var(--blue)" stroke-width="5" stroke-linecap="round" stroke-dasharray="'+circ+'" stroke-dashoffset="'+off+'" transform="rotate(-90 65 65)" style="transition:stroke-dashoffset .8s"/></svg><div class="w-center"><div class="w-amt">'+(total/1000).toFixed(2)+'</div><div class="w-unit">LITRES</div><div class="w-pct">'+Math.floor(pct)+'% of goal</div></div></div><div class="w-tgt-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg><span class="w-tgt-l">Daily target</span><span class="w-tgt-v">'+(waterTarget/1000).toFixed(1)+'L</span></div></div>'
+  +'<div class="sec fu">Quick Add</div><div class="qa-grid fu">'+[[100,'Espresso'],[250,'Cup'],[330,'Can'],[500,'Bottle']].map(function(q){return'<button class="qa-btn" onclick="addWater('+q[0]+')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg><div class="qa-v">'+q[0]+'ml</div><div class="qa-u">'+q[1]+'</div></button>'}).join('')+'</div>'
+  +'<button class="btn-gold fu" onclick="D.open(\'water-sheet\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Custom / Set Target</button>'
+  +'<div class="sec fu">Today\'s Log</div>'
+  +(log.length===0?'<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg><div class="empty-t">No entries yet</div><div class="empty-b">Tap quick-add or the button above.</div></div>'
+  :log.map(function(e){return'<div class="wlog-item fu"><div><div class="w-unit" style="font-size:11px">'+fmtCk(e.ts)+'</div></div><div class="wl-amt">'+e.ml+' ml</div><button class="wl-del" onclick="deleteWater('+e.id+')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>'}).join(''));
 }
 
-function selectPickerOption(key, val, el) {
-  pickerVals[key] = val;
-  const cfg = PICKER_DATA[key];
-  // Update display text
-  const opt = cfg.options.find(o => o.val === val);
-  if (opt && cfg.displayId) {
-    document.getElementById(cfg.displayId).textContent = opt.label;
-    document.getElementById(cfg.displayId).classList.remove('placeholder');
-  }
-  // Visual selection
-  document.querySelectorAll('#picker-options .picker-option').forEach(e => e.classList.remove('selected'));
-  el.classList.add('selected');
-  // Callback
-  if (cfg.onChange) cfg.onChange(val);
+/* ════ WORKOUT ════════════════════════════════════════ */
+function getWO(){try{var r=S.get('vt_wo');return r?JSON.parse(r):[]}catch(e){return[]}}
+function saveWO(w){S.set('vt_wo',JSON.stringify(w))}
+function logWorkout(){
+  var type=pickerVals['wo-type']||'running';
+  var dur=parseInt(document.getElementById('wo-dur').value);
+  var intensity=pickerVals['wo-intensity']||'moderate';
+  var notes=document.getElementById('wo-notes').value.trim();
+  if(!dur||dur<1){showToast('Enter duration');return}
+  var wt=WT_TYPES[type]||WT_TYPES.other;
+  var cal=Math.round(dur*wt.cal*(WT_MULT[intensity]||1));
+  var ws=getWO();ws.unshift({id:Date.now(),ts:Date.now(),type:type,dur:dur,intensity:intensity,cal:cal,notes:notes});
+  if(ws.length>100)ws.pop();saveWO(ws);
+  D.close('wo-sheet');renderWorkout();showToast(wt.l+' logged — ~'+cal+' kcal');
+  document.getElementById('wo-dur').value='';document.getElementById('wo-notes').value='';
+}
+function deleteWO(id){saveWO(getWO().filter(function(w){return w.id!==id}));renderWorkout();showToast('Removed')}
+function renderWorkout(){
+  var ws=getWO(),t=tod0();
+  var td=ws.filter(function(w){return w.ts>=t});
+  var tdMin=td.reduce(function(a,b){return a+b.dur},0);
+  var tdCal=td.reduce(function(a,b){return a+b.cal},0);
+  var el=document.getElementById('wo-pp');
+  el.innerHTML='<div class="wo-summary fu"><div class="sec">Today</div><div class="wo-stats"><div class="wo-stat"><div class="wo-v">'+td.length+'</div><div class="wo-l">Sessions</div></div><div class="wo-stat"><div class="wo-v">'+tdMin+'<span class="wo-u">m</span></div><div class="wo-l">Active</div></div><div class="wo-stat"><div class="wo-v">'+tdCal+'<span class="wo-u">kcal</span></div><div class="wo-l">Burned</div></div></div></div>'
+  +'<button class="btn-gold fu" onclick="D.open(\'wo-sheet\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Log Workout</button>'
+  +'<div class="sec fu">Recent Sessions</div>'
+  +(ws.length===0?'<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg><div class="empty-t">No workouts yet</div><div class="empty-b">Log your first session above.</div></div>'
+  :ws.slice(0,30).map(function(w){
+    var wt=WT_TYPES[w.type]||WT_TYPES.other;
+    var ip={low:25,moderate:55,high:80,max:100}[w.intensity]||55;
+    var ic={low:'var(--sage)',moderate:'var(--blue)',high:'var(--orange)',max:'var(--rose)'}[w.intensity]||'var(--blue)';
+    return'<div class="wo-item fu"><div style="display:flex;align-items:center;gap:10px;flex:1"><div class="wo-ic" style="background:'+wt.c+'18;border:1px solid '+wt.c+'30"><svg viewBox="0 0 24 24" fill="none" stroke="'+wt.c+'" stroke-width="1.8" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div><div><div class="wo-name">'+wt.l+'</div><div class="wo-meta">'+fmtDF(w.ts)+' · '+w.intensity+'</div>'+(w.notes?'<div class="wo-note">'+w.notes+'</div>':'')+'<div class="ibar" style="background:'+ic+'20"><div style="height:100%;width:'+ip+'%;background:'+ic+';border-radius:2px"></div></div><button class="del-btn" onclick="deleteWO('+w.id+')">remove</button></div></div><div><div class="wo-dur">'+w.dur+'m</div><div class="wo-cal">'+w.cal+' kcal</div></div></div>';
+  }).join(''));
 }
 
-function closePicker() {
-  document.getElementById('picker-backdrop').classList.remove('open');
-  document.getElementById('picker-panel').classList.remove('open');
-  document.getElementById('date-spinner-panel').classList.remove('open');
-  document.getElementById('time-spinner-panel').classList.remove('open');
-  _pickerCurrent = null;
+/* ════ SLEEP ══════════════════════════════════════════ */
+function getSL(){try{var r=S.get('vt_sl');return r?JSON.parse(r):[]}catch(e){return[]}}
+function saveSL(l){S.set('vt_sl',JSON.stringify(l))}
+function sqScore(q){return{great:100,good:75,fair:50,poor:25}[q]||50}
+function logSleep(){
+  var bedTs=PK.getTS('sl-bed','sl-bed');
+  var wakeTs=PK.getTS('sl-wake','sl-wake');
+  var quality=pickerVals['sl-quality']||'good';
+  if(!bedTs){showToast('Set bedtime date and time');return}
+  if(!wakeTs){showToast('Set wake date and time');return}
+  if(wakeTs<=bedTs){showToast('Wake must be after bedtime');return}
+  var dur=Math.round((wakeTs-bedTs)/60000);
+  if(dur<30||dur>1440){showToast('Duration must be 30min–24h');return}
+  var sl=getSL();sl.unshift({id:Date.now(),bedTs:bedTs,wakeTs:wakeTs,dur:dur,quality:quality});
+  if(sl.length>90)sl.pop();saveSL(sl);
+  D.close('sleep-sheet');renderSleep();showToast('Sleep logged — '+Math.floor(dur/60)+'h '+dur%60+'m');
+}
+function deleteSL(id){saveSL(getSL().filter(function(s){return s.id!==id}));renderSleep();showToast('Removed')}
+function renderSleep(){
+  var sl=getSL(),last=sl[0]||null;
+  var week=sl.slice(0,7);
+  var avgMin=week.length?Math.round(week.reduce(function(a,b){return a+b.dur},0)/week.length):0;
+  var avgScore=week.length?Math.round(week.reduce(function(a,b){return a+sqScore(b.quality)},0)/week.length):0;
+  var el=document.getElementById('sleep-pp');
+  var circ=377,sleepPct=Math.min(100,(avgMin/480)*100),off=circ-(circ*(sleepPct/100));
+  var days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  el.innerHTML='<div class="sleep-hero fu"><div class="sec" style="margin-bottom:12px">Last Night</div>'
+  +(last?'<div class="sl-arc"><svg width="130" height="130" viewBox="0 0 130 130"><circle cx="65" cy="65" r="60" fill="none" stroke="var(--bg3)" stroke-width="5"/><circle cx="65" cy="65" r="60" fill="none" stroke="var(--purple)" stroke-width="5" stroke-linecap="round" stroke-dasharray="'+circ+'" stroke-dashoffset="'+off+'" transform="rotate(-90 65 65)" style="transition:stroke-dashoffset .8s"/></svg><div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-family:var(--serif);font-size:28px;font-weight:300;color:var(--text);line-height:1">'+Math.floor(last.dur/60)+'h '+last.dur%60+'m</div><div style="font-size:10px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-top:4px">last night</div></div></div><div class="sl-stats"><div class="sl-stat"><div class="sl-sv">'+fmtCk(last.bedTs)+'</div><div class="sl-sl">Bedtime</div></div><div class="sl-stat"><div class="sl-sv">'+fmtCk(last.wakeTs)+'</div><div class="sl-sl">Wake</div></div><div class="sl-stat"><div class="sl-sv">'+{great:'😴',good:'😊',fair:'😐',poor:'😫'}[last.quality]+'</div><div class="sl-sl">'+last.quality+'</div></div></div>'
+  :'<div style="text-align:center;padding:20px 0;font-size:13px;color:var(--text3)">No sleep recorded yet</div>')
+  +'</div>'
+  +(week.length>1?'<div class="card fu" style="padding:16px"><div class="sec" style="margin-bottom:12px">7-Day Analysis</div><div class="row" style="gap:8px;margin-bottom:14px"><div class="stat-cell" style="flex:1"><div class="stat-num">'+Math.floor(avgMin/60)+'<span class="stat-u">h '+avgMin%60+'m</span></div><div class="stat-l">Avg Sleep</div></div><div class="stat-cell" style="flex:1"><div class="stat-num">'+avgScore+'<span class="stat-u">%</span></div><div class="stat-l">Quality Score</div></div></div><div class="week-bars">'+week.slice(0,7).reverse().map(function(s){var ht=(s.dur/480)*100;var c=sqScore(s.quality)>=75?'var(--purple)':sqScore(s.quality)>=50?'var(--blue)':'var(--rose)';var d=new Date(s.wakeTs);return'<div class="bar-col"><div class="bar-track"><div class="bar-fill" style="height:'+Math.min(100,ht)+'%;background:'+c+'"></div></div><div class="bar-day">'+days[d.getDay()]+'</div></div>'}).join('')+'</div></div>':'')
+  +'<button class="btn-gold fu" onclick="var n=new Date();var b=new Date(n-86400000);dateVals[\'sl-bed\']={d:b.getDate(),m:b.getMonth(),y:b.getFullYear()};timeVals[\'sl-bed\']={h:10,min:0,ap:\'pm\'};dateVals[\'sl-wake\']={d:n.getDate(),m:n.getMonth(),y:n.getFullYear()};timeVals[\'sl-wake\']={h:n.getHours()%12||12,min:n.getMinutes(),ap:n.getHours()>=12?\'pm\':\'am\'};document.getElementById(\'sl-bed-date-v\').textContent=b.getDate()+\' \'+MONTHS[b.getMonth()]+\' \'+b.getFullYear();document.getElementById(\'sl-bed-time-v\').textContent=\'10:00 pm\';document.getElementById(\'sl-wake-date-v\').textContent=n.getDate()+\' \'+MONTHS[n.getMonth()]+\' \'+n.getFullYear();document.getElementById(\'sl-wake-time-v\').textContent=(n.getHours()%12||12)+\':\'+p2(n.getMinutes())+(n.getHours()>=12?\'pm\':\'am\');[\'sl-bed-date-v\',\'sl-bed-time-v\',\'sl-wake-date-v\',\'sl-wake-time-v\'].forEach(function(id){var e=document.getElementById(id);if(e)e.classList.remove(\'ph\')});D.open(\'sleep-sheet\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Log Sleep</button>'
+  +'<div class="sec fu">Sleep History</div>'
+  +(sl.length===0?'<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><div class="empty-t">No sleep logged</div><div class="empty-b">Tap the button above to record your first session.</div></div>'
+  :sl.slice(0,20).map(function(s){return'<div class="sl-item fu"><div class="sl-top"><span class="sl-date">'+fmtDF(s.bedTs)+'</span><span class="sl-q '+s.quality+'">'+s.quality.toUpperCase()+'</span></div><div class="sl-times"><div class="sl-tb"><div class="sl-tl">Bedtime</div><div class="sl-tv">'+fmtCk(s.bedTs)+'</div></div><div class="sl-arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div><div class="sl-tb"><div class="sl-tl">Wake</div><div class="sl-tv">'+fmtCk(s.wakeTs)+'</div></div><div class="sl-dur">'+Math.floor(s.dur/60)+'h '+s.dur%60+'m</div></div><button class="del-btn" onclick="deleteSL('+s.id+')">remove</button></div>'}).join(''));
 }
 
-/* ── DATE SPINNER ─────────────────────────────────────────── */
-let _dateKey = null;
-let _spinD = 1, _spinM = 0, _spinY = 2026;
+/* ════ INIT ═══════════════════════════════════════════ */
+window.onAppResume=function(){try{loadFast();if(fast.on&&fast.start){elapsed=(Date.now()-fast.start)/1000;updateTimerDisplay();updateFastUI()}}catch(e){}};
+window.onServiceTick=function(ms){try{elapsed=ms/1000;updateTimerDisplay();updateRing();updatePhase();checkMilestones(elapsed/3600)}catch(e){}};
+window.onerror=function(){return true};
 
-function openDateSpinner(key) {
-  _dateKey = key;
-  const now = new Date();
-  const stored = dateVals[key];
-  _spinD = stored ? stored.d : (key.includes('bed') ? now.getDate()-1||1 : now.getDate());
-  _spinM = stored ? stored.m : now.getMonth();
-  _spinY = stored ? stored.y : now.getFullYear();
-  // Clamp
-  if (_spinD < 1) _spinD = now.getDate();
-  renderDateSpinner();
-  const title = key === 'meal' ? 'Last Meal Date' :
-                key === 'sl-bed' ? 'Bedtime Date' : 'Wake Date';
-  document.getElementById('date-spinner-title').textContent = title;
-  document.getElementById('picker-backdrop').classList.add('open');
-  document.getElementById('date-spinner-panel').classList.add('open');
-}
-
-function renderDateSpinner() {
-  const maxD = new Date(_spinY, _spinM+1, 0).getDate();
-  if (_spinD > maxD) _spinD = maxD;
-  document.getElementById('spin-day').textContent = pad(_spinD);
-  document.getElementById('spin-month').textContent = MONTHS[_spinM];
-  document.getElementById('spin-year').textContent = _spinY;
-}
-
-function spinDate(part, delta) {
-  if (part === 'd') {
-    const maxD = new Date(_spinY, _spinM+1, 0).getDate();
-    _spinD = ((_spinD - 1 + delta + maxD) % maxD) + 1;
-  } else if (part === 'm') {
-    _spinM = (_spinM + delta + 12) % 12;
-  } else if (part === 'y') {
-    _spinY = Math.max(2020, Math.min(2030, _spinY + delta));
-  }
-  renderDateSpinner();
-}
-
-function closeDateSpinner() {
-  dateVals[_dateKey] = {y:_spinY, m:_spinM, d:_spinD};
-  const dateStr = `${_spinY}-${pad(_spinM+1)}-${pad(_spinD)}`;
-  const displayStr = `${_spinD} ${MONTHS[_spinM]} ${_spinY}`;
-  // Update display buttons
-  if (_dateKey === 'meal') {
-    document.getElementById('meal-date-display').textContent = displayStr;
-  } else if (_dateKey === 'sl-bed') {
-    document.getElementById('sl-bed-date-display').textContent = displayStr;
-  } else if (_dateKey === 'sl-wake') {
-    document.getElementById('sl-wake-date-display').textContent = displayStr;
-  }
-  closePicker();
-}
-
-/* ── TIME SPINNER ─────────────────────────────────────────── */
-let _timeKey = null;
-let _spinH = 12, _spinMin = 0, _spinAmPm = 'am';
-
-function openTimeSpinner(key) {
-  _timeKey = key;
-  const stored = timeVals[key];
-  const now = new Date();
-  let h = now.getHours();
-  if (stored) {
-    _spinH = stored.h; _spinMin = stored.min; _spinAmPm = stored.ampm;
-  } else {
-    _spinAmPm = h >= 12 ? 'pm' : 'am';
-    _spinH = h % 12 || 12;
-    _spinMin = now.getMinutes();
-  }
-  renderTimeSpinner();
-  const title = key === 'meal' ? 'Last Meal Time' :
-                key === 'sl-bed' ? 'Bedtime' : 'Wake Time';
-  document.getElementById('time-spinner-title').textContent = title;
-  document.getElementById('picker-backdrop').classList.add('open');
-  document.getElementById('time-spinner-panel').classList.add('open');
-}
-
-function renderTimeSpinner() {
-  document.getElementById('spin-hour').textContent = _spinH;
-  document.getElementById('spin-min').textContent = pad(_spinMin);
-  document.getElementById('spin-am').className = 'ampm-btn' + (_spinAmPm==='am'?' active':'');
-  document.getElementById('spin-pm').className = 'ampm-btn' + (_spinAmPm==='pm'?' active':'');
-}
-
-function spinTime(part, delta) {
-  if (part === 'h') {
-    _spinH = (_spinH - 1 + delta + 12) % 12 + 1;
-  } else {
-    _spinMin = (_spinMin + delta + 60) % 60;
-  }
-  renderTimeSpinner();
-}
-
-function setAmPm(val) { _spinAmPm = val; renderTimeSpinner(); }
-
-function closeTimeSpinner() {
-  timeVals[_timeKey] = {h:_spinH, min:_spinMin, ampm:_spinAmPm};
-  const display = `${_spinH}:${pad(_spinMin)} ${_spinAmPm}`;
-  if (_timeKey === 'meal') {
-    document.getElementById('meal-time-display').textContent = display;
-  } else if (_timeKey === 'sl-bed') {
-    document.getElementById('sl-bed-time-display').textContent = display;
-  } else if (_timeKey === 'sl-wake') {
-    document.getElementById('sl-wake-time-display').textContent = display;
-  }
-  closePicker();
-}
-
-// Helper: get timestamp from dateVals+timeVals
-function getPickerTimestamp(dateKey, timeKey) {
-  const dv = dateVals[dateKey];
-  const tv = timeVals[timeKey];
-  if (!dv || !tv) return null;
-  let h = tv.h % 12;
-  if (tv.ampm === 'pm') h += 12;
-  return new Date(dv.y, dv.m, dv.d, h, tv.min, 0).getTime();
-}
-
-// Helper: get just the picker value
-function getPickerVal(key) { return pickerVals[key] || ''; }
-
-/* ── FAST INSIGHTS/HISTORY TOGGLE ─────────────────────────── */
-let _fastSection = null;
-function toggleFastSection(section) {
-  const insEl  = document.getElementById('fast-insights-section');
-  const histEl = document.getElementById('fast-history-section');
-  const btnIns = document.getElementById('btn-show-insights');
-  const btnHis = document.getElementById('btn-show-history');
-
-  if (_fastSection === section) {
-    // collapse
-    insEl.style.display = 'none';
-    histEl.style.display = 'none';
-    _fastSection = null;
-    btnIns.style.background = 'var(--bg3)';
-    btnIns.style.color = 'var(--text2)';
-    btnIns.style.borderColor = 'var(--border)';
-    btnHis.style.background = 'var(--bg3)';
-    btnHis.style.color = 'var(--text2)';
-    btnHis.style.borderColor = 'var(--border)';
-    return;
-  }
-  _fastSection = section;
-
-  if (section === 'insights') {
-    insEl.style.display = 'block';
-    histEl.style.display = 'none';
-    btnIns.style.background = 'var(--gold-dim)';
-    btnIns.style.color = 'var(--gold)';
-    btnIns.style.borderColor = 'var(--gold)';
-    btnHis.style.background = 'var(--bg3)';
-    btnHis.style.color = 'var(--text2)';
-    btnHis.style.borderColor = 'var(--border)';
-    renderFastInsights();
-  } else {
-    histEl.style.display = 'block';
-    insEl.style.display = 'none';
-    btnHis.style.background = 'var(--gold-dim)';
-    btnHis.style.color = 'var(--gold)';
-    btnHis.style.borderColor = 'var(--gold)';
-    btnIns.style.background = 'var(--bg3)';
-    btnIns.style.color = 'var(--text2)';
-    btnIns.style.borderColor = 'var(--border)';
-    renderFastHistory();
-  }
-}
-
-function renderFastInsights() {
-  const el = document.getElementById('fast-insights-inner');
-  if (!fast.on) {
-    el.innerHTML = '<p style="font-size:13px;color:var(--text3);padding:12px 0">Start a fast to see live biological insights.</p>';
-    return;
-  }
-  const h = elapsed / 3600;
-  const ph = getPhase(h);
-  const nx = PHASES.find(p => p.h > h);
-  const pct = Math.min(100, (h/24)*100);
-  el.innerHTML = `
-    <div class="tl-card" style="margin-bottom:12px">
-      <div class="tl-top">
-        <div class="tl-heading">Fasting <em>Journey</em></div>
-        <div class="tl-elapsed">${Math.floor(h)}h ${Math.floor((h%1)*60)}m</div>
-      </div>
-      <div class="tl-bar"><div class="tl-prog" style="width:${pct}%"></div></div>
-      <div class="tl-marks">${[0,4,8,12,16,20,24].map(t=>`<div class="tl-m ${h>=t?'hit':''}"><div class="tl-mh">${t}h</div><div class="tl-md"></div></div>`).join('')}</div>
-    </div>
-    <div class="ic-card bio" style="margin-bottom:8px">
-      <div class="ic-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 15c6.667-6 13.333 0 20-6"/><path d="M2 9c6.667 6 13.333 0 20 6"/></svg></div>
-      <div><div class="ic-cat">Biological</div><div class="ic-title">${ph.bio.title}</div><div class="ic-body">${ph.bio.body}</div></div>
-    </div>
-    <div class="ic-card mind" style="margin-bottom:8px">
-      <div class="ic-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/></svg></div>
-      <div><div class="ic-cat">Mental</div><div class="ic-title">${ph.mind.title}</div><div class="ic-body">${ph.mind.body}</div></div>
-    </div>
-    <div class="ic-card body">
-      <div class="ic-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg></div>
-      <div><div class="ic-cat">Physical</div><div class="ic-title">${ph.body.title}</div><div class="ic-body">${ph.body.body}</div></div>
-    </div>
-    ${nx ? `<div class="ic-card dim nxt" style="margin-top:8px">
-      <div class="ic-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-      <div><div class="ic-cat">Next at ${nx.h}h</div><div class="ic-title">${nx.bio.title}</div><div class="ic-body">${nx.bio.body.slice(0,90)}...</div></div>
-    </div>` : ''}
-  `;
-}
-
-function renderFastHistory() {
-  const hist = getFastHistory();
-  const el = document.getElementById('fast-history-inner');
-  if (!hist.length) {
-    el.innerHTML = '<p style="font-size:13px;color:var(--text3);padding:12px 0">No fasts recorded yet.</p>';
-    return;
-  }
-  const streak = calcStreak(hist);
-  el.innerHTML = `
-    <div style="display:flex;gap:10px;margin-bottom:12px">
-      <div class="stat-cell" style="flex:1"><div class="stat-num">${streak}<span class="stat-unit">🔥</span></div><div class="stat-lbl">Streak</div></div>
-      <div class="stat-cell" style="flex:1"><div class="stat-num">${hist.length}</div><div class="stat-lbl">Total Fasts</div></div>
-    </div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-      <div class="sec-label">Recent</div>
-      <button onclick="exportData()" style="font-size:11px;font-weight:600;color:var(--gold);background:var(--gold-dim);border:1px solid rgba(201,169,110,0.2);padding:5px 12px;border-radius:100px">Export</button>
-    </div>
-    ${hist.slice(0,10).map(f => {
-      const h = Math.floor(f.dur/3600), m = Math.floor((f.dur%3600)/60);
-      const pct = f.dur/((f.goal||16)*3600);
-      const badge = pct>=1?{c:'great',l:'✓ Goal'}:pct>=.75?{c:'good',l:'75%+'}:{c:'ok',l:Math.floor(pct*100)+'%'};
-      return `<div class="hist-item" style="margin-bottom:8px">
-        <div><div class="hi-date">${fmtDateFull(f.start)}</div><div class="hi-dur">${h}h ${m}m</div></div>
-        <div class="hi-badge ${badge.c}">${badge.l}</div>
-      </div>`;
-    }).join('')}
-  `;
-}
-
-init();
+try{isDark=(S.get('vt_theme')||'dark')==='dark';applyTheme()}catch(e){}
+try{loadFast()}catch(e){}
+try{waterTarget=parseInt(S.get('vt_water_target')||'2000')||2000}catch(e){}
+try{buildTicks()}catch(e){}
+try{buildGoalChips()}catch(e){}
+try{updateFastUI()}catch(e){}
+try{if(fast.on)startTick()}catch(e){}
 </script>
 </body>
 </html>
