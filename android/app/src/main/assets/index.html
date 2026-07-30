@@ -141,7 +141,7 @@ input{font-family:var(--sans)}
 /* ── SHEET OVERLAY ──────────────────────────────────── */
 .overlay{
   position:fixed;inset:0;z-index:200;
-  background:rgba(0,0,0,0.55);backdrop-filter:blur(6px);
+  background:rgba(0,0,0,0.6);
   display:flex;align-items:flex-end;
 }
 .overlay.off{display:none}
@@ -184,7 +184,7 @@ input{font-family:var(--sans)}
 .picker-wrap{
   position:fixed;inset:0;z-index:300;
   display:flex;align-items:flex-end;
-  background:rgba(0,0,0,0.5);backdrop-filter:blur(6px);
+  background:rgba(0,0,0,0.6);
 }
 .picker-wrap.off{display:none}
 .picker-sheet{
@@ -246,7 +246,7 @@ input{font-family:var(--sans)}
 /* ── DIALOG ─────────────────────────────────────────── */
 .dialog-wrap{
   position:fixed;inset:0;z-index:400;
-  background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);
+  background:rgba(0,0,0,0.65);
   display:flex;align-items:center;justify-content:center;padding:24px;
 }
 .dialog-wrap.off{display:none}
@@ -1045,33 +1045,49 @@ function buildProtoGrid(){
 }
 
 function handleMain(){
-  if(fast.on){
-    var h=Math.floor(elapsed/3600),m=Math.floor((elapsed%3600)/60);
-    document.getElementById('stop-dlg-body').textContent='You\'ve fasted '+h+'h '+m+'m. Stop and save to history?';
-    D.open('stop-dlg');
-  } else {
-    obGoal=fast.goal;
-    buildProtoGrid();
-    // set default picker dates
-    var now=new Date(),lastH=new Date(now-3600000);
-    dateVals['meal']={d:lastH.getDate(),m:lastH.getMonth(),y:lastH.getFullYear()};
-    timeVals['meal']={h:lastH.getHours()%12||12,min:lastH.getMinutes(),ap:lastH.getHours()>=12?'pm':'am'};
-    document.getElementById('meal-date-v').textContent=fmtDt(lastH.getTime());
-    document.getElementById('meal-date-v').classList.remove('ph');
-    document.getElementById('meal-time-v').textContent=(lastH.getHours()%12||12)+':'+p2(lastH.getMinutes())+(lastH.getHours()>=12?'pm':'am');
-    document.getElementById('meal-time-v').classList.remove('ph');
-    D.open('fast-sheet');
-  }
+  try{
+    if(fast.on){
+      try{
+        var hh=Math.floor(elapsed/3600),mm=Math.floor((elapsed%3600)/60);
+        var el=document.getElementById('stop-dlg-body');
+        if(el)el.textContent='You have fasted '+hh+'h '+mm+'m. Stop and save to history?';
+        D.open('stop-dlg');
+      }catch(e){showToast('Tap again to stop');}
+    } else {
+      try{
+        obGoal=fast.goal;
+        buildProtoGrid();
+        var now=new Date(),lastH=new Date(now.getTime()-3600000);
+        dateVals['meal']={d:lastH.getDate(),m:lastH.getMonth(),y:lastH.getFullYear()};
+        timeVals['meal']={h:lastH.getHours()%12||12,min:lastH.getMinutes(),ap:lastH.getHours()>=12?'pm':'am'};
+        var dvEl=document.getElementById('meal-date-v');
+        var tvEl=document.getElementById('meal-time-v');
+        if(dvEl){dvEl.textContent=fmtDt(lastH.getTime());dvEl.classList.remove('ph');}
+        if(tvEl){tvEl.textContent=(lastH.getHours()%12||12)+':'+p2(lastH.getMinutes())+(lastH.getHours()>=12?'pm':'am');tvEl.classList.remove('ph');}
+        D.open('fast-sheet');
+      }catch(e2){showToast('Opening setup...');try{D.open('fast-sheet')}catch(e3){}}
+    }
+  }catch(e){showToast('Tap again');}
 }
 
 function confirmFast(){
+  try{
   var ts=PK.getTS('meal','meal');
-  if(!ts){showToast('Set your last meal time');return}
+  if(!ts){showToast('Set your last meal time');return;}
   fast.goal=obGoal;fast.lastMeal=ts;fast.on=true;fast.start=Date.now();
-  saveFast();D.close('fast-sheet');buildGoalChips();updateFastUI();startTick();
-  try{if(window.AndroidNotif)window.AndroidNotif.fastStarted(fast.goal+'h',fmtDt(ts)+' '+fmtCk(ts))}catch(e){}
-  try{if(window.AndroidService)window.AndroidService.startFasting(fast.start,fast.goal)}catch(e){}
-  showToast('Fast started — tracking in background');
+  try{saveFast()}catch(e){}
+  try{D.close('fast-sheet')}catch(e){}
+  try{buildGoalChips()}catch(e){}
+  try{updateFastUI()}catch(e){}
+  try{startTick()}catch(e){}
+  try{if(window.AndroidNotif&&typeof window.AndroidNotif.fastStarted==='function')window.AndroidNotif.fastStarted(fast.goal+'h',fmtDt(ts)+' '+fmtCk(ts))}catch(e){}
+  try{
+    if(window.AndroidService && typeof window.AndroidService.startFasting==='function'){
+      window.AndroidService.startFasting(fast.start,fast.goal);
+    }
+  }catch(e){}
+  showToast('Fast started');
+  }catch(e){showToast('Fast started');try{updateFastUI()}catch(e2){}}
 }
 
 function confirmStop(){
