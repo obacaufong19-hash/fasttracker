@@ -1010,14 +1010,25 @@ function showPage(name){
 function loadFast(){
   try{
     var raw=S.get('vt_fast');
-    if(!raw)return;
+    if(!raw||raw==='null'||raw.length<5){fast={on:false,start:null,lastMeal:null,goal:16};return;}
     var s=JSON.parse(raw);
-    fast.on=!!s.on;fast.start=s.start||null;fast.lastMeal=s.lastMeal||null;fast.goal=s.goal||16;
-    if(fast.start&&(Date.now()-fast.start>604800000||fast.start>Date.now()))
-      fast={on:false,start:null,lastMeal:null,goal:16};
-  }catch(e){fast={on:false,start:null,lastMeal:null,goal:16}}
+    if(!s||typeof s!=='object'){fast={on:false,start:null,lastMeal:null,goal:16};return;}
+    fast.goal=parseInt(s.goal)||16;
+    fast.on=s.on===true;
+    fast.start=typeof s.start==='number'&&s.start>0?s.start:null;
+    fast.lastMeal=typeof s.lastMeal==='number'&&s.lastMeal>0?s.lastMeal:null;
+    if(fast.on&&fast.start){
+      var age=Date.now()-fast.start;
+      if(age<0||age>604800000){fast.on=false;fast.start=null;}
+    }
+  }catch(e){fast={on:false,start:null,lastMeal:null,goal:16};}
 }
-function saveFast(){S.set('vt_fast',JSON.stringify(fast))}
+function saveFast(){
+  try{
+    var data=JSON.stringify({on:fast.on,start:fast.start,lastMeal:fast.lastMeal,goal:fast.goal});
+    S.set('vt_fast',data);
+  }catch(e){}
+}
 
 function buildTicks(){
   var html='';
@@ -1075,10 +1086,12 @@ function confirmFast(){
   var ts=PK.getTS('meal','meal');
   if(!ts){showToast('Set your last meal time');return;}
   fast.goal=obGoal;fast.lastMeal=ts;fast.on=true;fast.start=Date.now();
-  try{saveFast()}catch(e){}
+  _mFired={};  // reset milestone tracker for new fast
+  try{saveFast()}catch(e){}   // SAVE FIRST - before any UI that could crash
   try{D.close('fast-sheet')}catch(e){}
   try{buildGoalChips()}catch(e){}
   try{updateFastUI()}catch(e){}
+  try{if(ticker)clearInterval(ticker);ticker=null;}catch(e){}
   try{startTick()}catch(e){}
   try{if(window.AndroidNotif&&typeof window.AndroidNotif.fastStarted==='function')window.AndroidNotif.fastStarted(fast.goal+'h',fmtDt(ts)+' '+fmtCk(ts))}catch(e){}
   try{
@@ -1094,9 +1107,12 @@ function confirmStop(){
   D.close('stop-dlg');
   var dur=fmtE(elapsed);
   saveFastHistory(fast.start,(Date.now()-fast.start)/1000);
-  fast={on:false,start:null,lastMeal:null,goal:fast.goal};
-  clearInterval(ticker);ticker=null;elapsed=0;
-  saveFast();updateFastUI();
+  var savedGoal=fast.goal;
+  fast={on:false,start:null,lastMeal:null,goal:savedGoal};
+  _mFired={};
+  try{clearInterval(ticker)}catch(e){}ticker=null;elapsed=0;
+  try{saveFast()}catch(e){}
+  try{updateFastUI()}catch(e){}
   try{if(window.AndroidNotif)window.AndroidNotif.fastStopped(dur)}catch(e){}
   try{if(window.AndroidService)window.AndroidService.stopFasting()}catch(e){}
   showToast('Fast saved to history');
@@ -1305,7 +1321,21 @@ function renderSleep(){
 }
 
 /* ════ INIT ═══════════════════════════════════════════ */
-window.onAppResume=function(){try{loadFast();if(fast.on&&fast.start){elapsed=(Date.now()-fast.start)/1000;updateTimerDisplay();updateFastUI()}}catch(e){}};
+window.onAppResume=function(){
+  try{
+    loadFast();
+    if(fast.on&&fast.start){
+      elapsed=(Date.now()-fast.start)/1000;
+      // Restart the JS ticker if not running
+      if(!ticker){startTick();}
+      else{updateTimerDisplay();updateRing();updatePhase();}
+      updateFastUI();
+      buildGoalChips();
+    } else {
+      updateFastUI();
+    }
+  }catch(e){}
+};
 window.onServiceTick=function(ms){try{elapsed=ms/1000;updateTimerDisplay();updateRing();updatePhase();checkMilestones(elapsed/3600)}catch(e){}};
 window.onerror=function(){return true};
 
@@ -1314,8 +1344,16 @@ try{loadFast()}catch(e){}
 try{waterTarget=parseInt(S.get('vt_water_target')||'2000')||2000}catch(e){}
 try{buildTicks()}catch(e){}
 try{buildGoalChips()}catch(e){}
-try{updateFastUI()}catch(e){}
-try{if(fast.on)startTick()}catch(e){}
+// Restore active fast on launch
+try{
+  if(fast.on&&fast.start){
+    elapsed=(Date.now()-fast.start)/1000;
+    updateFastUI();
+    startTick();
+  } else {
+    updateFastUI();
+  }
+}catch(e){try{updateFastUI()}catch(e2){}}
 </script>
 </body>
 </html>
