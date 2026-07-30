@@ -48,8 +48,9 @@ input,select{font-family:var(--font-body)}
 ::-webkit-scrollbar{width:0}
 
 /* ── SPLASH ── */
-#splash{position:fixed;top:0;left:0;right:0;bottom:0;z-index:999;background:#080810;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
-#splash.hide{opacity:0;pointer-events:none}
+#splash{position:fixed;top:0;left:0;right:0;bottom:0;z-index:999;background:#080810;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;animation:autoHideSplash 0.6s 2.5s ease forwards;}
+#splash.hide{opacity:0;pointer-events:none;visibility:hidden}
+@keyframes autoHideSplash{to{opacity:0;visibility:hidden;}}
 
 .splash-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 40%,rgba(201,169,110,0.07) 0%,transparent 70%)}
 .splash-ring{position:absolute;border:1px solid rgba(201,169,110,0.08);border-radius:50%}
@@ -787,27 +788,7 @@ let waterTarget=2000;
 /* ════════════════════════════════════════════════════════════
    INIT
 ══════════════════════════════════════════════════════════ */
-// NUCLEAR SPLASH DISMISS - fires no matter what
-function forceDismissSplash() {
-  try {
-    var sp = document.getElementById('splash');
-    if (sp) sp.style.display = 'none';
-    var app = document.getElementById('app');
-    if (app) { app.style.opacity = '1'; app.classList.add('ready'); }
-  } catch(e) {}
-}
-
-// Absolute deadline: splash MUST be gone within 3 seconds
-var splashKillTimer = setTimeout(forceDismissSplash, 3000);
-
 function init(){
-  // Step 1: Make app visible immediately (splash covers it)
-  try {
-    var app = document.getElementById('app');
-    if (app) { app.style.opacity = '1'; app.classList.add('ready'); }
-  } catch(e) {}
-
-  // Step 2: Load data safely
   try { loadTheme(); } catch(e) {}
   try { loadFast(); } catch(e) {}
   try { loadWaterTarget(); } catch(e) {}
@@ -816,21 +797,10 @@ function init(){
   try { buildProtoGrid(); } catch(e) {}
   try { setDefaultDT(); } catch(e) {}
   try { updateFastUI(); } catch(e) {}
-  try { if(fast.on) startTick(); } catch(e) {}
-
-  // Step 3: Dismiss splash after short delay
-  setTimeout(function() {
-    clearTimeout(splashKillTimer);
-    forceDismissSplash();
-  }, 1500);
+  try { if(fast && fast.on) startTick(); } catch(e) {}
 }
 
-// Global error handler
-window.onerror = function(msg, src, line, col, err) {
-  clearTimeout(splashKillTimer);
-  forceDismissSplash();
-  return true;
-};
+window.onerror = function(){ return true; };
 
 /* ════════════════════════════════════════════════════════════
    THEME
