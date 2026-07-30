@@ -32,11 +32,15 @@ jobs:
 
       - name: Build Debug APK
         working-directory: android
-        run: gradle assembleDebug --no-daemon --stacktrace
+        run: gradle assembleDebug --no-daemon --stacktrace --info 2>&1 | grep -E "(error:|warning:|FAILED|Exception|at com.fast)" | head -60
+
+      - name: Build Debug APK (full)
+        working-directory: android
+        run: gradle assembleDebug --no-daemon
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: FastTracker-debug
+          name: VitaTracker-debug-${{ github.run_number }}
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: warn

@@ -6,7 +6,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build;
@@ -40,12 +39,14 @@ public class MainActivity extends Activity {
         public void onReceive(Context context, Intent intent) {
             final long elapsed = intent.getLongExtra("elapsed", 0);
             final String js = "window.onServiceTick && window.onServiceTick(" + elapsed + ")";
-            webView.post(new Runnable() {
-                @Override
-                public void run() {
-                    webView.evaluateJavascript(js, null);
-                }
-            });
+            if (webView != null) {
+                webView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        webView.evaluateJavascript(js, null);
+                    }
+                });
+            }
         }
     };
 
@@ -55,8 +56,8 @@ public class MainActivity extends Activity {
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 
-        // Edge-to-edge rendering
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        // Edge-to-edge
+        if (Build.VERSION.SDK_INT >= 30) { // Build.VERSION_CODES.R
             getWindow().setDecorFitsSystemWindows(false);
         } else {
             getWindow().getDecorView().setSystemUiVisibility(
@@ -66,7 +67,7 @@ public class MainActivity extends Activity {
             );
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        if (Build.VERSION.SDK_INT >= 21) { // LOLLIPOP
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             getWindow().setStatusBarColor(Color.TRANSPARENT);
             getWindow().setNavigationBarColor(Color.TRANSPARENT);
@@ -95,31 +96,36 @@ public class MainActivity extends Activity {
     protected void onResume() {
         super.onResume();
         IntentFilter filter = new IntentFilter(FastingService.ACTION_TICK);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(tickReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
-        } else {
-            registerReceiver(tickReceiver, filter);
+        // Use basic registerReceiver for compatibility across all API levels
+        registerReceiver(tickReceiver, filter);
+
+        if (webView != null) {
+            webView.post(new Runnable() {
+                @Override
+                public void run() {
+                    webView.evaluateJavascript(
+                        "window.onAppResume && window.onAppResume()", null);
+                }
+            });
         }
-        webView.post(new Runnable() {
-            @Override
-            public void run() {
-                webView.evaluateJavascript("window.onAppResume && window.onAppResume()", null);
-            }
-        });
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        try { unregisterReceiver(tickReceiver); } catch (Exception ignored) {}
+        try {
+            unregisterReceiver(tickReceiver);
+        } catch (Exception ignored) {}
     }
 
     private void requestNotificationPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+        if (Build.VERSION.SDK_INT >= 33) { // TIRAMISU
+            if (ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.POST_NOTIFICATIONS)
                     != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.POST_NOTIFICATIONS}, PERM_REQ);
+                    new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                    PERM_REQ);
             }
         }
     }
@@ -130,20 +136,23 @@ public class MainActivity extends Activity {
         if (req == PERM_REQ) {
             final boolean granted = results.length > 0
                 && results[0] == PackageManager.PERMISSION_GRANTED;
-            webView.post(new Runnable() {
-                @Override
-                public void run() {
-                    webView.evaluateJavascript(
-                        "window.onNotifPermission && window.onNotifPermission(" + granted + ")",
-                        null);
-                }
-            });
+            if (webView != null) {
+                webView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        webView.evaluateJavascript(
+                            "window.onNotifPermission && window.onNotifPermission("
+                            + granted + ")", null);
+                    }
+                });
+            }
         }
     }
 
     private void fireEventNotif(String title, String body, String bigText, int priority) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+        if (Build.VERSION.SDK_INT >= 33) {
+            if (ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.POST_NOTIFICATIONS)
                     != PackageManager.PERMISSION_GRANTED) return;
         }
         Intent tap = new Intent(this, MainActivity.class);
@@ -169,7 +178,7 @@ public class MainActivity extends Activity {
     private void doVibrate(long[] pattern) {
         Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         if (v == null) return;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (Build.VERSION.SDK_INT >= 26) { // OREO
             v.vibrate(VibrationEffect.createWaveform(pattern, -1));
         } else {
             v.vibrate(pattern, -1);
@@ -178,8 +187,11 @@ public class MainActivity extends Activity {
 
     @Override
     public void onBackPressed() {
-        if (webView.canGoBack()) webView.goBack();
-        else super.onBackPressed();
+        if (webView != null && webView.canGoBack()) {
+            webView.goBack();
+        } else {
+            super.onBackPressed();
+        }
     }
 
     // ══ STORAGE BRIDGE ════════════════════════════════════════
@@ -187,62 +199,85 @@ public class MainActivity extends Activity {
         @JavascriptInterface
         public void setItem(String key, String value) {
             if (key == null || !key.matches("[a-zA-Z0-9_]+")) return;
-            getSharedPreferences(PREFS, MODE_PRIVATE).edit().putString(key, value).apply();
+            getSharedPreferences(PREFS, MODE_PRIVATE)
+                .edit().putString(key, value).apply();
         }
+
         @JavascriptInterface
         public String getItem(String key) {
             if (key == null || !key.matches("[a-zA-Z0-9_]+")) return null;
             return getSharedPreferences(PREFS, MODE_PRIVATE).getString(key, null);
         }
+
         @JavascriptInterface
         public void removeItem(String key) {
             if (key == null || !key.matches("[a-zA-Z0-9_]+")) return;
-            getSharedPreferences(PREFS, MODE_PRIVATE).edit().remove(key).apply();
+            getSharedPreferences(PREFS, MODE_PRIVATE)
+                .edit().remove(key).apply();
         }
     }
 
     // ══ NOTIFICATION BRIDGE ═══════════════════════════════════
     public class NotificationBridge {
+
         @JavascriptInterface
         public void fastStarted(String goalHours, String lastMeal) {
-            String g = goalHours != null ? goalHours.replaceAll("[^0-9hm: ]", "") : "?";
-            String m = lastMeal  != null ? lastMeal.replaceAll("[^0-9a-zA-Z:,/ -]", "") : "?";
-            fireEventNotif("Fast Started", "Your " + g + " fast has begun.",
+            String g = goalHours != null
+                ? goalHours.replaceAll("[^0-9hm: ]", "") : "?";
+            String m = lastMeal != null
+                ? lastMeal.replaceAll("[^0-9a-zA-Z:,/ -]", "") : "?";
+            fireEventNotif(
+                "Fast Started",
+                "Your " + g + " fast has begun.",
                 "Last meal: " + m + "\nGoal: " + g,
                 NotificationCompat.PRIORITY_DEFAULT);
             doVibrate(new long[]{0, 80, 60, 80});
         }
+
         @JavascriptInterface
         public void fastStopped(String duration) {
-            String d = duration != null ? duration.replaceAll("[^0-9:hm ]", "") : "?";
-            fireEventNotif("Fast Ended", "You fasted for " + d + ". Great work.",
+            String d = duration != null
+                ? duration.replaceAll("[^0-9:hm ]", "") : "?";
+            fireEventNotif(
+                "Fast Ended",
+                "You fasted for " + d + ". Great work.",
                 "Your fast of " + d + " has been recorded.",
                 NotificationCompat.PRIORITY_DEFAULT);
             doVibrate(new long[]{0, 60, 40, 60, 40, 60});
         }
+
         @JavascriptInterface
         public void goalReached(String goalHours) {
-            String g = goalHours != null ? goalHours.replaceAll("[^0-9h]", "") : "?";
-            fireEventNotif("Goal Reached!", "You completed your " + g + " fast!",
+            String g = goalHours != null
+                ? goalHours.replaceAll("[^0-9h]", "") : "?";
+            fireEventNotif(
+                "Goal Reached!",
+                "You completed your " + g + " fast!",
                 "Outstanding! You hit your " + g + " fasting goal.",
                 NotificationCompat.PRIORITY_HIGH);
             doVibrate(new long[]{0, 100, 80, 100, 80, 200});
         }
+
         @JavascriptInterface
         public void phaseMilestone(String name, String hour, String insight) {
-            fireEventNotif(hour + " — " + name, insight, insight,
+            fireEventNotif(
+                hour + " — " + name,
+                insight,
+                insight,
                 NotificationCompat.PRIORITY_DEFAULT);
             doVibrate(new long[]{0, 50, 80, 50});
         }
+
         @JavascriptInterface
         public boolean hasPermission() {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (Build.VERSION.SDK_INT >= 33) {
                 return ContextCompat.checkSelfPermission(MainActivity.this,
                     Manifest.permission.POST_NOTIFICATIONS)
                     == PackageManager.PERMISSION_GRANTED;
             }
             return true;
         }
+
         @JavascriptInterface
         public void requestPermission() {
             requestNotificationPermission();
@@ -251,18 +286,20 @@ public class MainActivity extends Activity {
 
     // ══ SERVICE BRIDGE ════════════════════════════════════════
     public class ServiceBridge {
+
         @JavascriptInterface
         public void startFasting(long startTime, float goalHours) {
             Intent i = new Intent(MainActivity.this, FastingService.class);
             i.setAction(FastingService.ACTION_START);
             i.putExtra("startTime", startTime);
             i.putExtra("goalHours", goalHours);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (Build.VERSION.SDK_INT >= 26) { // OREO
                 startForegroundService(i);
             } else {
                 startService(i);
             }
         }
+
         @JavascriptInterface
         public void stopFasting() {
             Intent i = new Intent(MainActivity.this, FastingService.class);
