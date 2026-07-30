@@ -49,23 +49,23 @@ input,select{font-family:var(--font-body)}
 
 /* ── SPLASH ── */
 #splash{position:fixed;top:0;left:0;right:0;bottom:0;z-index:999;background:#080810;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
-#splash.hide{animation:splashOut .6s ease forwards}
-@keyframes splashOut{to{opacity:0;transform:scale(1.04)}}
+#splash.hide{opacity:0;pointer-events:none}
+
 .splash-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 40%,rgba(201,169,110,0.07) 0%,transparent 70%)}
-.splash-ring{position:absolute;border:1px solid rgba(201,169,110,0.08);border-radius:50%;animation:ringExp 2s ease-out both}
+.splash-ring{position:absolute;border:1px solid rgba(201,169,110,0.08);border-radius:50%}
 .splash-ring:nth-child(2){width:320px;height:320px}
 .splash-ring:nth-child(3){width:220px;height:220px;animation-delay:.15s;border-color:rgba(201,169,110,0.12)}
 .splash-ring:nth-child(4){width:140px;height:140px;animation-delay:.3s;border-color:rgba(201,169,110,0.18)}
-@keyframes ringExp{from{opacity:0;transform:scale(.5)}to{opacity:1;transform:scale(1)}}
-.splash-content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;animation:fadeUp .8s .3s ease both}
+
+.splash-content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center}
 .splash-icon-wrap{width:80px;height:80px;border:1px solid rgba(201,169,110,0.25);border-radius:24px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(201,169,110,0.08),rgba(92,200,192,0.05));margin-bottom:20px;box-shadow:0 0 40px rgba(201,169,110,0.1)}
 .splash-icon-wrap svg{width:38px;height:38px}
 .splash-word{font-family:var(--font-display);font-size:40px;font-weight:300;color:var(--text);letter-spacing:.01em;line-height:1}
 .splash-word em{color:var(--gold);font-style:italic}
 .splash-tag{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.4em;text-transform:uppercase;margin-top:10px;margin-bottom:36px}
 .splash-bar{width:80px;height:1px;background:var(--border2);border-radius:1px;overflow:hidden}
-.splash-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--teal));animation:loadFill 2s .4s cubic-bezier(.4,0,.2,1) forwards;width:0}
-@keyframes loadFill{to{width:100%}}
+.splash-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--teal));animation:loadFill 1.2s .1s ease forwards;width:0}
+@keyframes loadFill{0%{width:0}100%{width:100%}}
 .splash-v{position:absolute;bottom:32px;font-size:10px;color:var(--text4);letter-spacing:.15em;font-family:var(--font-mono)}
 
 /* ── APP ── */
@@ -715,23 +715,27 @@ select.input{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w
    STORAGE
 ══════════════════════════════════════════════════════════ */
 const S={
-  get(k){
+  get:function(k){
     try{
+      var v=null;
       if(window.AndroidStorage){
-        const v=window.AndroidStorage.getItem(k);
-        return v===undefined||v==='null'?null:v;
+        v=window.AndroidStorage.getItem(k);
+      } else {
+        v=localStorage.getItem(k);
       }
-      return localStorage.getItem(k);
+      if(v===null||v===undefined||v==='null'||v==='undefined') return null;
+      return v;
     }catch(e){
-      try{return localStorage.getItem(k)}catch(e2){return null}
+      try{var x=localStorage.getItem(k);return(x==='null'||x===undefined)?null:x;}
+      catch(e2){return null;}
     }
   },
-  set(k,v){
+  set:function(k,v){
     try{
       if(window.AndroidStorage) window.AndroidStorage.setItem(k,String(v));
-      else localStorage.setItem(k,v);
+      else localStorage.setItem(k,String(v));
     }catch(e){
-      try{localStorage.setItem(k,v)}catch(e2){}
+      try{localStorage.setItem(k,String(v));}catch(e2){}
     }
   },
 };
@@ -783,37 +787,48 @@ let waterTarget=2000;
 /* ════════════════════════════════════════════════════════════
    INIT
 ══════════════════════════════════════════════════════════ */
-function init(){
+// NUCLEAR SPLASH DISMISS - fires no matter what
+function forceDismissSplash() {
   try {
-    loadTheme(); loadFast(); loadWaterTarget();
-    buildTicks(); buildGoalChips(); buildProtoGrid(); setDefaultDT();
-    // Show app immediately, don't wait for fonts
-    document.getElementById('app').classList.add('ready');
-    updateFastUI();
-    if(fast.on) startTick();
-    // Splash hides after brief delay
-    setTimeout(()=>{
-      const sp = document.getElementById('splash');
-      if(sp){ sp.classList.add('hide'); setTimeout(()=>sp.style.display='none', 600); }
-    }, 1800);
-  } catch(e) {
-    // Last resort recovery - show app even if something fails
-    console.error('Init error:', e);
-    document.getElementById('app').style.opacity = '1';
-    document.getElementById('app').classList.add('ready');
-    const sp = document.getElementById('splash');
-    if(sp) sp.style.display = 'none';
-  }
+    var sp = document.getElementById('splash');
+    if (sp) sp.style.display = 'none';
+    var app = document.getElementById('app');
+    if (app) { app.style.opacity = '1'; app.classList.add('ready'); }
+  } catch(e) {}
 }
 
-// Global error handler - prevents blank screen on any JS error
+// Absolute deadline: splash MUST be gone within 3 seconds
+var splashKillTimer = setTimeout(forceDismissSplash, 3000);
+
+function init(){
+  // Step 1: Make app visible immediately (splash covers it)
+  try {
+    var app = document.getElementById('app');
+    if (app) { app.style.opacity = '1'; app.classList.add('ready'); }
+  } catch(e) {}
+
+  // Step 2: Load data safely
+  try { loadTheme(); } catch(e) {}
+  try { loadFast(); } catch(e) {}
+  try { loadWaterTarget(); } catch(e) {}
+  try { buildTicks(); } catch(e) {}
+  try { buildGoalChips(); } catch(e) {}
+  try { buildProtoGrid(); } catch(e) {}
+  try { setDefaultDT(); } catch(e) {}
+  try { updateFastUI(); } catch(e) {}
+  try { if(fast.on) startTick(); } catch(e) {}
+
+  // Step 3: Dismiss splash after short delay
+  setTimeout(function() {
+    clearTimeout(splashKillTimer);
+    forceDismissSplash();
+  }, 1500);
+}
+
+// Global error handler
 window.onerror = function(msg, src, line, col, err) {
-  console.error('JS Error:', msg, line, col);
-  // Ensure app is always visible
-  const app = document.getElementById('app');
-  if(app) { app.style.opacity='1'; app.classList.add('ready'); }
-  const sp = document.getElementById('splash');
-  if(sp) sp.style.display='none';
+  clearTimeout(splashKillTimer);
+  forceDismissSplash();
   return true;
 };
 
@@ -858,7 +873,22 @@ function closeDialog(id){document.getElementById(id).classList.add('hidden')}
 /* ════════════════════════════════════════════════════════════
    FASTING
 ══════════════════════════════════════════════════════════ */
-function loadFast(){try{const raw=S.get('vt_fast');const s=raw?JSON.parse(raw):{};fast.on=!!s.on;fast.start=s.start||null;fast.lastMeal=s.lastMeal||null;fast.goal=s.goal||16}catch(e){fast={on:false,start:null,lastMeal:null,goal:16}}}
+function loadFast(){
+  try{
+    var raw=S.get('vt_fast');
+    if(!raw||raw==='null'||raw==='undefined'){fast={on:false,start:null,lastMeal:null,goal:16};return;}
+    var s=JSON.parse(raw);
+    fast.on=!!s.on;
+    fast.start=s.start||null;
+    fast.lastMeal=s.lastMeal||null;
+    fast.goal=s.goal||16;
+    // Safety: if start time is in future or >7 days ago, reset
+    if(fast.start){
+      var age=Date.now()-fast.start;
+      if(age<0||age>604800000){fast={on:false,start:null,lastMeal:null,goal:16};}
+    }
+  }catch(e){fast={on:false,start:null,lastMeal:null,goal:16};}
+}
 function saveFast(){S.set('vt_fast',JSON.stringify(fast))}
 function getPhase(h){let c=PHASES[0];for(const p of PHASES){if(h>=p.h)c=p;else break;}return c}
 
