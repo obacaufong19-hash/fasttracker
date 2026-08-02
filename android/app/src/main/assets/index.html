@@ -144,13 +144,13 @@ input{font-family:var(--sans)}
   background:rgba(0,0,0,0.6);
   display:flex;align-items:flex-end;
 }
-.overlay.off{display:none}
+.overlay.off{display:none!important;pointer-events:none!important}
 .sheet{
   width:100%;background:var(--bg2);
   border:1px solid var(--border2);border-bottom:none;
   border-radius:24px 24px 0 0;
   padding:8px 22px calc(32px + var(--sab));
-  animation:sheetUp .32s cubic-bezier(.32,1,.56,1);
+  
   max-height:88vh;overflow-y:auto;
 }
 @keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
@@ -192,7 +192,7 @@ input{font-family:var(--sans)}
   border:1px solid var(--border2);border-bottom:none;
   border-radius:24px 24px 0 0;
   padding:0 0 calc(16px + var(--sab));
-  animation:sheetUp .32s cubic-bezier(.32,1,.56,1);
+  
 }
 .picker-head{
   display:flex;align-items:center;justify-content:space-between;
@@ -1056,51 +1056,67 @@ function buildProtoGrid(){
 }
 
 function handleMain(){
-  try{
-    if(fast.on){
-      try{
-        var hh=Math.floor(elapsed/3600),mm=Math.floor((elapsed%3600)/60);
-        var el=document.getElementById('stop-dlg-body');
-        if(el)el.textContent='You have fasted '+hh+'h '+mm+'m. Stop and save to history?';
-        D.open('stop-dlg');
-      }catch(e){showToast('Tap again to stop');}
-    } else {
-      try{
-        obGoal=fast.goal;
-        buildProtoGrid();
-        var now=new Date(),lastH=new Date(now.getTime()-3600000);
-        dateVals['meal']={d:lastH.getDate(),m:lastH.getMonth(),y:lastH.getFullYear()};
-        timeVals['meal']={h:lastH.getHours()%12||12,min:lastH.getMinutes(),ap:lastH.getHours()>=12?'pm':'am'};
-        var dvEl=document.getElementById('meal-date-v');
-        var tvEl=document.getElementById('meal-time-v');
-        if(dvEl){dvEl.textContent=fmtDt(lastH.getTime());dvEl.classList.remove('ph');}
-        if(tvEl){tvEl.textContent=(lastH.getHours()%12||12)+':'+p2(lastH.getMinutes())+(lastH.getHours()>=12?'pm':'am');tvEl.classList.remove('ph');}
-        D.open('fast-sheet');
-      }catch(e2){showToast('Opening setup...');try{D.open('fast-sheet')}catch(e3){}}
-    }
-  }catch(e){showToast('Tap again');}
+  if(fast.on) {
+    // Show stop dialog
+    try {
+      var hh = Math.floor(elapsed/3600);
+      var mm = Math.floor((elapsed%3600)/60);
+      var el = document.getElementById('stop-dlg-body');
+      if(el) el.textContent = 'You have fasted ' + hh + 'h ' + mm + 'm. Stop and save?';
+    } catch(e) {}
+    try { D.open('stop-dlg'); } catch(e) {}
+  } else {
+    // Open fast setup sheet
+    obGoal = fast.goal || 16;
+    try { buildProtoGrid(); } catch(e) {}
+
+    // Pre-fill last meal to 1hr ago
+    try {
+      var now = new Date();
+      var ago = new Date(now.getTime() - 3600000);
+      dateVals['meal'] = {d: ago.getDate(), m: ago.getMonth(), y: ago.getFullYear()};
+      timeVals['meal'] = {h: ago.getHours()%12||12, min: ago.getMinutes(), ap: ago.getHours()>=12?'pm':'am'};
+      var dEl = document.getElementById('meal-date-v');
+      var tEl = document.getElementById('meal-time-v');
+      if(dEl) { dEl.textContent = fmtDt(ago.getTime()); dEl.classList.remove('ph'); }
+      if(tEl) { tEl.textContent = (ago.getHours()%12||12) + ':' + p2(ago.getMinutes()) + (ago.getHours()>=12?'pm':'am'); tEl.classList.remove('ph'); }
+    } catch(e) {}
+
+    try { D.open('fast-sheet'); } catch(e) {}
+  }
 }
 
 function confirmFast(){
-  try{
-  var ts=PK.getTS('meal','meal');
-  if(!ts){showToast('Set your last meal time');return;}
-  fast.goal=obGoal;fast.lastMeal=ts;fast.on=true;fast.start=Date.now();
-  _mFired={};  // reset milestone tracker for new fast
-  try{saveFast()}catch(e){}   // SAVE FIRST - before any UI that could crash
-  try{D.close('fast-sheet')}catch(e){}
-  try{buildGoalChips()}catch(e){}
-  try{updateFastUI()}catch(e){}
-  try{if(ticker)clearInterval(ticker);ticker=null;}catch(e){}
-  try{startTick()}catch(e){}
-  try{if(window.AndroidNotif&&typeof window.AndroidNotif.fastStarted==='function')window.AndroidNotif.fastStarted(fast.goal+'h',fmtDt(ts)+' '+fmtCk(ts))}catch(e){}
-  try{
-    if(window.AndroidService && typeof window.AndroidService.startFasting==='function'){
-      window.AndroidService.startFasting(fast.start,fast.goal);
-    }
-  }catch(e){}
+  // Fallback timestamp: 1 hour ago
+  var ts = Date.now() - 3600000;
+  try {
+    var picked = PK.getTS('meal','meal');
+    if(picked && picked > 0 && picked < Date.now()) ts = picked;
+  } catch(e) {}
+
+  fast.goal    = obGoal || 16;
+  fast.lastMeal = ts;
+  fast.on      = true;
+  fast.start   = Date.now();
+  _mFired      = {};
+
+  // Persist FIRST
+  try { saveFast(); } catch(e) {}
+
+  // Close sheet
+  try { D.close('fast-sheet'); } catch(e) {}
+
+  // Update UI
+  try { buildGoalChips(); } catch(e) {}
+  try { updateFastUI(); } catch(e) {}
+
+  // Start ticker
+  try { if(ticker){ clearInterval(ticker); ticker=null; } startTick(); } catch(e) {}
+
+  // Notification (non-critical — never let it crash the fast start)
+  try { if(window.AndroidNotif) window.AndroidNotif.fastStarted(fast.goal+'h',''); } catch(e) {}
+
   showToast('Fast started');
-  }catch(e){showToast('Fast started');try{updateFastUI()}catch(e2){}}
 }
 
 function confirmStop(){
@@ -1113,8 +1129,7 @@ function confirmStop(){
   try{clearInterval(ticker)}catch(e){}ticker=null;elapsed=0;
   try{saveFast()}catch(e){}
   try{updateFastUI()}catch(e){}
-  try{if(window.AndroidNotif)window.AndroidNotif.fastStopped(dur)}catch(e){}
-  try{if(window.AndroidService)window.AndroidService.stopFasting()}catch(e){}
+  try{if(window.AndroidNotif)window.AndroidNotif.fastStopped(dur)}catch(e2){}
   showToast('Fast saved to history');
 }
 
