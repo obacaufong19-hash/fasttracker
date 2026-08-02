@@ -261,7 +261,7 @@ input{font-family:var(--sans)}
 
 /* ── FAST PAGE ──────────────────────────────────────── */
 .fast-page{
-  align-items:center;padding:18px 18px 24px;gap:16px;
+  align-items:center;padding:18px 18px 28px;gap:14px;
   background:radial-gradient(ellipse 70% 40% at 50% 0%,rgba(201,169,110,0.05) 0%,transparent 65%);
 }
 .status-pill{
@@ -293,16 +293,16 @@ input{font-family:var(--sans)}
 
 /* phase card */
 .phase-card{
-  width:100%;background:var(--card);border:1px solid var(--border);
+  width:100%;background:var(--card);
+  border:1px solid var(--border);
+  border-left:3px solid var(--gold);
   border-radius:var(--r);padding:14px 16px;
-  display:flex;align-items:flex-start;gap:12px;
-  position:relative;overflow:hidden;
+  display:flex;align-items:center;gap:12px;
 }
-.phase-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;
-  background:linear-gradient(180deg,var(--gold),var(--teal));border-radius:0}
-.phase-ic{width:38px;height:38px;border-radius:11px;flex-shrink:0;
+.phase-card::before{display:none}
+.phase-ic{width:40px;height:40px;border-radius:12px;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
-  background:var(--gdim);border:1px solid rgba(201,169,110,.15)}
+  background:var(--gdim);border:1px solid rgba(201,169,110,.12);transition:background .4s}
 .phase-ic svg{width:18px;height:18px;color:var(--gold)}
 .phase-n{font-size:12px;font-weight:600;color:var(--gold);margin-bottom:3px}
 .phase-d{font-size:11px;color:var(--text2);line-height:1.5}
@@ -345,15 +345,16 @@ input{font-family:var(--sans)}
 /* sub-section toggles */
 .sub-row{display:flex;gap:8px;width:100%}
 .sub-btn{
-  flex:1;padding:10px;border-radius:12px;background:var(--bg3);
+  flex:1;padding:11px 10px;border-radius:12px;background:var(--bg3);
   border:1px solid var(--border);font-size:11px;font-weight:600;
-  color:var(--text2);display:flex;align-items:center;justify-content:center;gap:5px;
-  transition:all .2s;
+  color:var(--text2);display:flex;align-items:center;justify-content:center;gap:6px;
+  transition:all .2s;letter-spacing:.03em;
 }
-.sub-btn svg{width:13px;height:13px}
+.sub-btn svg{width:13px;height:13px;flex-shrink:0}
 .sub-btn.sel{background:var(--gdim);border-color:var(--gold);color:var(--gold)}
+.sub-section{width:100%;padding-top:4px}
 .sub-section{display:none;width:100%}
-.sub-section.on{display:block}
+.sub-section.on{display:block;padding-top:4px}
 
 /* insights inside fast */
 .tl-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px}
@@ -1159,7 +1160,7 @@ function updateTimerDisplay(){
   document.getElementById('ring-s').textContent='elapsed';
   document.getElementById('ring-p').textContent=Math.floor(pct)+'% of '+fast.goal+'h goal';
   if(fast.start)document.getElementById('ic-start').textContent=fmtCk(fast.start);
-  if(fast.lastMeal)document.getElementById('ic-meal').textContent=fmtDt(fast.lastMeal);
+  if(fast.lastMeal)document.getElementById('ic-meal').textContent=fmtCk(fast.lastMeal);
   document.getElementById('ic-goal').textContent=fast.goal+'h';
 }
 function updateRing(){
@@ -1169,9 +1170,18 @@ function updateRing(){
   document.getElementById('r-prog').style.stroke=pct<.33?'#c9a96e':pct<.66?'#5cc8c0':'#7ec8a0';
 }
 function updatePhase(){
-  var ph=getPhase(elapsed/3600);
+  var h=elapsed/3600;
+  var ph=getPhase(h);
   document.getElementById('phase-n').textContent=ph.n;
   document.getElementById('phase-d').textContent=ph.d;
+  // Update border color based on progress
+  var card=document.querySelector('.phase-card');
+  if(card){
+    var col=h<4?'var(--gold)':h<8?'var(--orange)':h<12?'var(--teal)':h<16?'var(--blue)':'var(--purple)';
+    card.style.borderLeftColor=col;
+    var ic=card.querySelector('.phase-ic');
+    if(ic) ic.style.background=col.replace('var(','rgba(').replace(')',',0.12)');
+  }
 }
 function updateFastUI(){
   var on=fast.on;
