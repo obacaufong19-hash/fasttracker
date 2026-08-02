@@ -1087,18 +1087,25 @@ function handleMain(){
 }
 
 function confirmFast(){
-  // Fallback timestamp: 1 hour ago
-  var ts = Date.now() - 3600000;
+  // Get last meal time from picker (fallback: 1 hour ago)
+  var lastMealTs = Date.now() - 3600000;
   try {
     var picked = PK.getTS('meal','meal');
-    if(picked && picked > 0 && picked < Date.now()) ts = picked;
+    if(picked && picked > 0 && picked < Date.now()) lastMealTs = picked;
   } catch(e) {}
 
-  fast.goal    = obGoal || 16;
-  fast.lastMeal = ts;
-  fast.on      = true;
-  fast.start   = Date.now();
-  _mFired      = {};
+  // Fast START time = last meal time (elapsed counts from when you stopped eating)
+  // But cap it: don't go back more than 24h to prevent accidents
+  var fastStart = lastMealTs;
+  var maxBack = Date.now() - (24 * 3600000);
+  if(fastStart < maxBack) fastStart = maxBack;
+  if(fastStart > Date.now()) fastStart = Date.now(); // can't be in future
+
+  fast.goal     = obGoal || 16;
+  fast.lastMeal = lastMealTs;
+  fast.on       = true;
+  fast.start    = fastStart;  // ← START FROM LAST MEAL, not current time
+  _mFired       = {};
 
   // Persist FIRST
   try { saveFast(); } catch(e) {}
@@ -1110,13 +1117,15 @@ function confirmFast(){
   try { buildGoalChips(); } catch(e) {}
   try { updateFastUI(); } catch(e) {}
 
-  // Start ticker
+  // Start ticker — elapsed will immediately reflect time since last meal
   try { if(ticker){ clearInterval(ticker); ticker=null; } startTick(); } catch(e) {}
 
-  // Notification (non-critical — never let it crash the fast start)
-  try { if(window.AndroidNotif) window.AndroidNotif.fastStarted(fast.goal+'h',''); } catch(e) {}
+  // Notification
+  var elapsedH = Math.floor((Date.now() - fastStart) / 3600000);
+  var msg = elapsedH > 0 ? 'Already ' + elapsedH + 'h into your fast!' : 'Your ' + fast.goal + 'h fast has begun.';
+  try { if(window.AndroidNotif) window.AndroidNotif.fastStarted(fast.goal+'h', msg); } catch(e) {}
 
-  showToast('Fast started');
+  showToast(elapsedH > 0 ? 'Fast started — ' + elapsedH + 'h already elapsed' : 'Fast started');
 }
 
 function confirmStop(){
